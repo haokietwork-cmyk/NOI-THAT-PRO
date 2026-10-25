@@ -314,10 +314,14 @@ export class StorageService {
 
   public static async saveProject(project: SavedProject): Promise<void> {
     const current = this.getLocalState();
-    const exists = current.projects.some((p) => p.id === project.id);
-    current.projects = exists
-      ? current.projects.map((p) => (p.id === project.id ? project : p))
-      : [project, ...current.projects];
+    const existing = current.projects.find((p) => p.id === project.id);
+    // Dự án cũ cập nhật: giữ nguyên calcVersion lịch sử của nó. Dự án mới tạo: gán tường minh = 2.
+    const resolvedCalcVersion = project.calcVersion ?? (existing ? (existing.calcVersion ?? 1) : 2);
+    const projectWithVersion = { ...project, calcVersion: resolvedCalcVersion };
+
+    current.projects = existing
+      ? current.projects.map((p) => (p.id === project.id ? projectWithVersion : p))
+      : [projectWithVersion, ...current.projects];
     this.setLocalState(current);
 
     if (this.isBrowser() && isSupabaseConfigured()) {
@@ -342,7 +346,7 @@ export class StorageService {
               profit_margin: project.profitMargin,
               total_cost: project.totalCost,
               total_quote: project.totalQuote,
-              calc_version: project.calcVersion ?? 2,
+              calc_version: resolvedCalcVersion,
             })
             .select()
             .single();

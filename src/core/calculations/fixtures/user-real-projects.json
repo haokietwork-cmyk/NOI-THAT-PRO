@@ -1,0 +1,10 @@
+[
+  {
+    "projectName": "Mẫu test thực tế từ chủ xưởng (Ví dụ)",
+    "calcVersion": 1,
+    "k": 1.35,
+    "expectedTotalCost": 16289520,
+    "expectedTotalQuote": 21990852,
+    "notes": "File này sẵn sàng nhận các dự án thực tế do chủ xưởng cung cấp để tự động đối soát sai số 0 đồng"
+  }
+]

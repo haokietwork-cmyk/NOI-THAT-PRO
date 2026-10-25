@@ -250,4 +250,18 @@ test("profit-calculator: BẢO TỒN PHIÊN BẢN (calcVersion 1 vs 2) TRONG cal
   assert.strictEqual(resV2.totalQuotePrice, 22_355_258, "calcVersion = 2 phải ra đúng giá bán chuẩn xưởng 22.355.258 đ");
 });
 
+test("profit-calculator: KHUNG ĐỐI SOÁT DỰ ÁN THỰC TẾ DO CHỦ XƯỞNG CUNG CẤP (fixtures/user-real-projects.json)", () => {
+  const realProjPath = new URL("./fixtures/user-real-projects.json", import.meta.url);
+  if (fs.existsSync(realProjPath)) {
+    const realProjects = JSON.parse(fs.readFileSync(realProjPath, "utf-8"));
+    realProjects.forEach((p: any) => {
+      if (p.expectedTotalCost > 0 && p.expectedTotalQuote > 0) {
+        const res = calculateQuoteEngine(SEED_PARTS, SEED_MATERIALS, p.k, undefined, p.calcVersion ?? 1);
+        assert.strictEqual(res.totalCost, p.expectedTotalCost, `Dự án [${p.projectName}] giá vốn phải khớp với số thực tế`);
+        assert.strictEqual(res.totalQuotePrice, p.expectedTotalQuote, `Dự án [${p.projectName}] giá bán phải khớp với số thực tế`);
+      }
+    });
+  }
+});
+
 
