@@ -370,8 +370,9 @@ export const SEED_PROJECTS: SavedProject[] = [
     materialSnapshots: SEED_MATERIALS,
     profitMargin: 1.65,
     roundingStep: 0.5,
-    totalCost: 15_613_000,
-    totalQuote: 25_800_000,
+    costConfigSnapshot: DEFAULT_WORKSHOP_COST_CONFIG,
+    totalCost: 16_281_950,
+    totalQuote: 26_865_218,
     calcVersion: 1,
   },
 ];
