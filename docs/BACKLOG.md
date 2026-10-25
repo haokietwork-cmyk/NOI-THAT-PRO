@@ -1,91 +1,130 @@
-# BACKLOG KỸ THUẬT & AN NINH HỆ THỐNG
-## Nền Tảng Web Bóc Tách Vật Tư Nội Thất & Báo Giá Tự Động
+# TÀI LIỆU QUY HOẠCH KỸ THUẬT & BACKLOG HỆ THỐNG
+## Nền Tảng Web Bóc Tách Vật Tư Nội Thất, Báo Giá Tự Động & Quản Trị Xưởng (AutoCutlist)
 
-> **Tài liệu ghi nhận các hạng mục kỹ thuật, an ninh và kiến trúc cần triển khai tiếp theo.**  
-> *Lưu ý: Tài liệu backlog phục vụ việc quy hoạch kỹ thuật trước khi bước vào giai đoạn cài đặt mã nguồn.*
-
----
-
-## 1. ĐÓNG BĂNG DỰ ÁN KHI ĐÃ DUYỆT (PROJECT FREEZE ON STATUS `approved`)
-
-### 1.1. Bối Cảnh Nghiệp Vụ
-- Khi báo giá đã được khách hàng chốt duyệt hoặc xưởng chuyển sang trạng thái sản xuất (`status = 'approved'` hoặc `'in_production'`), giá trị hợp đồng và danh mục tấm cắt đã trở thành căn cứ pháp lý và căn cứ sản xuất.
-- Nếu thợ kỹ thuật hoặc người dùng vô tình kéo trượt hệ số lãi, thay đổi quy cách ván hoặc sửa danh sách tấm thì toàn bộ số liệu giá vốn, giá bán và bản đặt ván BOM sẽ bị sai lệch so với thỏa thuận ban đầu.
-
-### 1.2. Giải Pháp Kỹ Thuật Dự Kiến
-1. **Ràng buộc Database (Server-side Postgres Trigger):**
-   - Viết hàm trigger `fn_prevent_frozen_project_modifications()` gắn vào hai bảng `projects` và `project_items`:
-     - Kiểm tra nếu `OLD.status IN ('approved', 'in_production', 'finalized')`:
-       - Chặn toàn bộ thao tác `DELETE` trên cả hai bảng.
-       - Chặn thao tác `UPDATE` trên `project_items`.
-       - Chặn thao tác `UPDATE` trên `projects`, ngoại trừ duy nhất trường hợp trường `status` được chuyển về `'draft'` (mở khóa) bởi người dùng sở hữu quyền quản trị.
-     - Ghi nhận `unfreeze_audit_log` (lý do mở khóa, thời gian, người thực hiện) khi dự án được mở khóa để kiểm toán.
-2. **Khóa Giao Diện (Client-side Lockdown):**
-   - Khi `project.status === 'approved'`:
-     - Ẩn hoặc vô hiệu hóa các nút "Sửa Cutlist", nút "Lưu thay đổi", thanh trượt điều chỉnh biên lợi nhuận.
-     - Hiển thị badge biểu tượng ổ khóa an toàn: *"Dự án đã chốt duyệt - Dữ liệu đang được đóng băng"*.
-     - Bổ sung nút *"Mở khóa để sửa lại"* kèm hộp thoại xác nhận cảnh báo rủi ro nhảy giá hợp đồng.
+> **Tài liệu Single Source of Truth quy hoạch các hạng mục phát triển trước khi phát hành công khai (Public SaaS).**  
+> *Được phân cấp theo 3 tầng ưu tiên: P0 (Chặn ra mắt) → P1 (Trải nghiệm cốt lõi) → P2 (Mở rộng & Tối ưu).*
 
 ---
 
-## 2. QUẢN LÝ LINK CHIA SẺ BÁO GIÁ (QUOTE SHARE LINKS - EXPIRATION & REVOCATION)
+## TẦNG P0: CÁC HẠNG MỤC BẮT BUỘC CHẶN RA MẮT (LAUNCH BLOCKERS)
+*Tuyệt đối không public sản phẩm ra thị trường nếu chưa hoàn tất 10 hạng mục dưới đây:*
 
-### 2.1. Bối Cảnh Nghiệp Vụ
-- Xưởng cần gửi đường dẫn trực tuyến (`/share/quote/[token]`) để khách hàng xem bản báo giá A4 tương tác trên điện thoại hoặc máy tính mà không bắt buộc khách phải đăng nhập tài khoản.
-- Tuy nhiên:
-  - Báo giá nội thất luôn có thời hạn (thường từ 7 đến 15 ngày) do biến động giá ván và phụ kiện thị trường.
-  - Khi có tranh chấp, đàm phán lại hoặc hủy hợp đồng, xưởng cần có quyền thu hồi link chia sẻ ngay lập tức.
+### P0-1. RLS Bảng `profiles`: Chặn Leo Thang Đặc Quyền Gói Cước
+- **Nguy cơ an ninh:** Nếu policy RLS `FOR UPDATE USING (auth.uid() = id)` cho phép người dùng cập nhật toàn bộ bảng, kẻ xấu có thể dùng DevTools/Postman tự gửi request đổi trường `subscription_tier = 'enterprise'` hoặc đổi `email` / `id`.
+- **Giải pháp kỹ thuật:**
+  - Áp dụng phân quyền theo cột (Column-level security):
+    ```sql
+    REVOKE UPDATE ON public.profiles FROM authenticated;
+    GRANT UPDATE (company_name, logo_url, phone, address, quote_terms, bank_info, cost_config, updated_at) ON public.profiles TO authenticated;
+    ```
+  - Viết trigger hoặc policy chặn tuyệt đối việc `NEW.subscription_tier != OLD.subscription_tier` từ role `authenticated`. Trường `subscription_tier` chỉ được phép cập nhật bởi role `service_role` thông qua Webhook thanh toán.
 
-### 2.2. Giải Pháp Kỹ Thuật Dự Kiến
-1. **Mô Hình Dữ Liệu Bảng `project_share_tokens`:**
-   - `id`: UUID khóa chính.
-   - `project_id`: Khóa ngoại tham chiếu `projects(id)` ON DELETE CASCADE.
-   - `token_hash`: Chuỗi SHA-256 mã hóa token bí mật (không lưu token dạng plain text).
-   - `expires_at`: Mốc thời gian hết hạn (mặc định +14 ngày kể từ ngày tạo).
-   - `revoked_at`: Mốc thời gian bị thu hồi thủ công (NULL nếu đang hoạt động).
-   - `max_views`: Số lượt xem tối đa được phép (tùy chọn).
-   - `view_count`: Đếm số lần khách hàng đã mở link.
-   - `created_at`: Thời gian phát hành link.
-2. **Cơ Chế Bảo Vệ & Thu Hồi:**
-   - **Xác thực Token:** Endpoint công khai `/api/share/[token]` kiểm tra: `revoked_at IS NULL AND expires_at > NOW()`. Nếu không thỏa mãn, trả về màn hình thông báo *"Báo giá đã hết hạn hiệu lực hoặc đã được xưởng thu hồi. Quý khách vui lòng liên hệ trực tiếp xưởng để nhận báo giá mới nhất"*.
-   - **Nút Thu Hồi Tức Thì (Instant Revoke):** Tại trang chi tiết dự án, cung cấp nút *"Hủy link chia sẻ"* để cập nhật `revoked_at = NOW()`, vô hiệu hóa link ngay lập tức.
-   - **Ghi Nhận Lượt Mở:** Cập nhật `view_count` và thời điểm khách xem gần nhất để xưởng nắm bắt mức độ quan tâm của khách hàng.
+### P0-2. RLS Bảng `project_items`: Kiểm Tra Quyền Sở Hữu Dự Án Cha
+- **Nguy cơ an ninh:** Hiện tại policy `project_items` chỉ kiểm tra `user_id = auth.uid()`. Kẻ xấu có thể chèn `project_id` của xưởng khác (IDOR - Insecure Direct Object References) để làm sai lệch danh sách tấm hoặc đọc trộm chi tiết nội thất.
+- **Giải pháp kỹ thuật:**
+  - Bổ sung ràng buộc kiểm tra chéo (Cross-table ownership check):
+    ```sql
+    CREATE POLICY "Users manage items of own projects" ON public.project_items
+      FOR ALL USING (
+        user_id = auth.uid() 
+        AND EXISTS (
+          SELECT 1 FROM public.projects 
+          WHERE projects.id = project_items.project_id 
+          AND projects.user_id = auth.uid()
+        )
+      );
+    ```
+
+### P0-3. Xác Thực, Rate Limiting & Schema Validation Cho 3 Tuyến API Routes
+- **Tuyến 1: `/api/webhooks/payment`:**
+  - Xác thực chữ ký số HMAC-SHA256 trên Request Header (`x-signature` / `x-sepay-signature`).
+  - Kiểm tra tính bất biến của mã giao dịch (Idempotency Key / `transaction_id UNIQUE`). Chống tấn công phát lại (Replay Attack).
+  - So khớp số tiền chuyển khoản thực tế với giá niêm yết trong DB trước khi kích hoạt Pro.
+- **Tuyến 2: `/api/license/verify` (AutoLISP CAD):**
+  - Rate limiting theo IP và Machine ID: Tối đa 10 req/phút/IP (trả về HTTP 429).
+  - Phản hồi có ký số mật mã (Ed25519/HMAC Signed Response) để chống proxy/fiddler giả lập.
+  - Ràng buộc phần cứng với Volume Serial Number kết hợp Salt bí mật.
+- **Tuyến 3: `/api/projects/direct-ingest` (Nạp từ CAD/SketchUp):**
+  - Bắt buộc xác thực Bearer Token / Personal Access Token của người dùng.
+  - Giới hạn kích thước payload tối đa 5MB.
+  - Zod Schema Validation kiểm duyệt từng phần tử mảng tấm (chặn số âm, NaN, SQL injection).
+  - Cấu hình CORS chặt chẽ, chỉ cho phép domain đã xác minh.
+
+### P0-4. Tách Biệt Project Supabase Giữa Development & Production
+- Không dùng chung một database cho môi trường dev và production.
+- Thiết lập 2 project Supabase độc lập:
+  - `autocutlist-dev`: Dùng cho phát triển và chạy CI pipeline.
+  - `autocutlist-prod`: Chỉ dùng cho môi trường production chính thức.
+- Đồng bộ database schema giữa 2 môi trường thông qua Supabase CLI migrations có kiểm soát phiên bản.
+
+### P0-5. Quản Lý Bí Mật & Chống Rò Rỉ Biến Môi Trường (Secrets Management)
+- Tuyệt đối cấm đặt `SUPABASE_SERVICE_ROLE_KEY`, `PAYMENT_WEBHOOK_SECRET` vào các biến có tiền tố `NEXT_PUBLIC_*`.
+- Kiểm tra toàn bộ log build và server response: Không in ra console hay client bất kỳ nội dung file `.env*`.
+- Sử dụng pre-commit hook chặn commit các file secret.
+
+### P0-6. Điều Khoản Dịch Vụ (Terms of Service) & Chính Sách Quyền Riêng Tư (Privacy Policy)
+- Soạn thảo và công bố trang pháp lý chính thức `/terms` và `/privacy`.
+- Quy định rõ:
+  - Cam kết bảo mật dữ liệu đơn giá vốn và danh sách khách hàng của từng xưởng mộc.
+  - Điều khoản miễn trừ trách nhiệm pháp lý đối với sai lệch khối lượng thi công thực tế tại công trình.
+
+### P0-7. Xóa Tài Khoản (Right to be Forgotten) & Xuất Dữ Liệu Cá Nhân
+- Đáp ứng quy định bảo vệ dữ liệu cá nhân (GDPR / Nghị định 13/2023/NĐ-CP):
+  - Cung cấp nút *"Tải toàn bộ dữ liệu xưởng (.zip/.json)"* để xuất danh sách dự án và thư viện vật tư.
+  - Cung cấp tính năng *"Xóa vĩnh viễn tài khoản và toàn bộ dữ liệu xưởng"* (xóa cascade profiles, projects, items, materials).
+
+### P0-8. Sao Lưu & Phục Hồi Tự Động (Disaster Recovery & Backup)
+- Kích hoạt tính năng Daily Automated Backups và Point-in-time Recovery (PITR) trên Supabase Pro.
+- Lập quy trình diễn tập phục hồi dữ liệu từ bản backup tối thiểu 1 lần trước khi mở bán.
+
+### P0-9. Giám Sát Lỗi Hệ Thống & Hiệu Năng Thời Gian Thực (Error Monitoring)
+- Tích hợp công cụ giám sát lỗi (Sentry hoặc tương đương):
+  - Bắt toàn bộ unhandled exceptions ở client và API routes.
+  - Tự động lọc sạch (sanitize) thông tin cá nhân (PII: tên khách, SĐT, địa chỉ) trước khi gửi log lỗi.
 
 ---
 
-## 3. RÀ SOÁT VÀ GIA CỐ AN NINH 3 TUYẾN API ROUTES
+## TẦNG P1: TRẢI NGHIỆM CỐT LÕI & VẬN HÀNH XƯỞNG
+*Triển khai ngay sau khi hoàn thành nền tảng an ninh P0:*
 
-### 3.1. Tuyến `/api/webhooks/payment` (Webhook Cổng Thanh Toán VietQR / SePay / PayOS)
-- **Rủi ro hiện tại:** Nếu không xác thực nguồn gốc hoặc thiếu cơ chế chống phát lại, kẻ xấu có thể gửi request POST giả lập tín hiệu thanh toán thành công để kích hoạt tài khoản hoặc đơn hàng lisp trái phép.
-- **Biện pháp gia cố:**
-  1. **HMAC-SHA256 Signature Verification:**
-     - Sử dụng `PAYMENT_WEBHOOK_SECRET` trong biến môi trường.
-     - Tính mã băm HMAC của raw payload và so sánh timing-safe (`crypto.timingSafeEqual`) với chữ ký trên Header (`x-signature` / `x-sepay-signature`).
-  2. **Chống Tấn Công Phát Lại (Replay Attack Prevention):**
-     - Lưu trữ `transaction_id` hoặc `reference_code` vào bảng `payment_transactions` có ràng buộc `UNIQUE`.
-     - Nếu nhận trùng mã giao dịch, trả về HTTP 200 ngay lập tức mà không cộng tiền/kích hoạt lại.
-  3. **Kiểm Tra Số Tiền Tuyệt Đối:**
-     - So khớp chính xác số tiền chuyển khoản thực tế với giá trị gói cước trong cơ sở dữ liệu trước khi nâng cấp tài khoản.
+### P1-1. Rút Gọn Luồng `/quoting` Thành 3 Bước Rõ Ràng
+- Tổ chức giao diện thành Stepper trực quan:
+  - **Bước 1:** Nhập {Danh sách tấm (Cutlist)}: Kéo thả Excel, nạp mẫu tủ, dán clipboard, sửa nhanh số đo và nẹp dán chỉ.
+  - **Bước 2:** Xem Báo Giá & Tinh Chỉnh Giá: Xem BOM xưởng, xem bản A4 khách hàng, kéo trượt hệ số lãi và biên lợi nhuận.
+  - **Bước 3:** Xuất Báo Giá & Lệnh Đặt Hàng: Xuất Excel đặt ván đại lý, In PDF A4 gửi khách, lưu đám mây.
+- Đưa phễu lọc 6 tiêu chí và quản lý bản v2 vào *"Chế độ nâng cao"* (mặc định tắt, nhớ qua `localStorage`).
 
-### 3.2. Tuyến `/api/license/verify` (Xác Thực Bản Quyền Plugin AutoCAD AutoLISP)
-- **Rủi ro hiện tại:** Nguy cơ bị tấn công vét cạn (brute-force) dò tìm license key, hoặc sửa đổi phản hồi HTTP qua proxy cục bộ để kích hoạt plugin lậu.
-- **Biện pháp gia cố:**
-  1. **Giới Hạn Tần Suất Truy Cập (Rate Limiting):**
-     - Áp dụng rate limiting theo IP và Machine ID: Tối đa 10 requests / phút trên mỗi địa chỉ IP. Trả về mã lỗi `429 Too Many Requests` khi vượt ngưỡng.
-  2. **Chữ Ký Phản Hồi (Signed Response):**
-     - Thay vì chỉ trả về `{ valid: true }`, server ký số payload phản hồi bằng khóa bí mật (Ed25519 hoặc HMAC): `{ valid: true, machine_id, exp, signature }`. AutoLISP plugin kiểm tra chữ ký này trước khi cấp quyền vẽ.
-  3. **Ràng Buộc Phần Cứng (Hardware Fingerprinting):**
-     - Thuật toán băm kết hợp Volume Serial Number và CPU ID cùng Salt bảo mật để chống việc sao chép file cấu hình sang máy tính khác.
+### P1-2. Chia Sẻ Báo Giá Bằng Link Bảo Mật (Quote Share Links)
+- Tạo bảng `project_share_tokens` với chuỗi băm token SHA-256.
+- Thiết lập thời hạn hết hạn tự động (+14 ngày mặc định) và nút thu hồi link tức thì.
+- Giao diện xem trực tuyến công khai cho khách: Chỉ xem thành phẩm tổng thể và điều khoản bảo hành, ẩn sạch thông số phôi tấm và tỷ lệ hao hụt nội bộ.
+- Ghi nhận lượt mở xem báo giá của khách hàng.
 
-### 3.3. Tuyến `/api/projects/direct-ingest` (Nạp Dữ Liệu Bóc Tách Trực Tiếp Từ CAD/SketchUp)
-- **Rủi ro hiện tại:** Tuyến nhận mảng chi tiết tấm lớn từ các plugin máy tính; có nguy cơ bị spam payload rác, tấn công từ chối dịch vụ (DoS) hoặc chèn dữ liệu không đúng cấu trúc schema.
-- **Biện pháp gia cố:**
-  1. **Xác Thực Định Danh Bắt Buộc (API Key / Personal Access Token):**
-     - Mọi request gửi lên từ plugin ngoài máy xưởng phải kèm Header `Authorization: Bearer <user_pat>`. Xác thực user id hợp lệ trước khi chạm vào logic tính toán.
-  2. **Kiểm Soát Kích Thước & Tải Trọng Payload (Payload Validation):**
-     - Giới hạn kích thước body request tối đa 5MB.
-     - Sử dụng thư viện kiểm chứng định dạng (Zod Schema) để kiểm soát nghiêm ngặt từng phần tử tấm trong mảng:
-       - `lengthMm`, `widthMm`, `thicknessMm`, `qty`: Bắt buộc là số dương hợp lệ, nằm trong khoảng kích thước vật lý khả thi (ví dụ: $0 < \text{dài} \le 5000\text{ mm}$).
-       - Chặn các chuỗi ký tự độc hại, SQL injection hoặc mảng dữ liệu rỗng.
-  3. **Cấu Hình CORS Chặt Chẽ:**
-     - Chỉ cho phép các domain được xác định hoặc desktop client có header định danh hợp lệ.
+### P1-3. Đóng Băng Dự Án Khi Status Chuyển Sang `approved`
+- Viết Postgres Trigger `fn_prevent_frozen_project_modifications()` chặn mọi thao tác `UPDATE` và `DELETE` trên `projects` và `project_items` khi dự án đã chốt duyệt hoặc đang sản xuất.
+- Chỉ cho phép mở khóa khi người dùng chủ động bấm nút mở khóa (kèm nhật ký audit log).
+- Khóa toàn bộ các trường nhập và thanh trượt trên giao diện khi đang ở trạng thái đóng băng.
+
+### P1-4. Thuật Toán Bóc Tách Bản Lề & Ray Từ Danh Sách Chi Tiết Tấm
+- Thay vì ước tính trung bình theo số tấm ván, nâng cấp thuật toán tự động nhận diện từ Cutlist:
+  - Phân loại chi tiết: Cánh tủ (door), hộc kéo (drawer).
+  - Chiều cao cánh $\le 900\text{ mm} \rightarrow 2\text{ bản lề}$; $900 - 1500\text{ mm} \rightarrow 3\text{ bản lề}$; $1500 - 2000\text{ mm} \rightarrow 4\text{ bản lề}$; $> 2000\text{ mm} \rightarrow 5\text{ bản lề}$.
+  - Mỗi cụm hộc kéo $\rightarrow 1\text{ bộ ray trượt âm}$.
+  - Cho phép người dùng ghi đè (override) số lượng bản lề/ray theo thiết kế thực tế.
+
+---
+
+## TẦNG P2: MỞ RỘNG TÍNH NĂNG & TỐI ƯU HÓA
+*Triển khai trong các giai đoạn phát triển tiếp theo:*
+
+### P2-1. Tinh Chỉnh Quy Tắc Làm Tròn Tấm Ván Theo Module
+- Cho phép thiết lập bước làm tròn độc lập (0.5 tấm vs 1.0 tấm) cho từng module hoặc từng loại mã ván đặc biệt (ván phủ Acrylic, Laminate, ván hậu).
+
+### P2-2. Xuất Dữ Liệu Sang Máy Cắt CNC & Phần Mềm Sắp Tấm (Nesting)
+- Xuất file CSV định dạng chuẩn tích hợp trực tiếp cho phần mềm cắt tấm: ABF, CutList Plus, OptiCut, Aspire.
+
+### P2-3. Quản Lý Kho Tồn Ván Tấm Lẻ (Offcut Management)
+- Ghi nhận và theo dõi kích thước các tấm ván thừa sau khi cắt tại xưởng để tái sử dụng cho các dự án tiếp theo.
+
+### P2-4. Module Thẩm Định Giá Báo Giá (Price Checker)
+- So sánh đơn giá của xưởng với mức giá trung bình của thị trường gỗ công nghiệp tại từng khu vực (Hà Nội, TP.HCM, Bình Dương).
