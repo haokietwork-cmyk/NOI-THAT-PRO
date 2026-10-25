@@ -56,7 +56,9 @@ export default function ProjectWorkspacePage() {
   const calcResult = calculateQuoteEngine(
     project.items,
     projectMaterials,
-    effectiveProfitMargin
+    effectiveProfitMargin,
+    undefined,
+    project.costConfigSnapshot
   );
   const formatVND = (val: number) => (val || 0).toLocaleString("vi-VN") + " đ";
 

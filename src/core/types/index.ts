@@ -5,6 +5,20 @@
 
 export type SubscriptionTier = 'free' | 'pro' | 'enterprise';
 
+export interface WorkshopCostConfig {
+  suppliesRatePerSheet: number; // Đơn giá vật tư phụ & phụ kiện liên kết (ốc cam, ke góc, màng PE - VNĐ/tấm)
+  laborRatePerSheet: number;    // Đơn giá nhân công CNC & hoàn thiện xưởng (VNĐ/tấm)
+  hingesPerSheet: number;       // Định mức bản lề ước tính (cái/tấm)
+  slidesPerSheet: number;       // Định mức ray trượt ước tính (bộ/tấm)
+}
+
+export const DEFAULT_WORKSHOP_COST_CONFIG: WorkshopCostConfig = {
+  suppliesRatePerSheet: 15_000,
+  laborRatePerSheet: 120_000,
+  hingesPerSheet: 2.0,
+  slidesPerSheet: 0.35,
+};
+
 export interface WorkshopProfile {
   name: string;
   companyName?: string;
@@ -16,6 +30,7 @@ export interface WorkshopProfile {
   accountNumber?: string;
   accountName?: string;
   subscriptionTier: SubscriptionTier;
+  costConfig?: WorkshopCostConfig; // Cấu hình định mức chi phí sản xuất xưởng
   updatedAt?: string;
 }
 
@@ -130,7 +145,9 @@ export interface SavedProject {
   roundingStep: 0.5 | 1;             // Quy tắc làm tròn số tấm ván (0.5 hoặc 1 tấm)
   totalCost: number;                 // Tổng giá vốn xưởng (VNĐ)
   totalQuote: number;                // Tổng tiền báo khách hàng (VNĐ)
-  calcVersion?: number;              // Phiên bản thuật toán tính toán (1: Legacy V1, 2: Modern V2)
+  calcVersion?: number;              // Phiên bản thuật toán tính toán (1: công thức hiện tại)
+  costConfigSnapshot?: WorkshopCostConfig; // Snapshot cấu hình chi phí xưởng (bảo toàn giá khi đổi setting)
+  snapshotTotals?: any;              // Snapshot tổng tiền đóng băng
 }
 
 export interface FeatureLead {

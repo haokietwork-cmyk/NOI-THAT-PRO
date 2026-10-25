@@ -11,7 +11,9 @@ import type {
   MaterialItem,
   ModuleQuoteLine,
   ProjectCalculationResult,
+  WorkshopCostConfig,
 } from "../types/index.ts";
+import { DEFAULT_WORKSHOP_COST_CONFIG } from "../types/index.ts";
 import { calculateCommercialQuote, calculateModuleQuoteLine } from "./profit-calculator.ts";
 
 // ============================================================================
@@ -101,7 +103,9 @@ export function calculateEdgeMeters(
 export interface CalculationOptions {
   profitMargin?: number;       // Hệ số lợi nhuận (VD: 1.65 tức markup 65%)
   roundingStep?: 0.5 | 1;      // Quy tắc làm tròn tấm ván: 0.5 tấm hoặc 1 tấm
-  laborRatePerSheet?: number;  // Đơn giá nhân công theo tấm ván (mặc định 120.000 đ/tấm)
+  laborRatePerSheet?: number;  // Đơn giá nhân công theo tấm ván (ghi đè cấu hình)
+  suppliesRatePerSheet?: number; // Đơn giá vật tư phụ/tấm (ghi đè cấu hình)
+  costConfig?: WorkshopCostConfig; // Object cấu hình chi phí xưởng được chụp từ Profile
   defaultBoardPrice?: number;  // Giá dự phòng nếu mã ván không tìm thấy trong thư viện
   defaultEdgePrice?: number;   // Giá dự phòng nếu mã chỉ không tìm thấy
 }
@@ -314,28 +318,42 @@ export function calculateProject(
   });
 
   // ==========================================================================
-  // 3. PHỤ KIỆN KIM KHÍ ĐỘC LẬP (HARDWARE)
+  // 3. PHỤ KIỆN KIM KHÍ ĐỘC LẬP (HARDWARE - BẢN LỀ, RAY TRƯỢT)
   // ==========================================================================
   const hingeItem = materials.find((m) => m.category === "hardware" && (m.code.includes("BAN_LE") || m.name.toLowerCase().includes("bản lề")))
     || { name: "Bản Lề Bật Inox 304 Giảm Chấn (Hệ 32mm)", unitPrice: 28_000 };
   const slideItem = materials.find((m) => m.category === "hardware" && (m.code.includes("RAY") || m.name.toLowerCase().includes("ray")))
     || { name: "Ray Trượt Âm 450mm Giảm Chấn Mở Toàn Phần", unitPrice: 165_000 };
 
-  const estHingesQty = Math.max(2, Math.round(totalSheetsAllBoards * 2.0));
-  const estSlidesQty = Math.max(1, Math.round(totalSheetsAllBoards * 0.35));
-  const estFastenersCost = Math.round(totalSheetsAllBoards * 15_000); // ốc cam, chốt đợt
+  const hingesPerSheet = options?.costConfig?.hingesPerSheet ?? DEFAULT_WORKSHOP_COST_CONFIG.hingesPerSheet;
+  const slidesPerSheet = options?.costConfig?.slidesPerSheet ?? DEFAULT_WORKSHOP_COST_CONFIG.slidesPerSheet;
 
-  const totalHardwareCost = (estHingesQty * hingeItem.unitPrice) + (estSlidesQty * slideItem.unitPrice) + estFastenersCost;
+  const estHingesQty = Math.max(2, Math.round(totalSheetsAllBoards * hingesPerSheet));
+  const estSlidesQty = Math.max(1, Math.round(totalSheetsAllBoards * slidesPerSheet));
+
+  // Ghi chú: Đã loại bỏ estFastenersCost khỏi Hardware để gom về mục Vật tư phụ, tránh tính trùng 15.000 đ
+  const totalHardwareCost = (estHingesQty * hingeItem.unitPrice) + (estSlidesQty * slideItem.unitPrice);
 
   // ==========================================================================
   // 4. NHÂN CÔNG GIA CÔNG & LẮP ĐẶT (LABOR - ĐỘC LẬP HOÀN TOÀN)
   // ==========================================================================
-  const laborCost = Math.round(totalSheetsAllBoards * laborRatePerSheet);
+  const effectiveLaborRate = options?.laborRatePerSheet 
+    ?? options?.costConfig?.laborRatePerSheet 
+    ?? laborItem?.unitPrice 
+    ?? DEFAULT_WORKSHOP_COST_CONFIG.laborRatePerSheet;
+  const laborCost = Math.round(totalSheetsAllBoards * effectiveLaborRate);
 
-  // 5. Vật tư phụ (keo dán hạt nhiệt độ cao, vít liên kết, màng PE bọc bảo vệ): 15.000 đ/tấm
-  const suppliesCost = Math.round(totalSheetsAllBoards * 15_000);
+  // ==========================================================================
+  // 5. VẬT TƯ PHỤ & PHỤ KIỆN LIÊN KẾT (SUPPLIES & FASTENERS)
+  // Gồm: ốc cam chốt liên kết, ke góc định vị, vít bắt gỗ, màng PE bọc bảo vệ
+  // Mặc định tạm: 15.000 đ/tấm (cho phép sửa đổi linh hoạt trong Cài đặt xưởng)
+  // ==========================================================================
+  const effectiveSuppliesRate = options?.suppliesRatePerSheet 
+    ?? options?.costConfig?.suppliesRatePerSheet 
+    ?? DEFAULT_WORKSHOP_COST_CONFIG.suppliesRatePerSheet;
+  const suppliesCost = Math.round(totalSheetsAllBoards * effectiveSuppliesRate);
 
-  // TỔNG GIÁ VỐN XƯỞNG (BOM BASE COST - ĐỦ 5 THÀNH PHẦN)
+  // TỔNG GIÁ VỐN XƯỞNG (BOM BASE COST - ĐỦ 5 THÀNH PHẦN KHÔNG CHỒNG LẤN)
   const totalBaseCost = totalBoardCost + totalEdgeCost + totalHardwareCost + laborCost + suppliesCost;
 
   // TỔNG GIÁ BÁO KHÁCH HÀNG (COMMERCIAL QUOTE) DÙNG CHUNG TỪ PROFIT-CALCULATOR

@@ -14,7 +14,8 @@ import {
   ArrowLeft,
   Printer,
   Sparkles,
-  QrCode
+  QrCode,
+  Sliders
 } from "lucide-react";
 import { useAppStore } from "@/core/store/useAppStore";
 
@@ -30,6 +31,11 @@ export default function WorkshopProfileSettingsPage() {
   const [accountNumber, setAccountNumber] = useState(profile.accountNumber || "99990912345678");
   const [accountName, setAccountName] = useState(profile.accountName || "XUONG NOI THAT HOANG GIA");
 
+  const [suppliesRate, setSuppliesRate] = useState(profile.costConfig?.suppliesRatePerSheet ?? 15000);
+  const [laborRate, setLaborRate] = useState(profile.costConfig?.laborRatePerSheet ?? 120000);
+  const [hingesPerSheet, setHingesPerSheet] = useState(profile.costConfig?.hingesPerSheet ?? 2.0);
+  const [slidesPerSheet, setSlidesPerSheet] = useState(profile.costConfig?.slidesPerSheet ?? 0.35);
+
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -43,6 +49,12 @@ export default function WorkshopProfileSettingsPage() {
       bankName: bankName.trim(),
       accountNumber: accountNumber.trim(),
       accountName: accountName.trim().toUpperCase(),
+      costConfig: {
+        suppliesRatePerSheet: Number(suppliesRate) || 15000,
+        laborRatePerSheet: Number(laborRate) || 120000,
+        hingesPerSheet: Number(hingesPerSheet) || 2.0,
+        slidesPerSheet: Number(slidesPerSheet) || 0.35,
+      },
     });
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 3000);
@@ -195,6 +207,83 @@ export default function WorkshopProfileSettingsPage() {
                     placeholder="NGUYEN VAN A"
                     className="w-full p-2 uppercase font-bold bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500"
                   />
+                </div>
+              </div>
+            </div>
+
+            {/* Cấu hình định mức chi phí sản xuất xưởng */}
+            <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-3">
+              <div>
+                <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                  <Sliders className="w-4 h-4 text-amber-600" />
+                  <span>Định mức chi phí sản xuất & Vật tư phụ xưởng</span>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Các thông số này được dùng để tính giá vốn và sẽ được chụp (snapshot) cố định vào từng dự án khi tạo.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">
+                    Vật tư phụ & phụ kiện liên kết (VNĐ/tấm):
+                  </label>
+                  <input
+                    type="number"
+                    value={suppliesRate}
+                    onChange={(e) => setSuppliesRate(Number(e.target.value) || 0)}
+                    className="w-full p-2.5 font-mono font-bold bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 text-slate-900"
+                  />
+                  <span className="text-[10px] text-amber-700 font-medium block mt-1">
+                    * Giá trị tạm, hãy nhập số thực tế của xưởng (gồm ốc cam, ke góc, vít, màng PE).
+                  </span>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">
+                    Nhân công xưởng CNC & hoàn thiện (VNĐ/tấm):
+                  </label>
+                  <input
+                    type="number"
+                    value={laborRate}
+                    onChange={(e) => setLaborRate(Number(e.target.value) || 0)}
+                    className="w-full p-2.5 font-mono font-bold bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 text-slate-900"
+                  />
+                  <span className="text-[10px] text-slate-500 block mt-1">
+                    Mặc định xưởng: 120.000 đ/tấm ván gia công.
+                  </span>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">
+                    Định mức bản lề ước tính (cái/tấm):
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={hingesPerSheet}
+                    onChange={(e) => setHingesPerSheet(Number(e.target.value) || 0)}
+                    className="w-full p-2.5 font-mono font-bold bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 text-slate-900"
+                  />
+                  <span className="text-[10px] text-slate-500 block mt-1">
+                    Mặc định: 2.0 cái bản lề bật cho mỗi tấm ván tủ.
+                  </span>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">
+                    Định mức ray trượt ước tính (bộ/tấm):
+                  </label>
+                  <input
+                    type="number"
+                    step="0.05"
+                    value={slidesPerSheet}
+                    onChange={(e) => setSlidesPerSheet(Number(e.target.value) || 0)}
+                    className="w-full p-2.5 font-mono font-bold bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 text-slate-900"
+                  />
+                  <span className="text-[10px] text-slate-500 block mt-1">
+                    Mặc định: 0.35 bộ ray trượt cho mỗi tấm ván tủ.
+                  </span>
                 </div>
               </div>
             </div>

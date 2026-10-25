@@ -4,7 +4,8 @@
  * Gom logic tính giá và phân bổ module về src/core/calculations/profit-calculator.ts
  */
 
-import type { CutlistPart, MaterialItem, SavedProject } from "../types/index.ts";
+import type { CutlistPart, MaterialItem, SavedProject, WorkshopCostConfig } from "../types/index.ts";
+import { DEFAULT_WORKSHOP_COST_CONFIG } from "../types/index.ts";
 import { calculateProject, STANDARD_BOARD, STANDARD_SHEET_AREA_M2 } from "./engine.ts";
 import {
   calculateCommercialQuote,
@@ -76,6 +77,7 @@ export interface QuoteCalculationResult {
   laborRatePerSheet: number;
   totalSheets: number;
   laborCost: number;
+  suppliesCost: number; // Vật tư phụ & phụ kiện liên kết (ốc cam, ke góc, vít, màng PE)
   totalMaterialCost: number;
   totalCost: number; // Tổng giá vốn xưởng
 
@@ -103,7 +105,8 @@ export function calculateQuoteEngine(
   parts: (CutlistPart | CutlistItem)[],
   materials: (MaterialItem | MaterialPricing)[],
   profitMargin?: number,
-  customLaborRate?: number
+  customLaborRate?: number,
+  costConfig?: WorkshopCostConfig
 ): QuoteCalculationResult {
   const effectiveMargin = resolveProjectProfitMargin(profitMargin);
 
@@ -140,6 +143,7 @@ export function calculateQuoteEngine(
     profitMargin: effectiveMargin,
     laborRatePerSheet: customLaborRate,
     roundingStep: 0.5,
+    costConfig,
   });
 
   const totalSheets = projResult.totalSheets;
@@ -147,12 +151,14 @@ export function calculateQuoteEngine(
     || { name: "Bản Lề Bật Inox 304 Giảm Chấn (Hệ 32mm)", unitPrice: 28_000 };
   const slideItem = materials.find((m) => m.category === "hardware" && (m.code.includes("RAY") || m.name.toLowerCase().includes("ray")))
     || { name: "Ray Trượt Âm 450mm Giảm Chấn Mở Toàn Phần", unitPrice: 165_000 };
-  const fastenerItem = { name: "Ốc cam chốt liên kết, ke góc định vị", unitPrice: 15_000 };
 
-  const estHingesQty = Math.max(2, Math.round(totalSheets * 2.0));
-  const estSlidesQty = Math.max(1, Math.round(totalSheets * 0.35));
-  const estFastenersQty = Math.max(1, Math.round(totalSheets));
+  const hingesPerSheet = costConfig?.hingesPerSheet ?? DEFAULT_WORKSHOP_COST_CONFIG.hingesPerSheet;
+  const slidesPerSheet = costConfig?.slidesPerSheet ?? DEFAULT_WORKSHOP_COST_CONFIG.slidesPerSheet;
 
+  const estHingesQty = Math.max(2, Math.round(totalSheets * hingesPerSheet));
+  const estSlidesQty = Math.max(1, Math.round(totalSheets * slidesPerSheet));
+
+  // Ghi chú: Đã loại bỏ fastenerItem (ốc cam) khỏi hardware để tránh tính trùng với suppliesCost
   const hardwareResult: WorkshopBOMHardware[] = [
     {
       name: hingeItem.name,
@@ -165,12 +171,6 @@ export function calculateQuoteEngine(
       qty: estSlidesQty,
       unitPrice: slideItem.unitPrice,
       totalCost: estSlidesQty * slideItem.unitPrice,
-    },
-    {
-      name: fastenerItem.name,
-      qty: estFastenersQty,
-      unitPrice: fastenerItem.unitPrice,
-      totalCost: estFastenersQty * fastenerItem.unitPrice,
     },
   ];
 
@@ -194,6 +194,7 @@ export function calculateQuoteEngine(
     laborRatePerSheet: projResult.laborCost > 0 && totalSheets > 0 ? Math.round(projResult.laborCost / totalSheets) : (customLaborRate ?? 120_000),
     totalSheets,
     laborCost: projResult.laborCost,
+    suppliesCost: projResult.suppliesCost,
     totalMaterialCost: projResult.totalBaseCost - projResult.laborCost,
     totalCost: projResult.totalBaseCost,
     profitMargin: effectiveMargin,

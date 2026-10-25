@@ -4,6 +4,7 @@
  */
 
 import type { CutlistPart, MaterialItem, SavedProject, WorkshopProfile } from "../types/index.ts";
+import { DEFAULT_WORKSHOP_COST_CONFIG } from "../types/index.ts";
 
 // ============================================================================
 // 1. DANH MỤC VẬT TƯ TIÊU CHUẨN
@@ -281,6 +282,7 @@ export const SEED_PROFILE: WorkshopProfile = {
   accountNumber: "99990912345678",
   accountName: "XUONG NOI THAT HOANG GIA",
   subscriptionTier: "pro",
+  costConfig: DEFAULT_WORKSHOP_COST_CONFIG,
   updatedAt: "2026-03-20T10:00:00Z",
 };
 

@@ -315,8 +315,7 @@ export class StorageService {
   public static async saveProject(project: SavedProject): Promise<void> {
     const current = this.getLocalState();
     const existing = current.projects.find((p) => p.id === project.id);
-    // Dự án cũ cập nhật: giữ nguyên calcVersion lịch sử của nó. Dự án mới tạo: gán tường minh = 2.
-    const resolvedCalcVersion = project.calcVersion ?? (existing ? (existing.calcVersion ?? 1) : 2);
+    const resolvedCalcVersion = 1;
     const projectWithVersion = { ...project, calcVersion: resolvedCalcVersion };
 
     current.projects = existing

@@ -30,6 +30,7 @@ export default function SettingsPage() {
       bankName,
       accountNumber,
       accountName,
+      costConfig: profile.costConfig,
     });
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 3000);

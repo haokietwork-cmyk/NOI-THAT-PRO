@@ -40,7 +40,7 @@ import { useAuth } from "@/core/store/useAuth";
 import AuthModal from "@/core/components/AuthModal";
 import TechnicalHandbookModal from "@/core/components/TechnicalHandbookModal";
 import PresetLibraryModal from "@/core/components/PresetLibraryModal";
-import { CutlistPart, MaterialItem, SavedProject, ProjectStatus } from "@/core/types";
+import { CutlistPart, MaterialItem, SavedProject, ProjectStatus, DEFAULT_WORKSHOP_COST_CONFIG } from "@/core/types";
 import { calculateProject, LEGAL_DISCLAIMER } from "@/core/calculations/engine";
 import {
   calculateMarkupPercent,
@@ -345,8 +345,9 @@ function QuotingWorkspace() {
     return calculateProject(parts, activeMaterials, {
       profitMargin,
       roundingStep,
+      costConfig: profile.costConfig,
     });
-  }, [parts, activeMaterials, profitMargin, roundingStep]);
+  }, [parts, activeMaterials, profitMargin, roundingStep, profile.costConfig]);
 
   // ==========================================================================
   // THUẬT TOÁN NHẬN DIỆN CỘT THÔNG MINH (SMART AUTO-MAPPING)
@@ -604,7 +605,8 @@ function QuotingWorkspace() {
       roundingStep,
       totalCost: calcResult.totalBaseCost,
       totalQuote: calcResult.totalQuotePrice,
-      calcVersion: 2,
+      calcVersion: 1,
+      costConfigSnapshot: profile.costConfig || DEFAULT_WORKSHOP_COST_CONFIG,
     };
 
     saveProject(projectToSave);
