@@ -82,6 +82,11 @@
   - Bắt toàn bộ unhandled exceptions ở client và API routes.
   - Tự động lọc sạch (sanitize) thông tin cá nhân (PII: tên khách, SĐT, địa chỉ) trước khi gửi log lỗi.
 
+### P0-10. Chuẩn Hóa Schema Migration Nền Bảng `projects` & Trigger Khởi Tạo Profile
+- **(a) Bỏ `profit_margin DEFAULT 1.25`:** Schema Supabase cũ gán `profit_margin numeric DEFAULT 1.25` lệch pha với chuẩn xưởng duy nhất hiện tại ($k = 1.65$). Cần chạy lệnh `ALTER TABLE public.projects ALTER COLUMN profit_margin DROP DEFAULT;` (hoặc `SET DEFAULT 1.65`) trong migration nền để bảo đảm tính nhất quán với `resolveProjectProfitMargin()`.
+- **(b) Bổ sung cột `client_address`:** Mã nguồn giao diện và `SavedProject.clientAddress` đã hỗ trợ nhập địa chỉ công trình, nhưng bảng `public.projects` thực tế chưa có cột này (chỉ có `client_name, client_phone`). Cần bổ sung `ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS client_address TEXT;` vào migration nền để lưu trữ trọn vẹn thông tin giao hàng lên Cloud.
+- **(c) Trigger khởi tạo Profile khi Signup (`handle_new_user`):** Bảng `public.profiles` đã `REVOKE INSERT` từ role `authenticated` để chống tấn công. Vì vậy, bắt buộc tạo trigger `on_auth_user_created` trên `auth.users` chạy hàm `SECURITY DEFINER` để tự động tạo bản ghi `profiles` ban đầu khi khách đăng ký. Phía client `storageService.saveProfile` chỉ gọi lệnh `.update().eq("id", user.id)`.
+
 ---
 
 ## TẦNG P1: TRẢI NGHIỆM CỐT LÕI & VẬN HÀNH XƯỞNG
@@ -105,12 +110,16 @@
 - Chỉ cho phép mở khóa khi người dùng chủ động bấm nút mở khóa (kèm nhật ký audit log).
 - Khóa toàn bộ các trường nhập và thanh trượt trên giao diện khi đang ở trạng thái đóng băng.
 
-### P1-4. Thuật Toán Bóc Tách Bản Lề & Ray Từ Danh Sách Chi Tiết Tấm
-- Thay vì ước tính trung bình theo số tấm ván, nâng cấp thuật toán tự động nhận diện từ Cutlist:
-  - Phân loại chi tiết: Cánh tủ (door), hộc kéo (drawer).
-  - Chiều cao cánh $\le 900\text{ mm} \rightarrow 2\text{ bản lề}$; $900 - 1500\text{ mm} \rightarrow 3\text{ bản lề}$; $1500 - 2000\text{ mm} \rightarrow 4\text{ bản lề}$; $> 2000\text{ mm} \rightarrow 5\text{ bản lề}$.
+### P1-4. Thuật Toán Bóc Tách Bản Lề & Ray Từ Danh Sách Chi Tiết Tấm (Kèm Định Mức Keo)
+- **Định mức keo hạt dán cạnh EVA/PUR:**
+  - Tuyệt đối loại bỏ công thức gán cứng `0.02 kg/md` và đơn giá keo chưa kiểm chứng.
+  - Lượng keo tiêu hao (`glueRatePerMd`) và đơn giá keo (`glueUnitPrice`) do xưởng tự khai báo theo thực tế máy dán cạnh của họ.
+  - Mặc định để 0 / trống kèm nhãn *"hãy nhập số thực tế"* trên giao diện.
+- **Ngưỡng bản lề theo chiều cao cánh:**
+  - Các ngưỡng chiều cao cánh ($\le 900\text{ mm} \rightarrow 2\text{ bản lề}$, $900 - 1500\text{ mm} \rightarrow 3\text{ bản lề}$...) bắt buộc nằm trong cấu hình xưởng (`WorkshopCostConfig.hingeThresholds`), không được gán cứng (hardcode) trong code tính toán.
+  - Xưởng có thể tự do tùy chỉnh ngưỡng (ví dụ xưởng làm tủ kịch trần 2m8 cần 6 bản lề).
+  - Cho phép người dùng ghi đè (override) số lượng bản lề/ray theo thiết kế thực tế tại từng chi tiết tấm.
   - Mỗi cụm hộc kéo $\rightarrow 1\text{ bộ ray trượt âm}$.
-  - Cho phép người dùng ghi đè (override) số lượng bản lề/ray theo thiết kế thực tế.
 
 ---
 
