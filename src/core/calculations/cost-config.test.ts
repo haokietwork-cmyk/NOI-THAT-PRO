@@ -70,17 +70,30 @@ test("cost-config: Thiếu trường hoặc input null/undefined fallback về m
   assert.strictEqual(resPartial.slidesPerSheet, DEFAULT_WORKSHOP_COST_CONFIG.slidesPerSheet);
 });
 
-test("cost-config: Zod schema safeParse trả về lỗi cụ thể khi dữ liệu không hợp lệ", () => {
-  const invalidNegative = WorkshopCostConfigSchema.safeParse({
-    suppliesRatePerSheet: -100,
-    laborRatePerSheet: 100_000,
-    hingesPerSheet: 2,
-    slidesPerSheet: 1,
-  });
+test("cost-config: Định mức keo mặc định là 0 (không gán cứng 0.02 kg/md) và ngưỡng bản lề tùy chỉnh", () => {
+  const customConfig = {
+    suppliesRatePerSheet: 18_000,
+    laborRatePerSheet: 130_000,
+    hingesPerSheet: 2.2,
+    slidesPerSheet: 0.4,
+    hingeThresholds: [
+      { maxHeightMm: 1000, hingeCount: 2 },
+      { maxHeightMm: 1800, hingeCount: 3 },
+      { maxHeightMm: 2400, hingeCount: 4 },
+    ],
+    glueRatePerMd: 0.035, // Người dùng tự nhập số thực tế
+    glueUnitPrice: 95_000, // Đơn giá keo thực tế tại xưởng
+  };
 
-  assert.strictEqual(invalidNegative.success, false);
-  if (!invalidNegative.success) {
-    const issue = invalidNegative.error.issues[0];
-    assert.strictEqual(issue.path[0], "suppliesRatePerSheet");
-  }
+  const res = validateAndSanitizeCostConfig(customConfig);
+  assert.strictEqual(res.glueRatePerMd, 0.035);
+  assert.strictEqual(res.glueUnitPrice, 95_000);
+  assert.strictEqual(res.hingeThresholds?.length, 3);
+  assert.strictEqual(res.hingeThresholds?.[0].maxHeightMm, 1000);
+
+  // Mặc định khi không khai báo keo: phải là 0
+  const defaultConfig = validateAndSanitizeCostConfig({});
+  assert.strictEqual(defaultConfig.glueRatePerMd, 0, "Keo mặc định là 0 để xưởng tự nhập thực tế");
+  assert.strictEqual(defaultConfig.glueUnitPrice, 0, "Đơn giá keo mặc định là 0");
+  assert.ok(Array.isArray(defaultConfig.hingeThresholds), "Ngưỡng bản lề mặc định là mảng cấu hình");
 });

@@ -5,11 +5,28 @@
 
 export type SubscriptionTier = 'free' | 'pro' | 'enterprise';
 
+export interface HingeHeightThreshold {
+  maxHeightMm: number; // Ngưỡng chiều cao tối đa của cánh (mm)
+  hingeCount: number;  // Số lượng bản lề tương ứng
+}
+
+export const DEFAULT_HINGE_THRESHOLDS: HingeHeightThreshold[] = [
+  { maxHeightMm: 900, hingeCount: 2 },
+  { maxHeightMm: 1500, hingeCount: 3 },
+  { maxHeightMm: 2000, hingeCount: 4 },
+  { maxHeightMm: 2700, hingeCount: 5 },
+];
+
 export interface WorkshopCostConfig {
   suppliesRatePerSheet: number; // Đơn giá vật tư phụ & phụ kiện liên kết (ốc cam, ke góc, màng PE - VNĐ/tấm)
   laborRatePerSheet: number;    // Đơn giá nhân công CNC & hoàn thiện xưởng (VNĐ/tấm)
   hingesPerSheet: number;       // Định mức bản lề ước tính (cái/tấm)
   slidesPerSheet: number;       // Định mức ray trượt ước tính (bộ/tấm)
+  // Ngưỡng bản lề theo chiều cao cánh (nằm trong cấu hình xưởng, không gán cứng)
+  hingeThresholds?: HingeHeightThreshold[];
+  // Định mức keo dán cạnh (xưởng tự nhập thực tế, mặc định 0/trống kèm nhãn "hãy nhập số thực tế")
+  glueRatePerMd?: number;       // Tiêu hao keo (kg/md)
+  glueUnitPrice?: number;       // Đơn giá keo (VNĐ/kg)
 }
 
 export const DEFAULT_WORKSHOP_COST_CONFIG: WorkshopCostConfig = {
@@ -17,6 +34,9 @@ export const DEFAULT_WORKSHOP_COST_CONFIG: WorkshopCostConfig = {
   laborRatePerSheet: 120_000,
   hingesPerSheet: 2.0,
   slidesPerSheet: 0.35,
+  hingeThresholds: DEFAULT_HINGE_THRESHOLDS,
+  glueRatePerMd: 0,
+  glueUnitPrice: 0,
 };
 
 export interface WorkshopProfile {
