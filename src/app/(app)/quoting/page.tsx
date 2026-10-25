@@ -1524,7 +1524,8 @@ function QuotingWorkspace() {
                     calcResult.boards,
                     calcResult.edges,
                     calcResult.laborCost,
-                    calcResult.totalBaseCost
+                    calcResult.totalBaseCost,
+                    profile.costConfig
                   );
                   showToast("Đã xuất file Excel đặt ván nội bộ thành công!");
                 }}
@@ -1600,14 +1601,23 @@ function QuotingWorkspace() {
 
               {/* 3. Phụ kiện ước tính */}
               <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-2 text-xs">
-                <span className="font-bold text-slate-800 block">3. Phụ kiện kim khí (Hệ 32mm)</span>
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-800 block">3. Phụ kiện kim khí (Hệ 32mm)</span>
+                  <HelpTooltip
+                    content={`Ước tính theo cấu hình xưởng (${profile.costConfig?.hingesPerSheet ?? 2.0} bản lề/tấm, ${profile.costConfig?.slidesPerSheet ?? 0.35} bộ ray/tấm). Bạn có thể chỉnh lại tỷ lệ này trong trang Cài Đặt Hồ Sơ Xưởng.`}
+                    label="Giải thích định mức phụ kiện xưởng"
+                  />
+                </div>
+                <div className="text-[11px] text-amber-800 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200 font-medium">
+                  Ước tính theo cấu hình xưởng ({profile.costConfig?.hingesPerSheet ?? 2.0} bản lề/tấm, {profile.costConfig?.slidesPerSheet ?? 0.35} bộ ray/tấm)
+                </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Bản lề Inox 304 giảm chấn:</span>
-                  <span className="font-mono font-bold text-slate-800">~{Math.max(4, Math.round(calcResult.totalSheets * 2))} cái</span>
+                  <span className="font-mono font-bold text-slate-800">~{Math.max(4, Math.round(calcResult.totalSheets * (profile.costConfig?.hingesPerSheet ?? 2.0)))} cái</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Ray bi / ray âm 450mm:</span>
-                  <span className="font-mono font-bold text-slate-800">~{Math.max(1, Math.round(calcResult.totalSheets * 0.35))} bộ</span>
+                  <span className="font-mono font-bold text-slate-800">~{Math.max(1, Math.round(calcResult.totalSheets * (profile.costConfig?.slidesPerSheet ?? 0.35)))} bộ</span>
                 </div>
                 <div className="pt-2 border-t border-slate-200 flex justify-between font-bold">
                   <span>Tiền phụ kiện:</span>

@@ -5,6 +5,7 @@
 
 import * as XLSX from "xlsx";
 import { WorkshopBOMBoard, WorkshopBOMEdge, CutlistItem } from "@/core/calculations/quote-engine";
+import type { WorkshopCostConfig } from "@/core/types";
 
 /**
  * Xuất file Excel Bảng Tổng Hợp Vật Tư Xưởng (BOM)
@@ -14,9 +15,17 @@ export function exportWorkshopBOMExcel(
   boards: any[],
   edges: any,
   laborCost: number,
-  totalCost: number
+  totalCost: number,
+  costConfig?: WorkshopCostConfig
 ) {
   const wb = XLSX.utils.book_new();
+
+  // Định mức xưởng
+  const hingesRate = costConfig?.hingesPerSheet ?? 2.0;
+  const slidesRate = costConfig?.slidesPerSheet ?? 0.35;
+  const totalSheets = boards.reduce((s, b) => s + (b.sheetsNeeded ?? b.sheetsToBuy ?? 0), 0);
+  const estHinges = Math.max(4, Math.round(totalSheets * hingesRate));
+  const estSlides = Math.max(1, Math.round(totalSheets * slidesRate));
 
   // 1. Sheet Đặt Ván
   const boardData = boards.map((b, idx) => ({
@@ -52,20 +61,23 @@ export function exportWorkshopBOMExcel(
     {
       "Hạng Mục Phụ Kiện": "Bản lề bật Inox 304 giảm chấn (Hệ 32mm)",
       "Quy Cách": "Chén phi 35mm, tháo lắp nhanh",
+      "Số Lượng": estHinges,
       "Đơn Vị": "Cái",
-      "Ghi Chú": "Theo quy mô số cánh mở",
+      "Ghi Chú": `Ước tính theo cấu hình xưởng (${hingesRate} bản lề/tấm)`,
     },
     {
       "Hạng Mục Phụ Kiện": "Ray trượt âm giảm chấn 450mm mở toàn phần",
       "Quy Cách": "Độ sâu lọt lòng hộc ≥ 460mm, tải trọng 35kg",
+      "Số Lượng": estSlides,
       "Đơn Vị": "Bộ",
-      "Ghi Chú": "Theo số lượng ngăn kéo",
+      "Ghi Chú": `Ước tính theo cấu hình xưởng (${slidesRate} bộ ray/tấm)`,
     },
     {
-      "Hạng Mục Phụ Kiện": "Ốc cam chốt liên kết, ke định vị",
-      "Quy Cách": "Khoan mộng liên kết máy CNC",
-      "Đơn Vị": "Bộ",
-      "Ghi Chú": "Đầy đủ cho toàn bộ công trình",
+      "Hạng Mục Phụ Kiện": "Vật tư phụ & phụ kiện liên kết (ốc cam, chốt đợt, đinh vít, keo)",
+      "Quy Cách": "Quy cách chuẩn xưởng sản xuất",
+      "Số Lượng": `${totalSheets} tấm`,
+      "Đơn Vị": "Gói",
+      "Ghi Chú": `Định mức ${costConfig?.suppliesRatePerSheet ?? 15000} đ/tấm`,
     },
   ];
   const wsHardware = XLSX.utils.json_to_sheet(hardwareData);
@@ -84,18 +96,23 @@ export function exportWorkshopBOMExcel(
       "Thành Tiền (VNĐ)": edgeCost,
     },
     {
-      "Thành Phần Giá Vốn": "3. Phụ kiện kim khí (Bản lề, ray, ốc cam)",
-      "Chi Tiết": "Ước tính theo khối lượng tủ",
-      "Thành Tiền (VNĐ)": Math.max(0, totalCost - boardData.reduce((s, b) => s + (b["Thành Tiền (VNĐ)"] || 0), 0) - edgeCost - laborCost),
+      "Thành Phần Giá Vốn": "3. Phụ kiện kim khí (Bản lề, ray)",
+      "Chi Tiết": `Ước tính theo cấu hình xưởng (${hingesRate} bản lề/tấm, ${slidesRate} bộ ray/tấm)`,
+      "Thành Tiền (VNĐ)": Math.max(0, totalCost - boardData.reduce((s, b) => s + (b["Thành Tiền (VNĐ)"] || 0), 0) - edgeCost - laborCost - (totalSheets * (costConfig?.suppliesRatePerSheet ?? 15000))),
     },
     {
-      "Thành Phần Giá Vốn": "4. Nhân công gia công xưởng & lắp ráp công trình",
-      "Chi Tiết": "Định mức cắt CNC, dán cạnh & thợ lắp đặt",
+      "Thành Phần Giá Vốn": "4. Vật tư phụ & phụ kiện liên kết",
+      "Chi Tiết": `Định mức ${costConfig?.suppliesRatePerSheet ?? 15000} đ/tấm × ${totalSheets} tấm`,
+      "Thành Tiền (VNĐ)": totalSheets * (costConfig?.suppliesRatePerSheet ?? 15000),
+    },
+    {
+      "Thành Phần Giá Vốn": "5. Nhân công gia công xưởng & lắp ráp công trình",
+      "Chi Tiết": `Định mức ${costConfig?.laborRatePerSheet ?? 120000} đ/tấm × ${totalSheets} tấm`,
       "Thành Tiền (VNĐ)": laborCost,
     },
     {
       "Thành Phần Giá Vốn": "TỔNG GIÁ VỐN NỘI BỘ XƯỞNG",
-      "Chi Tiết": "Bao gồm đủ 4 thành phần giá vốn",
+      "Chi Tiết": "Bao gồm đủ 5 thành phần giá vốn",
       "Thành Tiền (VNĐ)": totalCost,
     },
   ];

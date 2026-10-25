@@ -147,7 +147,8 @@ export default function ProjectWorkspacePage() {
                   calcResult.boards,
                   calcResult.edges,
                   calcResult.laborCost,
-                  calcResult.totalCost
+                  calcResult.totalCost,
+                  project.costConfigSnapshot
                 );
               }}
               className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl transition shadow-sm"
