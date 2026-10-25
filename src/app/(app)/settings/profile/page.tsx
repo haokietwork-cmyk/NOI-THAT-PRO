@@ -59,7 +59,7 @@ export default function WorkshopProfileSettingsPage() {
       },
     });
     if (res?.error) {
-      setErrorMessage(`Đã lưu trên máy, nhưng chưa đồng bộ Cloud: ${res.error}`);
+      setErrorMessage(`⚠️ Đã lưu tạm trên máy, chưa lên Cloud: ${res.error}`);
     } else {
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 3000);

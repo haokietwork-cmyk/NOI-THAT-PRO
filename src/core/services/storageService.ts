@@ -4,9 +4,9 @@
  * và LocalStorage Offline (chế độ Demo / Khách vãng lai / Không có mạng).
  */
 
-import type { CutlistPart, FeatureLead, MaterialItem, SavedProject, WorkshopProfile } from "../types";
-import { SEED_MATERIALS, SEED_PROFILE, SEED_PROJECTS } from "./seedData";
-import { createClient, isSupabaseConfigured } from "../supabase/client";
+import type { CutlistPart, FeatureLead, MaterialItem, SavedProject, WorkshopProfile } from "../types/index.ts";
+import { SEED_MATERIALS, SEED_PROFILE, SEED_PROJECTS } from "./seedData.ts";
+import { createClient, isSupabaseConfigured } from "../supabase/client.ts";
 import { resolveProjectProfitMargin } from "../calculations/profit-calculator.ts";
 import { validateAndSanitizeCostConfig } from "../calculations/cost-config-validator.ts";
 
@@ -17,6 +17,8 @@ const STORAGE_KEYS = {
   PROJECTS: "noithat_pro_projects",
   LEADS: "noithat_pro_leads",
 };
+
+let memoryState: StorageDataState | null = null;
 
 export interface StorageDataState {
   profile: WorkshopProfile;
@@ -35,11 +37,14 @@ export class StorageService {
 
   public static getLocalState(): StorageDataState {
     if (!this.isBrowser()) {
-      return {
-        profile: SEED_PROFILE,
-        materials: SEED_MATERIALS,
-        projects: SEED_PROJECTS,
-      };
+      if (!memoryState) {
+        memoryState = {
+          profile: { ...SEED_PROFILE },
+          materials: [...SEED_MATERIALS],
+          projects: [...SEED_PROJECTS],
+        };
+      }
+      return memoryState;
     }
 
     try {
@@ -89,6 +94,7 @@ export class StorageService {
   }
 
   public static setLocalState(state: StorageDataState): void {
+    memoryState = state;
     if (!this.isBrowser()) return;
     try {
       localStorage.setItem(STORAGE_KEYS.STATE, JSON.stringify(state));
@@ -162,7 +168,6 @@ export class StorageService {
 
         if (user) {
           const profilePayload: Record<string, any> = {
-            id: user.id,
             company_name: sanitizedProfile.name,
             phone: sanitizedProfile.phone,
             address: sanitizedProfile.address,
@@ -171,7 +176,13 @@ export class StorageService {
             cost_config: sanitizedCostConfig,
           };
 
-          const { error } = await supabase.from("profiles").upsert(profilePayload);
+          // Dùng .update() thay vì .upsert() vì bảng profiles đã REVOKE INSERT đối với authenticated users
+          // Hàng profiles gốc được tạo tự động bởi database trigger khi người dùng đăng ký auth.users
+          const { error } = await supabase
+            .from("profiles")
+            .update(profilePayload)
+            .eq("id", user.id);
+
           if (error) {
             console.error("Lỗi đồng bộ Supabase Profile:", error);
             return { success: false, error: error.message };

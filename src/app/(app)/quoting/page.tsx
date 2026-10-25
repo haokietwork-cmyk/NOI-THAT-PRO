@@ -611,11 +611,11 @@ function QuotingWorkspace() {
 
     const res = await saveProject(projectToSave);
     if (res?.error) {
-      showToast(`Đã lưu dự án trên máy, nhưng chưa thể đồng bộ Cloud: ${res.error}`, "info");
+      showToast(`⚠️ Đã lưu tạm trên máy, chưa lên Cloud: ${res.error}`, "info");
     } else {
       setSaveSuccess(true);
       showToast(
-        "Đã lưu dự án thành công vào tài khoản xưởng của bạn!",
+        "✅ Đã lưu dự án thành công lên Cloud!",
         "success"
       );
       setTimeout(() => setSaveSuccess(false), 3000);
