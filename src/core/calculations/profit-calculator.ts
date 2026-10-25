@@ -12,24 +12,21 @@
  * - 0 < k < 1: Lãi âm (bán lỗ dưới giá vốn)
  */
 
-export const DEFAULT_LEGACY_PROFIT_MARGIN = 1.35; // Mặc định cũ (markup 35%) cho dự án lịch sử thiếu profitMargin
-export const DEFAULT_NEW_PROFIT_MARGIN = 1.65;    // Mặc định mới (markup 65%) cho dự án tạo mới
-export const DEFAULT_PROFIT_MARGIN = DEFAULT_NEW_PROFIT_MARGIN;
+export const DEFAULT_PROFIT_MARGIN = 1.65; // Mặc định chuẩn xưởng (markup 65%, biên lợi nhuận thực ~39.4%)
+export const DEFAULT_NEW_PROFIT_MARGIN = DEFAULT_PROFIT_MARGIN;
 
 /**
  * Phân giải hệ số lợi nhuận an toàn cho dự án:
  * - Nếu dự án có lưu profitMargin hợp lệ (> 0): dùng đúng giá trị đã lưu.
- * - Nếu dự án cũ bị thiếu/null: dùng DEFAULT_LEGACY_PROFIT_MARGIN (1.35) để không làm nhảy số tiền lịch sử.
- * - Nếu là dự án mới tạo: dùng DEFAULT_NEW_PROFIT_MARGIN (1.65).
+ * - Nếu thiếu/null: dùng mặc định duy nhất là 1.65 (65% markup).
  */
 export function resolveProjectProfitMargin(
-  savedMargin?: number | null,
-  isNewProject: boolean = false
+  savedMargin?: number | null
 ): number {
   if (savedMargin !== undefined && savedMargin !== null && !isNaN(savedMargin) && savedMargin > 0) {
     return Number(savedMargin);
   }
-  return isNewProject ? DEFAULT_NEW_PROFIT_MARGIN : DEFAULT_LEGACY_PROFIT_MARGIN;
+  return DEFAULT_PROFIT_MARGIN;
 }
 
 /**

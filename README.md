@@ -31,3 +31,11 @@ npm test
 # 5. Đóng gói bản chạy thực tế (Production Build)
 npm run build
 ```
+
+---
+
+## Quy Tắc Phiên Bản Tính Toán (calc_version)
+
+- `calc_version = 1`: Đại diện cho công thức tính toán chuẩn xưởng hiện tại của AutoCutlist.
+- **Quy tắc bất biến:** Kể từ thời điểm có khách hàng thật lưu dự án đầu tiên lên hệ thống, nếu có bất kỳ sự thay đổi logic/công thức tính toán nào trong tương lai, BẮT BUỘC phải tăng `calc_version` lên (+1) và bảo lưu nguyên vẹn engine tính toán của các phiên bản cũ để bảo vệ triệt để tính toàn vẹn của báo giá lịch sử (Snapshot Pricing).
+

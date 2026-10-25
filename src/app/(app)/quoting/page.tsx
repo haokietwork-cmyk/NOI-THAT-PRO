@@ -317,7 +317,7 @@ function QuotingWorkspace() {
         setClientName(found.clientName);
         setClientPhone(found.clientPhone || "");
         setParts(found.items);
-        setProfitMargin(resolveProjectProfitMargin(found.profitMargin, false));
+        setProfitMargin(resolveProjectProfitMargin(found.profitMargin));
         if (found.roundingStep) setRoundingStep(found.roundingStep);
       }
     }

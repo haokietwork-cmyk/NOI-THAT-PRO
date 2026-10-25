@@ -52,13 +52,11 @@ export default function ProjectWorkspacePage() {
     ? project.materialSnapshots
     : materials;
 
-  const effectiveProfitMargin = resolveProjectProfitMargin(project.profitMargin, false);
+  const effectiveProfitMargin = resolveProjectProfitMargin(project.profitMargin);
   const calcResult = calculateQuoteEngine(
     project.items,
     projectMaterials,
-    effectiveProfitMargin,
-    undefined,
-    project.calcVersion ?? 1
+    effectiveProfitMargin
   );
   const formatVND = (val: number) => (val || 0).toLocaleString("vi-VN") + " đ";
 

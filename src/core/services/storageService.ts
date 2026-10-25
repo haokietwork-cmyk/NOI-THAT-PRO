@@ -70,7 +70,7 @@ export class StorageService {
           projects: Array.isArray(parsed.projects)
             ? parsed.projects.map((proj: SavedProject) => ({
                 ...proj,
-                profitMargin: resolveProjectProfitMargin(proj.profitMargin, false),
+                profitMargin: resolveProjectProfitMargin(proj.profitMargin),
                 calcVersion: proj.calcVersion ?? 1,
               }))
             : SEED_PROJECTS,
@@ -278,7 +278,7 @@ export class StorageService {
               clientAddress: p.client_address || "",
               createdAt: p.created_at,
               status: p.status || "draft",
-              profitMargin: resolveProjectProfitMargin(p.profit_margin, false),
+              profitMargin: resolveProjectProfitMargin(p.profit_margin),
               roundingStep: 0.5,
               totalCost: Number(p.total_cost || 0),
               totalQuote: Number(p.total_quote || 0),

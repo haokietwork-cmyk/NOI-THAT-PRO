@@ -4,20 +4,17 @@
  * Gom logic tính giá và phân bổ module về src/core/calculations/profit-calculator.ts
  */
 
-import type { CutlistPart, MaterialItem } from "../types/index.ts";
+import type { CutlistPart, MaterialItem, SavedProject } from "../types/index.ts";
 import { calculateProject, STANDARD_BOARD, STANDARD_SHEET_AREA_M2 } from "./engine.ts";
 import {
   calculateCommercialQuote,
   calculateModuleQuoteLine,
   resolveProjectProfitMargin,
-  DEFAULT_LEGACY_PROFIT_MARGIN,
   DEFAULT_NEW_PROFIT_MARGIN,
   DEFAULT_PROFIT_MARGIN,
 } from "./profit-calculator.ts";
 import type { EdgeBandingConfig } from "./edge-calculator.ts";
-import { calculateLegacyV1 } from "./legacy-v1-calculator.ts";
 
-export { calculateLegacyV1 } from "./legacy-v1-calculator.ts";
 export { calculateProject, STANDARD_BOARD, STANDARD_SHEET_AREA_M2 } from "./engine.ts";
 export * from "./profit-calculator.ts";
 
@@ -100,24 +97,15 @@ export const LEGAL_DISCLAIMER =
 
 /**
  * Tính toán toàn diện giá vốn và báo giá từ danh sách chi tiết tấm Cutlist
- * Hỗ trợ phân định phiên bản thuật toán (calcVersion):
- *  - calcVersion = 1: Chạy calculateLegacyV1 (Bảo tồn Snapshot các dự án cũ - 16.289.520 đ)
- *  - calcVersion = 2: Chạy calculateProject (Chuẩn xưởng hiện đại V2 - 16.559.450 đ)
+ * Lớp bọc chuẩn hóa chuyển tiếp dữ liệu đến calculateProject (Engine duy nhất)
  */
 export function calculateQuoteEngine(
   parts: (CutlistPart | CutlistItem)[],
   materials: (MaterialItem | MaterialPricing)[],
   profitMargin?: number,
-  customLaborRate?: number,
-  calcVersion?: number
+  customLaborRate?: number
 ): QuoteCalculationResult {
-  // Phân giải hệ số lợi nhuận an toàn: nếu thiếu -> fallback về 1.35 cho dự án cũ
-  const effectiveMargin = resolveProjectProfitMargin(profitMargin, false);
-
-  // Phân luồng phiên bản: Dự án cũ (calcVersion = 1) chạy thẳng qua calculateLegacyV1
-  if (calcVersion === 1) {
-    return calculateLegacyV1(parts, materials, effectiveMargin, customLaborRate);
-  }
+  const effectiveMargin = resolveProjectProfitMargin(profitMargin);
 
   // Chuẩn hóa dữ liệu tấm đầu vào tương thích giữa CutlistPart và CutlistItem
   const normalizedParts: CutlistPart[] = parts.map((p, idx) => {
@@ -218,5 +206,34 @@ export function calculateQuoteEngine(
       estimatedCost: m.baseCost,
       estimatedQuote: m.quotePrice,
     })),
+  };
+}
+
+/**
+ * Trích xuất hoặc tính toán tổng tiền của dự án:
+ * - Nếu dự án đã có snapshot tổng tiền đóng băng (is_locked/snapshotTotals): lấy trực tiếp từ snapshot.
+ * - Nếu chưa có snapshot: tính bằng engine hiện tại.
+ */
+export function getProjectTotals(
+  project: SavedProject,
+  materials?: MaterialItem[]
+): {
+  totalCost: number;
+  totalQuote: number;
+  grossProfit: number;
+  profitMargin: number;
+} {
+  const effectiveMaterials = (project.materialsSnapshot && project.materialsSnapshot.length > 0)
+    ? project.materialsSnapshot
+    : (materials || []);
+
+  const margin = resolveProjectProfitMargin(project.profitMargin);
+  const calc = calculateQuoteEngine(project.items, effectiveMaterials, margin);
+
+  return {
+    totalCost: calc.totalCost,
+    totalQuote: calc.totalQuotePrice,
+    grossProfit: calc.grossProfit,
+    profitMargin: margin,
   };
 }
