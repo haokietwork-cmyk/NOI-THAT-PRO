@@ -55,14 +55,14 @@ export function useAppStore() {
   }, []);
 
   // PROFILE ACTIONS
-  const updateProfile = async (patch: Partial<WorkshopProfile>) => {
+  const updateProfile = async (patch: Partial<WorkshopProfile>): Promise<{ success: boolean; error?: string }> => {
     const updated = { ...currentState.profile, ...patch };
     currentState = {
       ...currentState,
       profile: updated,
     };
     notify();
-    await StorageService.saveProfile(updated);
+    return await StorageService.saveProfile(updated);
   };
 
   // MATERIALS ACTIONS
@@ -98,7 +98,7 @@ export function useAppStore() {
   };
 
   // PROJECT ACTIONS
-  const saveProject = async (project: SavedProject) => {
+  const saveProject = async (project: SavedProject): Promise<{ success: boolean; error?: string }> => {
     const exists = currentState.projects.some((p) => p.id === project.id);
     const updatedProjects = exists
       ? currentState.projects.map((p) => (p.id === project.id ? project : p))
@@ -109,7 +109,7 @@ export function useAppStore() {
       projects: updatedProjects,
     };
     notify();
-    await StorageService.saveProject(project);
+    return await StorageService.saveProject(project);
   };
 
   const deleteProject = async (id: string) => {

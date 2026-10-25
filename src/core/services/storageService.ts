@@ -8,6 +8,7 @@ import type { CutlistPart, FeatureLead, MaterialItem, SavedProject, WorkshopProf
 import { SEED_MATERIALS, SEED_PROFILE, SEED_PROJECTS } from "./seedData";
 import { createClient, isSupabaseConfigured } from "../supabase/client";
 import { resolveProjectProfitMargin } from "../calculations/profit-calculator.ts";
+import { validateAndSanitizeCostConfig } from "../calculations/cost-config-validator.ts";
 
 const STORAGE_KEYS = {
   STATE: "noithat_pro_state_v1",
@@ -139,10 +140,16 @@ export class StorageService {
     return this.getLocalState().profile;
   }
 
-  public static async saveProfile(profile: WorkshopProfile): Promise<void> {
+  public static async saveProfile(profile: WorkshopProfile): Promise<{ success: boolean; error?: string }> {
     // 1. Luôn cập nhật LocalStorage trước để phản hồi tức thì
+    const sanitizedCostConfig = validateAndSanitizeCostConfig(profile.costConfig);
+    const sanitizedProfile: WorkshopProfile = {
+      ...profile,
+      costConfig: sanitizedCostConfig,
+    };
+
     const current = this.getLocalState();
-    current.profile = profile;
+    current.profile = sanitizedProfile;
     this.setLocalState(current);
 
     // 2. Đồng bộ lên Supabase nếu có phiên làm việc
@@ -154,20 +161,29 @@ export class StorageService {
         } = await supabase.auth.getUser();
 
         if (user) {
-          await supabase.from("profiles").upsert({
+          const profilePayload: Record<string, any> = {
             id: user.id,
-            company_name: profile.name,
-            phone: profile.phone,
-            address: profile.address,
-            logo_url: profile.logoUrl,
-            subscription_tier: profile.subscriptionTier,
+            company_name: sanitizedProfile.name,
+            phone: sanitizedProfile.phone,
+            address: sanitizedProfile.address,
+            logo_url: sanitizedProfile.logoUrl,
             updated_at: new Date().toISOString(),
-          });
+            cost_config: sanitizedCostConfig,
+          };
+
+          const { error } = await supabase.from("profiles").upsert(profilePayload);
+          if (error) {
+            console.error("Lỗi đồng bộ Supabase Profile:", error);
+            return { success: false, error: error.message };
+          }
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Lỗi đồng bộ Supabase Profile:", err);
+        return { success: false, error: err?.message || "Lỗi kết nối Supabase Cloud" };
       }
     }
+
+    return { success: true };
   }
 
   // ==========================================================================
@@ -312,11 +328,16 @@ export class StorageService {
     return this.getLocalState().projects;
   }
 
-  public static async saveProject(project: SavedProject): Promise<void> {
+  public static async saveProject(project: SavedProject): Promise<{ success: boolean; error?: string }> {
     const current = this.getLocalState();
     const existing = current.projects.find((p) => p.id === project.id);
     const resolvedCalcVersion = 1;
-    const projectWithVersion = { ...project, calcVersion: resolvedCalcVersion };
+    const sanitizedCostConfigSnapshot = validateAndSanitizeCostConfig(project.costConfigSnapshot);
+    const projectWithVersion: SavedProject = {
+      ...project,
+      calcVersion: resolvedCalcVersion,
+      costConfigSnapshot: sanitizedCostConfigSnapshot,
+    };
 
     current.projects = existing
       ? current.projects.map((p) => (p.id === project.id ? projectWithVersion : p))
@@ -331,26 +352,35 @@ export class StorageService {
         } = await supabase.auth.getUser();
 
         if (user) {
-          // Lưu dự án
+          // Lưu dự án: chỉ map các trường khớp với schema database thực tế
+          const projectPayload: Record<string, any> = {
+            id: project.id.startsWith("proj-") ? undefined : project.id,
+            user_id: user.id,
+            project_name: project.projectName,
+            client_name: project.clientName,
+            client_phone: project.clientPhone,
+            status: project.status,
+            profit_margin: project.profitMargin,
+            total_cost: project.totalCost,
+            total_quote: project.totalQuote,
+            rounding_step: project.roundingStep ?? 0.5,
+            materials_snapshot: project.materialsSnapshot || project.materialSnapshots,
+            cost_config_snapshot: sanitizedCostConfigSnapshot,
+            calc_version: resolvedCalcVersion,
+          };
+
           const { data: savedProj, error: projErr } = await supabase
             .from("projects")
-            .upsert({
-              id: project.id.startsWith("proj-") ? undefined : project.id,
-              user_id: user.id,
-              project_name: project.projectName,
-              client_name: project.clientName,
-              client_phone: project.clientPhone,
-              client_address: project.clientAddress,
-              status: project.status,
-              profit_margin: project.profitMargin,
-              total_cost: project.totalCost,
-              total_quote: project.totalQuote,
-              calc_version: resolvedCalcVersion,
-            })
+            .upsert(projectPayload)
             .select()
             .single();
 
-          if (!projErr && savedProj) {
+          if (projErr) {
+            console.error("Lỗi đồng bộ Supabase Project:", projErr);
+            return { success: false, error: projErr.message };
+          }
+
+          if (savedProj) {
             // Lưu các chi tiết tấm (project_items)
             const items = project.items.map((item) => ({
               project_id: savedProj.id,
@@ -369,14 +399,25 @@ export class StorageService {
             }));
 
             // Xóa cũ và nạp mới items
-            await supabase.from("project_items").delete().eq("project_id", savedProj.id);
-            await supabase.from("project_items").insert(items);
+            const { error: delErr } = await supabase.from("project_items").delete().eq("project_id", savedProj.id);
+            if (delErr) {
+              console.error("Lỗi xóa project_items cũ:", delErr);
+            }
+
+            const { error: insErr } = await supabase.from("project_items").insert(items);
+            if (insErr) {
+              console.error("Lỗi thêm mới project_items:", insErr);
+              return { success: false, error: insErr.message };
+            }
           }
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Lỗi đồng bộ Supabase Project:", err);
+        return { success: false, error: err?.message || "Lỗi kết nối Supabase Cloud" };
       }
     }
+
+    return { success: true };
   }
 
   public static async deleteProject(id: string): Promise<void> {

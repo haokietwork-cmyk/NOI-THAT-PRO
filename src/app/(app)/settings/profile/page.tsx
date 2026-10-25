@@ -37,10 +37,12 @@ export default function WorkshopProfileSettingsPage() {
   const [slidesPerSheet, setSlidesPerSheet] = useState(profile.costConfig?.slidesPerSheet ?? 0.35);
 
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    await updateProfile({
+    setErrorMessage(null);
+    const res = await updateProfile({
       name: name.trim(),
       phone: phone.trim(),
       address: address.trim(),
@@ -56,8 +58,12 @@ export default function WorkshopProfileSettingsPage() {
         slidesPerSheet: Number(slidesPerSheet) || 0.35,
       },
     });
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3000);
+    if (res?.error) {
+      setErrorMessage(`Đã lưu trên máy, nhưng chưa đồng bộ Cloud: ${res.error}`);
+    } else {
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 3000);
+    }
   };
 
   return (
@@ -304,7 +310,11 @@ export default function WorkshopProfileSettingsPage() {
 
             {/* Buttons */}
             <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-              {savedSuccess ? (
+              {errorMessage ? (
+                <div className="flex items-center gap-1.5 text-xs text-rose-700 font-bold max-w-sm">
+                  <span>⚠️ {errorMessage}</span>
+                </div>
+              ) : savedSuccess ? (
                 <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-bold">
                   <CheckCircle2 className="w-4 h-4" />
                   <span>Đã lưu thành công vào hệ thống!</span>

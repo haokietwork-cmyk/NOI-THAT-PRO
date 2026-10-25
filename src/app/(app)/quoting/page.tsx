@@ -583,7 +583,7 @@ function QuotingWorkspace() {
   };
 
   // Lưu dự án vào Store
-  const handleSaveProject = () => {
+  const handleSaveProject = async () => {
     if (!isAuthenticated) {
       setAuthModalTitle("Yêu cầu Đăng nhập để Lưu Dự Án");
       setAuthModalDesc("Chức năng dùng thử chỉ cho phép xem trước bảng tính tạm thời. Vui lòng đăng nhập qua Email hoặc Số điện thoại để lưu dự án lên đám mây và bảo vệ đơn giá theo xưởng của bạn.");
@@ -609,13 +609,17 @@ function QuotingWorkspace() {
       costConfigSnapshot: profile.costConfig || DEFAULT_WORKSHOP_COST_CONFIG,
     };
 
-    saveProject(projectToSave);
-    setSaveSuccess(true);
-    showToast(
-      "Đã lưu dự án thành công vào tài khoản xưởng của bạn!",
-      "success"
-    );
-    setTimeout(() => setSaveSuccess(false), 3000);
+    const res = await saveProject(projectToSave);
+    if (res?.error) {
+      showToast(`Đã lưu dự án trên máy, nhưng chưa thể đồng bộ Cloud: ${res.error}`, "info");
+    } else {
+      setSaveSuccess(true);
+      showToast(
+        "Đã lưu dự án thành công vào tài khoản xưởng của bạn!",
+        "success"
+      );
+      setTimeout(() => setSaveSuccess(false), 3000);
+    }
   };
 
   const formatVND = (val: number) => (val || 0).toLocaleString("vi-VN") + " đ";
