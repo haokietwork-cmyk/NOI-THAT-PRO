@@ -1,0 +1,1 @@
+(load "public/plugins/autocad/test-drawings/test_kitchen_suite_run.lsp")

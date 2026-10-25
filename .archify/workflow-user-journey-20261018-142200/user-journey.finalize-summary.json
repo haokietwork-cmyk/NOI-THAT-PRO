@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "workflow",
+  "quality": "showcase",
+  "specification": {
+    "path": "C:\\Users\\KIET_PC\\Desktop\\Web nội thất\\.archify\\workflow-user-journey-20261018-142200\\candidate.json",
+    "sha256": "369cf6bdb3dd6d16957980949a4ebfed80e8d780dd56d017c4c67bdcf6922bc9",
+    "bytes": 6137
+  },
+  "artifact": {
+    "path": "C:\\Users\\KIET_PC\\Desktop\\Web nội thất\\.archify\\workflow-user-journey-20261018-142200\\user-journey.html",
+    "sha256": "f89abcf50aca95defbe5882eef3eb4807dc003fffd3107a9ec99c7cfcd8e8755",
+    "bytes": 833693
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "C:\\Users\\KIET_PC\\Desktop\\Web nội thất\\.archify\\workflow-user-journey-20261018-142200\\user-journey.finalize.json",
+    "summaryReceipt": "C:\\Users\\KIET_PC\\Desktop\\Web nội thất\\.archify\\workflow-user-journey-20261018-142200\\user-journey.finalize-summary.json",
+    "browserCheckReceipt": "C:\\Users\\KIET_PC\\Desktop\\Web nội thất\\.archify\\workflow-user-journey-20261018-142200\\user-journey.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.1.0",
+    "availableVersion": "3.1.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-18T07:23:50.634Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 4987
+}

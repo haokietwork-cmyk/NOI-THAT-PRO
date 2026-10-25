@@ -1,0 +1,3576 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NoiThatPro - Profile &amp; Moulding Pro V2.0 (Web-Twin Architecture)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --card-hover: #f1f5f9;
+      --border: rgba(226, 232, 240, 0.85);
+      --border-strong: #cbd5e1;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --brand: #f59e0b;
+      --brand-hover: #d97706;
+      --primary: #059669;
+      --primary-hover: #047857;
+      --accent: #0284c7;
+      --accent-hover: #0369a1;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --blueprint-line: rgba(148, 163, 184, 0.09);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      background-image: 
+        linear-gradient(to right, var(--blueprint-line) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--blueprint-line) 1px, transparent 1px);
+      background-size: 24px 24px;
+      color: var(--text);
+      line-height: 1.5;
+      padding: 16px;
+      font-size: 13px;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .font-mono, .tabular-nums, .metric-value, .stat-value, .hwid-box, td:nth-child(4), td:nth-child(5), td:nth-child(6), td:nth-child(7), td:nth-child(8), td:nth-child(9) {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1, "zero" 1;
+    }
+
+    /* Brand Header Card */
+    /* Top Toolbar (Simple, Utilitarian, No Logo Bloat) */
+    .top-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .toolbar-left { display: flex; align-items: center; gap: 8px; }
+    .toolbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .quick-status-pill {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+      padding: 5px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11.5px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+    }
+    .badge-master {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .badge-master:hover { background: #d1fae5; }
+    .badge-dot, .pulse-dot {
+      width: 7px;
+      height: 7px;
+      background-color: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 6px #10b981;
+      display: inline-block;
+      animation: pulseDot 2s infinite;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    /* Segmented Pill Navigation */
+    .tabs-bar {
+      display: inline-flex;
+      background: rgba(241, 245, 249, 0.9);
+      border: 1px solid var(--border);
+      padding: 4px;
+      border-radius: 9999px;
+      gap: 4px;
+      margin-bottom: 14px;
+      box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+    .tab-btn {
+      padding: 7px 16px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active {
+      background: #ffffff;
+      color: #0f172a;
+      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.1), 0 1px 1px rgba(15, 23, 42, 0.06);
+    }
+
+    /* Views */
+    .view-content { display: none; }
+    .view-content.active { display: block; animation: tabFadeIn 0.2s ease; }
+    @keyframes tabFadeIn {
+      from { opacity: 0; transform: translateY(3px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* VIEW 1: SETUP GRID */
+    .setup-grid {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    /* Left Sidebar: Profile Library */
+    .sidebar-panel {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.03);
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .panel-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #0f172a;
+      text-transform: uppercase;
+      letter-spacing: -0.2px;
+    }
+    .search-box {
+      width: 100%;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 11.5px;
+      color: #0f172a;
+      font-family: inherit;
+      margin-bottom: 10px;
+      outline: none;
+      transition: all 0.15s;
+    }
+    .search-box:focus {
+      border-color: var(--brand);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
+    }
+
+    .category-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+    .cat-pill {
+      font-size: 10.5px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+    .cat-pill:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+    .cat-pill.active {
+      background: #0f172a;
+      color: #ffffff;
+      border-color: #0f172a;
+    }
+
+    .profile-list {
+      max-height: 480px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-right: 4px;
+    }
+    .profile-list::-webkit-scrollbar { width: 5px; }
+    .profile-list::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+    .profile-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+    .profile-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      position: relative;
+    }
+    .profile-card:hover {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+      transform: translateY(-1px);
+    }
+    .profile-card.selected {
+      border-color: var(--brand);
+      background: #fffbeb;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.12);
+    }
+    .profile-card.selected::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--brand);
+      border-top-left-radius: 9px;
+      border-bottom-left-radius: 9px;
+    }
+    .profile-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+    .profile-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: #0f172a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .profile-tag {
+      font-size: 9.5px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .profile-card.selected .profile-tag {
+      background: #fef3c7;
+      color: #92400e;
+      border-color: #fde68a;
+    }
+    .profile-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Right Controls Panel */
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Preview Card */
+    .preview-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.03);
+    }
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .svg-container {
+      width: 100%;
+      height: 195px;
+      background-color: #f8fafc;
+      background-image: 
+        linear-gradient(to right, rgba(148, 163, 184, 0.12) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
+      background-size: 16px 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .profile-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Transforms Bar */
+    .transforms-bar {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .transform-group { display: flex; gap: 6px; align-items: center; }
+    .toggle-btn {
+      background: #ffffff;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .toggle-btn:hover { background: #f8fafc; color: #0f172a; }
+    .toggle-btn.active {
+      background: #fef3c7;
+      color: #92400e;
+      border-color: #fde68a;
+      font-weight: 700;
+    }
+
+    .rot-btn {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 10.5px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      transition: all 0.15s;
+    }
+    .rot-btn:hover { background: #e2e8f0; color: #0f172a; }
+    .rot-btn.active {
+      background: #0f172a;
+      color: #ffffff;
+      border-color: #0f172a;
+    }
+
+    /* Settings Row */
+    .settings-row {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 8px;
+    }
+    .setting-box {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 12px;
+    }
+    .box-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 6px;
+    }
+
+    /* 3x3 Matrix Grid */
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+    }
+    .matrix-btn {
+      aspect-ratio: 1;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #475569;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      transition: all 0.15s;
+    }
+    .matrix-btn:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+      border-color: #cbd5e1;
+    }
+    .matrix-btn.active {
+      background: #059669;
+      color: #ffffff;
+      border-color: #059669;
+      box-shadow: 0 1px 3px rgba(5, 150, 105, 0.3);
+    }
+
+    /* Inputs */
+    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }
+    .input-group label {
+      display: block;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 3px;
+    }
+    .input-group input, .input-group select {
+      width: 100%;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 11.5px;
+      color: #0f172a;
+      outline: none;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .input-group input {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .input-group input:focus, .input-group select:focus {
+      border-color: var(--brand);
+      background: #ffffff;
+      box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.12);
+    }
+
+    /* Actions Footer */
+    .actions-footer {
+      display: grid;
+      grid-template-columns: 2fr 1.5fr 1fr;
+      gap: 8px;
+    }
+    .btn-main {
+      background: #059669;
+      color: #ffffff;
+      border: 1px solid #047857;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 12.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+      transition: all 0.15s;
+    }
+    .btn-main:hover { background: #047857; }
+    .btn-update {
+      background: #0284c7;
+      color: #ffffff;
+      border: 1px solid #0369a1;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2);
+      transition: all 0.15s;
+    }
+    .btn-update:hover { background: #0369a1; }
+    .btn-custom-face {
+      color: #b45309;
+      border: 1px solid #fde68a;
+      background: #fef3c7;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 11.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+    .btn-custom-face:hover { background: #fde68a; }
+
+    /* Status Banner */
+    .status-banner {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: #065f46;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 11.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-banner.error {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #991b1b;
+    }
+
+    /* VIEW 2: BOM STATS & TABLE */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .stat-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 16px;
+      box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.03);
+    }
+    .stat-card .label { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+    .stat-card .value {
+      font-size: 20px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-top: 2px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .stat-card .desc { font-size: 10.5px; color: var(--text-muted); margin-top: 2px; }
+
+    .table-container {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.03);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th {
+      background: #f8fafc;
+      color: #475569;
+      font-weight: 700;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    td {
+      padding: 9px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #334155;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+
+    .table-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+    }
+    .btn-excel {
+      background: #059669;
+      color: #fff;
+      border: 1px solid #047857;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 11.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-excel:hover { background: #047857; }
+    .btn-csv {
+      background: #ffffff;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 11.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-csv:hover { background: #f8fafc; color: #0f172a; }
+
+    /* Tab 3: Assemblies Grid */
+    .asm-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .asm-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.03);
+    }
+    .asm-card:hover {
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    .asm-card.selected {
+      border-color: var(--brand);
+      background: #fffbeb;
+      box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+    }
+    .asm-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .asm-title {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .asm-desc {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+    .asm-components-list {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 11px;
+      margin-bottom: 12px;
+    }
+    .asm-comp-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .asm-comp-name { font-weight: 600; color: #334155; }
+    .asm-comp-badge {
+      background: #e2e8f0;
+      color: #475569;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Tab 4: Hole & Trim Tools Grid */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .tool-box {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.03);
+    }
+    .tool-box-title {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .tool-box-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+    .preset-pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .preset-pill {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .preset-pill:hover { background: #e2e8f0; color: #0f172a; }
+    .preset-pill.active {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #0284c7;
+    }
+
+    /* Modal License */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 480px;
+      padding: 22px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .hwid-box {
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--accent);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #0f172a;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 12px;
+      display: none;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      z-index: 9999;
+      animation: fadeIn 0.2s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP TOOLBAR: TABS & QUICK STATUS (CLEAN, NO LOGO BLOAT) -->
+  <div class="top-toolbar">
+    <div class="toolbar-left">
+      <div class="tabs-bar" style="margin-bottom: 0;">
+        <button class="tab-btn active" id="tab-btn-setup" onclick="switchTab('setup')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          📐 Biên Dạng Đơn (28 Mẫu)
+        </button>
+        <button class="tab-btn" id="tab-btn-asm" onclick="switchTab('asm')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          🧩 Tổ Hợp (Assemblies)
+        </button>
+        <button class="tab-btn" id="tab-btn-tools" onclick="switchTab('tools')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+          🕳️ Khoét Lỗ &amp; Gọt Vát
+        </button>
+        <button class="tab-btn" id="tab-btn-bom" onclick="switchTab('bom')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          📊 Dự Toán BOM
+        </button>
+      </div>
+    </div>
+    <div class="toolbar-right">
+      <button class="toggle-btn" onclick="triggerSmartPath()" title="Tự động truy vết toàn bộ chuỗi cạnh liên tục xung quanh tủ" style="background: #ffffff; border-color: #0284c7; color: #0284c7; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+        ⚡ Smart-Path
+      </button>
+      <div class="quick-status-pill">
+        <span class="pulse-dot"></span>
+        <span id="ribbon-active-name" style="font-weight: 700; color: #0f172a;">Phào Nóc Hộp Hiện Đại 40x40</span>
+        <span style="color: #cbd5e1;">•</span>
+        <span id="ribbon-active-dim" style="font-family: 'JetBrains Mono', monospace; color: #0284c7; font-weight: 600;">40.0 x 40.0 mm</span>
+      </div>
+      <span class="badge-master" id="license-badge" onclick="openLicenseModal()" title="Bản quyền hệ thống">
+        <span class="badge-dot"></span> HOST MASTER
+      </span>
+    </div>
+  </div>
+
+  <!-- VIEW 1: KHO BIÊN DẠNG & THIẾT LẬP (PROFILE MEMBER) -->
+  <div class="view-content active" id="view-setup">
+    <div class="setup-grid">
+      
+      <!-- CỘT TRÁI: DANH MỤC PHÀO NẸP -->
+      <div class="sidebar-panel">
+        <div class="panel-header">
+          <div class="panel-title">Thư Viện Phào Nẹp</div>
+          <span class="badge-tag tool-tag" id="profile-count-label">28 Mẫu</span>
+        </div>
+
+        <!-- Ô tìm kiếm nhanh -->
+        <input type="text" class="search-box" id="search-input" placeholder="🔍 Tìm nhanh: Gola, LED, 40x40, Cánh kính..." oninput="onSearchInput()">
+        
+        <!-- Bộ lọc Chủng loại -->
+        <div class="category-pills">
+          <span class="cat-pill active" onclick="filterCategory('all', this)">Tất cả</span>
+          <span class="cat-pill" onclick="filterCategory('phao_noc', this)">Phào nóc/trần</span>
+          <span class="cat-pill" onclick="filterCategory('len_chan', this)">Len chân</span>
+          <span class="cat-pill" onclick="filterCategory('nep_nhom', this)">Nẹp T/U/V/L</span>
+          <span class="cat-pill" onclick="filterCategory('mang_led', this)">Máng LED</span>
+          <span class="cat-pill" onclick="filterCategory('tay_nam', this)">Tay nắm &amp; Gola</span>
+          <span class="cat-pill" onclick="filterCategory('canh_kinh', this)">Cánh kính</span>
+          <span class="cat-pill" onclick="filterCategory('chi_tuong', this)">Chỉ tường PU</span>
+          <span class="cat-pill" onclick="filterCategory('tu_ve', this)">Tự vẽ</span>
+        </div>
+
+        <!-- Danh sách card phào nẹp -->
+        <div class="profile-list" id="profile-list-container">
+          <!-- Render dynamically via JS -->
+        </div>
+      </div>
+
+      <!-- CỘT PHẢI: XEM TRƯỚC SVG MÔ PHỎNG DỄ NHẬN BIẾT & ĐIỀU KHIỂN -->
+      <div class="controls-panel">
+        
+        <!-- HỘP XEM TRƯỚC MẶT CẮT KỸ THUẬT (ICONIC VISUALIZER LIKE PROFILE BUILDER 4) -->
+        <div class="preview-card">
+          <div class="preview-header">
+            <div>
+              <strong id="active-profile-title" style="color: #0f172a; font-size: 14px; font-weight: 800;">Phào Nóc Hộp Hiện Đại 40x40</strong>
+              <div id="active-profile-desc" style="font-size: 11px; color: var(--text-muted); margin-top: 1px;">
+                Phào nóc che khe hở kịch trần tủ bếp và tủ áo
+              </div>
+            </div>
+            <div style="font-size: 12px; color: var(--accent); font-weight: 700; font-family: 'JetBrains Mono', monospace;" id="active-profile-dim">
+              40.0 x 40.0 mm
+            </div>
+          </div>
+
+          <!-- KHUNG VẼ BẢN VẼ KỸ THUẬT BLUEPRINT SVG CÓ THƯỚC ĐO & TÂM NEO ĐỎ -->
+          <div class="svg-container" id="svg-container">
+            <svg class="profile-svg" id="profile-svg" viewBox="0 0 200 200">
+              <!-- SVG path, CAD dimension callouts, and red placement point dynamically rendered -->
+            </svg>
+          </div>
+        </div>
+
+        <!-- THANH CÔNG CỤ BIẾN ĐỔI HÌNH HỌC (MIRROR & ROTATION) -->
+        <div class="transforms-bar">
+          <span style="font-size: 11px; font-weight: 700; color: #64748b; margin-right: 2px;">LẬT:</span>
+          <div class="transform-group">
+            <button class="toggle-btn" id="btn-mirror-x" onclick="toggleMirrorX()">
+              ↔ Flip X (Ngang)
+            </button>
+            <button class="toggle-btn" id="btn-mirror-y" onclick="toggleMirrorY()">
+              ↕ Flip Y (Đứng)
+            </button>
+          </div>
+
+          <div style="height: 16px; width: 1px; background: #e2e8f0; margin: 0 4px;"></div>
+
+          <span style="font-size: 11px; font-weight: 700; color: #64748b; margin-right: 2px;">XOAY GÓC:</span>
+          <div class="transform-group">
+            <button class="rot-btn active" data-rot="0" onclick="setRotation(0)">0°</button>
+            <button class="rot-btn" data-rot="90" onclick="setRotation(90)">90°</button>
+            <button class="rot-btn" data-rot="180" onclick="setRotation(180)">180°</button>
+            <button class="rot-btn" data-rot="270" onclick="setRotation(270)">270°</button>
+          </div>
+        </div>
+
+        <!-- HÀNG THIẾT LẬP: MA TRẬN NEO 3X3 & TINH CHỈNH OFFSET -->
+        <div class="settings-row">
+          
+          <!-- Ma trận điểm neo 3x3 (Justification) -->
+          <div class="setting-box">
+            <div class="box-title">
+              <span>ĐIỂM NEO (PLACEMENT POINT)</span>
+              <span id="active-just-label" style="color: #ef4444; font-weight: 700;">Bottom-Left</span>
+            </div>
+            <div class="matrix-grid">
+              <button class="matrix-btn" data-just="top_left" onclick="selectJustification('top_left')">TL</button>
+              <button class="matrix-btn" data-just="top_center" onclick="selectJustification('top_center')">TC</button>
+              <button class="matrix-btn" data-just="top_right" onclick="selectJustification('top_right')">TR</button>
+              
+              <button class="matrix-btn" data-just="mid_left" onclick="selectJustification('mid_left')">ML</button>
+              <button class="matrix-btn" data-just="center" onclick="selectJustification('center')">C</button>
+              <button class="matrix-btn" data-just="mid_right" onclick="selectJustification('mid_right')">MR</button>
+              
+              <button class="matrix-btn active" data-just="bottom_left" onclick="selectJustification('bottom_left')">BL</button>
+              <button class="matrix-btn" data-just="bottom_center" onclick="selectJustification('bottom_center')">BC</button>
+              <button class="matrix-btn" data-just="bottom_right" onclick="selectJustification('bottom_right')">BR</button>
+            </div>
+          </div>
+
+          <!-- Tinh chỉnh Offset & Vật liệu -->
+          <div class="setting-box">
+            <div class="box-title">
+              <span>ĐỘ LỆCH OFFSET (mm) &amp; BỀ MẶT</span>
+              <a href="javascript:void(0)" onclick="resetOffsets()" style="color: var(--accent); font-size: 11px; text-decoration: none; font-weight: 600;">Đặt lại 0</a>
+            </div>
+            <div class="input-row">
+              <div class="input-group">
+                <label>Offset X (Ngang mm):</label>
+                <input type="number" id="offset-x" value="0.0" step="0.5" oninput="updateSvgPreview()">
+              </div>
+              <div class="input-group">
+                <label>Offset Y (Đứng mm):</label>
+                <input type="number" id="offset-y" value="0.0" step="0.5" oninput="updateSvgPreview()">
+              </div>
+            </div>
+            <div class="input-group" style="margin-top: 4px;">
+              <label>Vật liệu / Bề mặt hoàn thiện:</label>
+              <select id="material-select">
+                <option value="Nhom_Anode_Bac">Nhôm Anode Bạc mờ tiêu chuẩn</option>
+                <option value="Nhom_Den_Nham">Nhôm Anode Đen nhám cao cấp</option>
+                <option value="Nhom_Vang_Bong">Nhôm Vàng bóng gương / Champagne</option>
+                <option value="Go_MDF_Phu_Melamine">Gỗ MDF phủ Melamine vân sồi</option>
+                <option value="Go_Son_Trang">Gỗ Sơn bệt trắng cao cấp</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- NÚT HÀNH ĐỘNG CHÍNH -->
+        <div class="actions-footer">
+          <button class="btn-main" id="btn-build" onclick="triggerBuildProfile()">
+            <span>🟢 DỰNG THEO ĐƯỜNG DẪN</span>
+          </button>
+          <button class="btn-update" id="btn-update" onclick="triggerUpdateProfile()">
+            <span>🔄 CẬP NHẬT ĐÃ CHỌN</span>
+          </button>
+          <button class="btn-custom-face" onclick="saveCustomFacePrompt()">
+            <span>📐 LẤY TỪ FACE 3D</span>
+          </button>
+        </div>
+
+        <!-- DÒNG THÔNG BÁO TRẠNG THÁI -->
+        <div class="status-banner" id="status-banner" style="display: none;">
+          <span id="status-text">Sẵn sàng dựng phào nẹp.</span>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- VIEW 2: TỔ HỢP THÔNG MINH (SMART ASSEMBLIES) -->
+  <div class="view-content" id="view-asm">
+    <div style="background: #ffffff; border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <div>
+          <h3 style="font-size: 14px; font-weight: 800; color: #0f172a;">Tổ Hợp Thông Minh (Smart Assemblies)</h3>
+          <p style="font-size: 11.5px; color: var(--text-muted);">Kết hợp Profile Member với các phụ kiện thành phần (Ke góc, tai kẹp lò xo, nắp bịt đầu hồi) tự động phân bổ theo đường dẫn 3D.</p>
+        </div>
+        <button class="btn-main" onclick="triggerBuildAssembly()" style="padding: 8px 16px;">
+          <span>🟢 DỰNG TỔ HỢP ĐANG CHỌN</span>
+        </button>
+      </div>
+
+      <div class="asm-grid" id="asm-container">
+        <!-- Render dynamically via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 3: KHOÉT LỖ & GỌT VÁT (HOLE TOOL & TRIM / JOIN TOOLS) -->
+  <div class="view-content" id="view-tools">
+    <div class="tools-grid">
+      
+      <!-- CÔNG CỤ 1: KHOÉT LỖ PARAMETRIC (HOLE TOOL) -->
+      <div class="tool-box">
+        <div class="tool-box-title">
+          <span>🕳️ Công Cụ Khoét Lỗ (Parametric Hole Tool)</span>
+        </div>
+        <div class="tool-box-desc">
+          Khoét lỗ xuyên qua thanh phào nhôm, thanh Gola hoặc vách tủ. Lỗ khoan duy trì vị trí và tự động trừ khối sạch sẽ.
+        </div>
+
+        <div style="margin-bottom: 10px;">
+          <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">DẠNG LỖ KHOÉT:</label>
+          <div class="preset-pill-group">
+            <span class="preset-pill active" id="hole-type-circle" onclick="setHoleType('circle')">⭕ Lỗ Tròn (Bản lề / Dây điện)</span>
+            <span class="preset-pill" id="hole-type-rect" onclick="setHoleType('rect')">⏹️ Lỗ Chữ Nhật (Ổ cắm / Công tắc)</span>
+          </div>
+        </div>
+
+        <div class="input-row">
+          <div class="input-group" id="group-hole-p1">
+            <label id="label-hole-p1">Đường kính Ø (mm):</label>
+            <input type="number" id="hole-p1" value="35.0" step="1">
+          </div>
+          <div class="input-group" id="group-hole-p2" style="display: none;">
+            <label>Chiều cao H (mm):</label>
+            <input type="number" id="hole-p2" value="45.0" step="1">
+          </div>
+          <div class="input-group">
+            <label>Khoảng cách từ đầu thanh (mm):</label>
+            <input type="number" id="hole-offset" value="100.0" step="5">
+          </div>
+        </div>
+
+        <div class="preset-pill-group" style="margin-top: 6px;">
+          <span style="font-size: 10.5px; color: var(--text-muted); align-self: center;">Mẫu nhanh:</span>
+          <span class="preset-pill" onclick="quickHole(20, 'circle')">Ø20 (Dây LED)</span>
+          <span class="preset-pill" onclick="quickHole(35, 'circle')">Ø35 (Bản lề cup)</span>
+          <span class="preset-pill" onclick="quickHole(60, 'circle')">Ø60 (Nắp bàn)</span>
+          <span class="preset-pill" onclick="quickHoleRect(85, 45)">85x45 (Hộp điện)</span>
+        </div>
+
+        <button class="btn-main" onclick="triggerCutHole()" style="width: 100%; margin-top: 10px; background: #0284c7; border-color: #0369a1;">
+          <span>🕳️ KHOÉT LỖ TRÊN THANH PHÀO ĐANG CHỌN</span>
+        </button>
+      </div>
+
+      <!-- CÔNG CỤ 2 & 3: KÉO DÀI / CẮT MÒI & HÀN NỐI (EXTEND & JOIN) -->
+      <div class="tool-box">
+        <div class="tool-box-title">
+          <span>📐 Kéo Dài &amp; Hàn Nối Thanh (Extend &amp; Join)</span>
+        </div>
+        <div class="tool-box-desc">
+          Mở rộng thanh phào thêm ±ΔL (mm) để gối đầu lên phào khác, hoặc hàn nối 2 thanh tiếp giáp thành 1 thanh liên tục (Tính năng mới PB4).
+        </div>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+          <div style="font-weight: 700; font-size: 11.5px; color: #0f172a; margin-bottom: 8px;">Kéo Dài Đoạn Đầu / Đoạn Cuối:</div>
+          <div class="input-row">
+            <div class="input-group">
+              <label>Kéo dài đầu thanh (+/- mm):</label>
+              <input type="number" id="extend-start" value="0.0" step="5">
+            </div>
+            <div class="input-group">
+              <label>Kéo dài cuối thanh (+/- mm):</label>
+              <input type="number" id="extend-end" value="50.0" step="5">
+            </div>
+          </div>
+          <button class="btn-main" onclick="triggerExtendMember()" style="width: 100%; margin-top: 6px; background: #f59e0b; border-color: #d97706;">
+            <span>📐 KÉO DÀI ĐỐI TƯỢNG ĐÃ CHỌN</span>
+          </button>
+        </div>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+          <div style="font-weight: 700; font-size: 11.5px; color: #0f172a; margin-bottom: 4px;">🔗 Hàn Nối 2 Thanh Tiếp Giáp (Join Tool):</div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Chọn 2 thanh phào nẹp tiếp xúc nhau trong 3D và nhấn hàn nối để hợp nhất thành 1 khối duy nhất.</div>
+          <button class="btn-main" onclick="triggerJoinMembers()" style="width: 100%; background: #0f172a; border-color: #0f172a;">
+            <span>🔗 HÀN NỐI 2 THANH PHÀO (JOIN)</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- VIEW 4: DỰ TOÁN VẬT TƯ (BOM) -->
+  <div class="view-content" id="view-bom">
+    
+    <!-- STAT CARDS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="label">Tổng mét dài phào nẹp</div>
+        <div class="value" id="stat-total-length">0.0 m</div>
+        <div class="desc">Tổng chiều dài đo đạc thực tế trong mô hình</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Tổng số cây nguyên cần mua</div>
+        <div class="value" id="stat-total-bars" style="color: var(--primary);">0 Cây</div>
+        <div class="desc">Đã tính 5% hao hụt góc cắt mòi 45 độ</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Tổng kinh phí dự toán</div>
+        <div class="value" id="stat-total-cost" style="color: var(--accent);">0 đ</div>
+        <div class="desc">Theo bảng giá vật tư xưởng thiết lập</div>
+      </div>
+    </div>
+
+    <!-- BẢNG CHI TIẾT VẬT TƯ -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 40px; text-align: center;">STT</th>
+            <th>Tên Phào / Nẹp / Máng LED</th>
+            <th style="width: 140px; text-align: center;">Phân Loại</th>
+            <th style="width: 90px; text-align: center;">Dài Cây</th>
+            <th style="width: 110px; text-align: right;">Tổng Mét Dài</th>
+            <th style="width: 80px; text-align: center;">Hao Hụt</th>
+            <th style="width: 110px; text-align: right;">Số Cây Mua</th>
+            <th style="width: 120px; text-align: right;">Đơn Giá</th>
+            <th style="width: 140px; text-align: right;">Thành Tiền</th>
+          </tr>
+        </thead>
+        <tbody id="bom-table-body">
+          <tr>
+            <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 30px;">
+              Chưa có dữ liệu phào nẹp trong mô hình. Hãy dùng công cụ dựng phào nẹp trước!
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ACTION BAR BOM -->
+    <div class="table-actions">
+      <div style="font-size: 11px; color: var(--text-muted);">
+        * Đã bao gồm hệ số an toàn cắt mòi góc 45 độ (1.05)
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn-csv" onclick="exportCsv()">
+          <span>📊 Xuất File CSV</span>
+        </button>
+        <button class="btn-excel" onclick="exportExcel()">
+          <span>📗 Xuất Bảng Đặt Vật Tư (.XLS)</span>
+        </button>
+        <button class="btn-csv" onclick="refreshEstimation()">
+          <span>🔄 Quét Lại Mô Hình</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL BẢN QUYỀN -->
+  <div class="modal-overlay" id="modal-license">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="color: #0f172a; font-size: 15px; font-weight: 800;">Thông Tin Bản Quyền Profile Pro</h3>
+        <button class="modal-close" onclick="closeLicenseModal()">&times;</button>
+      </div>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">
+        Mã máy phần cứng (Hardware ID) dùng để đăng ký license:
+      </p>
+      <div class="hwid-box">
+        <span id="modal-hwid" style="font-weight: 700;">Đang kiểm tra...</span>
+        <button style="background: #ffffff; border: 1px solid #cbd5e1; color: #0f172a; padding: 3px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: 600;" onclick="copyHwid()">Sao Chép</button>
+      </div>
+      <div style="margin-bottom: 14px;">
+        <label style="font-size: 11px; color: #64748b; display: block; margin-bottom: 4px; font-weight: 600;">Nhập License Key kích hoạt:</label>
+        <input type="text" id="license-key-input" placeholder="NTPRO-XXXX-XXXX-XXXX-XXXX" style="width: 100%; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 7px 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px;">
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; padding: 7px 14px; border-radius: 8px; font-weight: 600;" onclick="closeLicenseModal()">Đóng</button>
+        <button style="background: var(--primary); color: #fff; border: none; padding: 7px 18px; border-radius: 8px; font-weight: 700;" onclick="submitActivation()">Kích Hoạt</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+window.DEFAULT_PROFILES = {
+  "PHAO_NOC_HIEN_DAI_40x40": {
+    "name": "Phào Nóc Hộp Hiện Đại 40x40",
+    "category": "phao_noc",
+    "width": 40,
+    "height": 40,
+    "material": "Go_MDF_Phu_Melamine",
+    "bar_length": 2.44,
+    "points": [
+      [
+        0,
+        0
+      ],
+      [
+        40,
+        0
+      ],
+      [
+        40,
+        40
+      ],
+      [
+        0,
+        40
+      ]
+    ],
+    "description": "Phào nóc hộp chữ nhật phẳng hiện đại che khe hở kịch trần tủ.",
+    "id": "PHAO_NOC_HIEN_DAI_40x40"
+  },
+  "PHAO_NOC_CO_DIEN_60x60": {
+    "name": "Phào Nóc Tân Cổ Điển Giật Cấp 60x60",
+    "category": "phao_noc",
+    "width": 60,
+    "height": 60,
+    "material": "Go_Son_Trang",
+    "bar_length": 2.44,
+    "points": [
+      [
+        0,
+        0
+      ],
+      [
+        60,
+        0
+      ],
+      [
+        60,
+        15
+      ],
+      [
+        50,
+        15
+      ],
+      [
+        50,
+        30
+      ],
+      [
+        35,
+        45
+      ],
+      [
+        20,
+        45
+      ],
+      [
+        20,
+        60
+      ],
+      [
+        0,
+        60
+      ]
+    ],
+    "description": "Phào nóc giật cấp giọt nước sang trọng cho tủ áo và tủ bếp tân cổ điển.",
+    "id": "PHAO_NOC_CO_DIEN_60x60"
+  },
+  "PHAO_CO_TRAN_PU_80x80": {
+    "name": "Phào Cổ Trần PU Tân Cổ Điển 80x80",
+    "category": "phao_noc",
+    "width": 80,
+    "height": 80,
+    "material": "Go_Son_Trang",
+    "bar_length": 2.4,
+    "points": [
+      [
+        0,
+        0
+      ],
+      [
+        80,
+        0
+      ],
+      [
+        80,
+        18
+      ],
+      [
+        65,
+        30
+      ],
+      [
+        50,
+        50
+      ],
+      [
+        30,
+        65
+      ],
+      [
+        18,
+        80
+      ],
+      [
+        0,
+        80
+      ]
+    ],
+    "description": "Phào chỉ cổ trần PU lòng máng mềm mại giáp ranh giữa tủ và trần thạch cao.",
+    "id": "PHAO_CO_TRAN_PU_80x80"
+  },
+  "PHAO_CO_TRAN_PU_100x100": {
+    "name": "Phào Cổ Trần Biệt Thự Cổ Điển 100x100",
+    "category": "phao_noc",
+    "width": 100,
+    "height": 100,
+    "material": "Go_Son_Trang",
+    "bar_length": 2.4,
+    "points": [
+      [
+        0,
+        0
+      ],
+      [
+        100,
+        0
+      ],
+      [
+        100,
+        22
+      ],
+      [
+        85,
+        25
+      ],
+      [
+        80,
+        45
+      ],
+      [
+        60,
+        70
+      ],
+      [
+        35,
+        85
+      ],
+      [
+        20,
+        100
+      ],
+      [
+        0,
+        100
+      ]
+    ],
+    "description": "Phào trần kích thước lớn 100x100mm cho phòng khách, phòng ngủ master biệt thự.",
+    "id": "PHAO_CO_TRAN_PU_100x100"
+  },
+  "LEN_CHAN_TU_100x15": {
+    "name": "Len Chân Tủ Nhôm Chống Nước 100x15",
+    "category": "len_chan",
+    "width": 15,
+    "height": 100,
+    "material": "Nhom_Anode_Bac",
+    "bar_length": 3,
+    "points": [
+      [
+        0,
+        0
+      ],
+      [
+        15,
+        0
+      ],
+      [
+        15,
+        95
+      ],
+      [
+        12,
+        100
+      ],
+      [
+        0,
+        100
+      ],
+      [
+        0,
+        8
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        3,
+        0
+      ]
+    ],
+    "description": "Len chân tủ bếp bằng nhôm anode có rãnh gài gioăng cao su chống nước tràn gầm.",
+    "id": "LEN_CHAN_TU_100x15"
+  },
+  "LEN_CHAN_TU_80x17": {
+    "name": "Len Chân Tủ Gỗ MDF 80x17",
+    "category": "len_chan",
+    "width": 17,
+    "height": 80,
+    "material": "Go_MDF_Chong_Am_17",
+    "bar_length": 2.44,
+    "points": [
+      [
+        0,
+        0
+      ],
+      [
+        17,
+        0
+      ],
+      [
+        17,
+        80
+      ],
+      [
+        0,
+        80
+      ]
+    ],
+    "description": "Len chân tủ gỗ công nghiệp MDF chống ẩm vát giấu chân tăng chỉnh.",
+    "id": "LEN_CHAN_TU_80x17"
+  },
+  "LEN_CHAN_TUONG_GO_60x12": {
+    "name": "Len Chân Tường Gỗ Gờ Tròn 60x12",
+    "category": "len_chan",
+    "width": 12,
+    "height": 60,
+    "material": "Go_MDF_Phu_Melamine",
+    "bar_length": 2.44,
+    "points": [
+      [
+        0,
+        0
+      ],
+      [
+        12,
+        0
+      ],
+      [
+        12,
+        52
+      ],
+      [
+        8,
+        58
+      ],
+      [
+        4,
+        60
+      ],
+      [
+        0,
+        60
+      ]
+    ],
+    "description": "Len chân tường gỗ công nghiệp bo vát mép trên chống bám bụi bẩn sàn.",
+    "id": "LEN_CHAN_TUONG_GO_60x12"
+  },
+  "LEN_CHAN_TUONG_NHOM_40x10": {
+    "name": "Len Chân Tường Nhôm Âm 40x10",
+    "category": "len_chan",
+    "width": 10,
+    "height": 40,
+    "material": "Nhom_Den_Nham",
+    "bar_length": 3,
+    "points": [
+      [
+        0,
+        0
+      ],
+      [
+        10,
+        0
+      ],
+      [
+        10,
+        40
+      ],
+      [
+        0,
+        40
+      ]
+    ],
+    "description": "Len chân tường nhôm mỏng phong cách Minimalist hiện đại.",
+    "id": "LEN_CHAN_TUONG_NHOM_40x10"
+  },
+  "NEP_NHOM_CHU_T_14": {
+    "name": "Chỉ Nhôm Chữ T14 Che Khe Ván",
+    "category": "nep_nhom",
+    "width": 14,
+    "height": 7,
+    "material": "Nhom_Vang_Bong",
+    "bar_length": 2.5,
+    "points": [
+      [
+        -7,
+        7
+      ],
+      [
+        7,
+        7
+      ],
+      [
+        7,
+        5.5
+      ],
+      [
+        1,
+        5.5
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        -1,
+        0
+      ],
+      [
+        -1,
+        5.5
+      ],
+      [
+        -7,
+        5.5
+      ]
+    ],
+    "description": "Nẹp nhôm T14 che khe tiếp giáp giữa 2 tấm ván hoặc vách ốp.",
+    "id": "NEP_NHOM_CHU_T_14"
+  },
+  "NEP_NHOM_CHU_T_20": {
+    "name": "Chỉ Nhôm Chữ T20 Bản Rộng",
+    "category": "nep_nhom",
+    "width": 20,
+    "height": 8,
+    "material": "Nhom_Vang_Bong",
+    "bar_length": 2.5,
+    "points": [
+      [
+        -10,
+        8
+      ],
+      [
+        10,
+        8
+      ],
+      [
+        10,
+        6.5
+      ],
+      [
+        1.2,
+        6.5
+      ],
+      [
+        1.2,
+        0
+      ],
+      [
+        -1.2,
+        0
+      ],
+      [
+        -1.2,
+        6.5
+      ],
+      [
+        -10,
+        6.5
+      ]
+    ],
+    "description": "Nẹp nhôm T20 che khe co ngót sàn gỗ hoặc phân tách 2 loại sàn.",
+    "id": "NEP_NHOM_CHU_T_20"
+  },
+  "NEP_NHOM_CHU_U_10": {
+    "name": "Chỉ Nhôm Âm Chữ U10",
+    "category": "nep_nhom",
+    "width": 10,
+    "height": 10,
+    "material": "Nhom_Den_Nham",
+    "bar_length": 2.5,
+    "points": [
+      [
+        0,
+        10
+      ],
+      [
+        1.2,
+        10
+      ],
+      [
+        1.2,
+        1.2
+      ],
+      [
+        8.8,
+        1.2
+      ],
+      [
+        8.8,
+        10
+      ],
+      [
+        10,
+        10
+      ],
+      [
+        10,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ],
+    "description": "Chỉ âm chữ U10 soi âm vào cánh tủ hoặc vách nan trang trí.",
+    "id": "NEP_NHOM_CHU_U_10"
+  },
+  "NEP_NHOM_CHU_U_20": {
+    "name": "Chỉ Nhôm Âm Chữ U20 Rãnh Lớn",
+    "category": "nep_nhom",
+    "width": 20,
+    "height": 10,
+    "material": "Nhom_Den_Nham",
+    "bar_length": 2.5,
+    "points": [
+      [
+        0,
+        10
+      ],
+      [
+        1.5,
+        10
+      ],
+      [
+        1.5,
+        1.5
+      ],
+      [
+        18.5,
+        1.5
+      ],
+      [
+        18.5,
+        10
+      ],
+      [
+        20,
+        10
+      ],
+      [
+        20,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ],
+    "description": "Chỉ nhôm chữ U bản rộng 20mm tạo điểm nhấn rãnh sâu sang trọng.",
+    "id": "NEP_NHOM_CHU_U_20"
+  },
+  "NEP_NHOM_CHU_V_20": {
+    "name": "Nẹp Góc Ngoài Chữ V20x20",
+    "category": "nep_nhom",
+    "width": 20,
+    "height": 20,
+    "material": "Nhom_Vang_Bong",
+    "bar_length": 2.5,
+    "points": [
+      [
+        0,
+        0
+      ],
+      [
+        20,
+        0
+      ],
+      [
+        20,
+        1.2
+      ],
+      [
+        1.2,
+        1.2
+      ],
+      [
+        1.2,
+        20
+      ],
+      [
+        0,
+        20
+      ]
+    ],
+    "description": "Nẹp nhôm V20 bảo vệ góc ngoài của hồi tủ hoặc cột vách tránh mẻ cạnh.",
+    "id": "NEP_NHOM_CHU_V_20"
+  },
+  "NEP_NHOM_CHU_V_30": {
+    "name": "Nẹp Góc Ngoài Chữ V30x30",
+    "category": "nep_nhom",
+    "width": 30,
+    "height": 30,
+    "material": "Nhom_Vang_Bong",
+    "bar_length": 2.5,
+    "points": [
+      [
+        0,
+        0
+      ],
+      [
+        30,
+        0
+      ],
+      [
+        30,
+        1.5
+      ],
+      [
+        1.5,
+        1.5
+      ],
+      [
+        1.5,
+        30
+      ],
+      [
+        0,
+        30
+      ]
+    ],
+    "description": "Nẹp nhôm V30 góc lớn bảo vệ cạnh bàn ăn, quầy bar hoặc vách ốp đá.",
+    "id": "NEP_NHOM_CHU_V_30"
+  },
+  "NEP_KET_THUC_CHU_L_20": {
+    "name": "Nẹp Chữ L Kết Thúc Sàn & Tủ 20x10",
+    "category": "nep_nhom",
+    "width": 20,
+    "height": 10,
+    "material": "Nhom_Anode_Bac",
+    "bar_length": 2.5,
+    "points": [
+      [
+        0,
+        0
+      ],
+      [
+        20,
+        0
+      ],
+      [
+        20,
+        1.5
+      ],
+      [
+        1.5,
+        1.5
+      ],
+      [
+        1.5,
+        10
+      ],
+      [
+        0,
+        10
+      ]
+    ],
+    "description": "Nẹp chữ L che mép kết thúc sàn gỗ hoặc viền chân tủ trang trí.",
+    "id": "NEP_KET_THUC_CHU_L_20"
+  },
+  "MANG_LED_NHOM_AM_17": {
+    "name": "Máng LED Âm Tủ Bếp Có Tai 17.5x7mm",
+    "category": "mang_led",
+    "width": 24.5,
+    "height": 7,
+    "material": "Nhom_Anode_Bac",
+    "bar_length": 3,
+    "points": [
+      [
+        -12.25,
+        7
+      ],
+      [
+        -8.75,
+        7
+      ],
+      [
+        -8.75,
+        1
+      ],
+      [
+        8.75,
+        1
+      ],
+      [
+        8.75,
+        7
+      ],
+      [
+        12.25,
+        7
+      ],
+      [
+        12.25,
+        5.5
+      ],
+      [
+        10,
+        5.5
+      ],
+      [
+        10,
+        0
+      ],
+      [
+        -10,
+        0
+      ],
+      [
+        -10,
+        5.5
+      ],
+      [
+        -12.25,
+        5.5
+      ]
+    ],
+    "description": "Máng nhôm LED có tai che mép rãnh phay đáy tủ bếp trên và đợt tủ áo.",
+    "id": "MANG_LED_NHOM_AM_17"
+  },
+  "MANG_LED_NHOM_NOI_17": {
+    "name": "Máng LED Gắn Nổi Không Tai 17x8mm",
+    "category": "mang_led",
+    "width": 17.5,
+    "height": 8,
+    "material": "Nhom_Anode_Bac",
+    "bar_length": 3,
+    "points": [
+      [
+        0,
+        0
+      ],
+      [
+        17.5,
+        0
+      ],
+      [
+        17.5,
+        8
+      ],
+      [
+        16,
+        8
+      ],
+      [
+        16,
+        1.2
+      ],
+      [
+        1.5,
+        1.2
+      ],
+      [
+        1.5,
+        8
+      ],
+      [
+        0,
+        8
+      ]
+    ],
+    "description": "Máng nhôm LED dạng hộp chữ nhật gắn nổi bằng pát kẹp hoặc dán keo.",
+    "id": "MANG_LED_NHOM_NOI_17"
+  },
+  "MANG_LED_GOC_V_45": {
+    "name": "Máng LED Góc V 45 Độ Hắt Sáng",
+    "category": "mang_led",
+    "width": 16,
+    "height": 16,
+    "material": "Nhom_Anode_Bac",
+    "bar_length": 3,
+    "points": [
+      [
+        0,
+        0
+      ],
+      [
+        16,
+        0
+      ],
+      [
+        16,
+        1.5
+      ],
+      [
+        2,
+        1.5
+      ],
+      [
+        1.5,
+        2
+      ],
+      [
+        1.5,
+        16
+      ],
+      [
+        0,
+        16
+      ]
+    ],
+    "description": "Máng nhôm LED góc V chiếu hắt chéo 45 độ gắn góc đáy tủ và kính ốp bếp.",
+    "id": "MANG_LED_GOC_V_45"
+  },
+  "MANG_LED_AM_DAY_TU_12": {
+    "name": "Máng LED Siêu Mỏng Âm Đợt Ván 12x4mm",
+    "category": "mang_led",
+    "width": 14,
+    "height": 4.5,
+    "material": "Nhom_Anode_Bac",
+    "bar_length": 3,
+    "points": [
+      [
+        -7,
+        4.5
+      ],
+      [
+        -5.5,
+        4.5
+      ],
+      [
+        -5.5,
+        1
+      ],
+      [
+        5.5,
+        1
+      ],
+      [
+        5.5,
+        4.5
+      ],
+      [
+        7,
+        4.5
+      ],
+      [
+        7,
+        3.5
+      ],
+      [
+        6,
+        3.5
+      ],
+      [
+        6,
+        0
+      ],
+      [
+        -6,
+        0
+      ],
+      [
+        -6,
+        3.5
+      ],
+      [
+        -7,
+        3.5
+      ]
+    ],
+    "description": "Máng LED siêu mỏng chỉ sâu 4.5mm âm vào đợt ván 17mm không lo thủng ván.",
+    "id": "MANG_LED_AM_DAY_TU_12"
+  },
+  "NHOM_GOLA_CHU_C": {
+    "name": "Nhôm Gola Chữ C (Ngăn Kéo Giữa)",
+    "category": "tay_nam",
+    "width": 26,
+    "height": 73,
+    "material": "Nhom_Den_Nham",
+    "bar_length": 3,
+    "points": [
+      [
+        0,
+        0
+      ],
+      [
+        15,
+        0
+      ],
+      [
+        20,
+        10
+      ],
+      [
+        20,
+        25
+      ],
+      [
+        10,
+        36.5
+      ],
+      [
+        20,
+        48
+      ],
+      [
+        20,
+        63
+      ],
+      [
+        15,
+        73
+      ],
+      [
+        0,
+        73
+      ],
+      [
+        2,
+        40
+      ],
+      [
+        0,
+        0
+      ]
+    ],
+    "description": "Thanh nhôm Gola chữ C gắn giữa 2 hàng ngăn kéo tủ bếp để thò tay mở 2 chiều.",
+    "id": "NHOM_GOLA_CHU_C"
+  },
+  "NHOM_GOLA_CHU_L": {
+    "name": "Nhôm Gola Chữ L (Sát Mặt Đá Bếp)",
+    "category": "tay_nam",
+    "width": 26,
+    "height": 57,
+    "material": "Nhom_Den_Nham",
+    "bar_length": 3,
+    "points": [
+      [
+        0,
+        0
+      ],
+      [
+        16,
+        0
+      ],
+      [
+        20,
+        12
+      ],
+      [
+        20,
+        30
+      ],
+      [
+        10,
+        45
+      ],
+      [
+        10,
+        57
+      ],
+      [
+        0,
+        57
+      ],
+      [
+        0,
+        0
+      ]
+    ],
+    "description": "Thanh nhôm Gola chữ L gắn mép trên thùng tủ bếp dưới, sát dưới mặt đá bếp.",
+    "id": "NHOM_GOLA_CHU_L"
+  },
+  "TAY_NAM_NHOM_CHU_J": {
+    "name": "Tay Nắm Nhôm Âm Chữ J (Ván 17mm)",
+    "category": "tay_nam",
+    "width": 22,
+    "height": 38,
+    "material": "Nhom_Den_Nham",
+    "bar_length": 3,
+    "points": [
+      [
+        0,
+        0
+      ],
+      [
+        17.5,
+        0
+      ],
+      [
+        17.5,
+        18
+      ],
+      [
+        22,
+        18
+      ],
+      [
+        22,
+        24
+      ],
+      [
+        17.5,
+        24
+      ],
+      [
+        17.5,
+        38
+      ],
+      [
+        13,
+        38
+      ],
+      [
+        13,
+        26
+      ],
+      [
+        5,
+        26
+      ],
+      [
+        0,
+        20
+      ]
+    ],
+    "description": "Tay nắm nhôm chữ J gài mép trên cánh tủ bếp dưới hoặc hộc kéo.",
+    "id": "TAY_NAM_NHOM_CHU_J"
+  },
+  "TAY_NAM_NHOM_CHU_K": {
+    "name": "Tay Nắm Nhôm Âm Chữ K Lọt Lòng",
+    "category": "tay_nam",
+    "width": 20,
+    "height": 42,
+    "material": "Nhom_Anode_Bac",
+    "bar_length": 3,
+    "points": [
+      [
+        0,
+        0
+      ],
+      [
+        17.5,
+        0
+      ],
+      [
+        17.5,
+        15
+      ],
+      [
+        20,
+        20
+      ],
+      [
+        20,
+        35
+      ],
+      [
+        16,
+        42
+      ],
+      [
+        12,
+        42
+      ],
+      [
+        15,
+        35
+      ],
+      [
+        15,
+        22
+      ],
+      [
+        0,
+        22
+      ]
+    ],
+    "description": "Tay nắm nhôm chữ K phẳng mặt cánh phong cách tối giản không lộ gờ.",
+    "id": "TAY_NAM_NHOM_CHU_K"
+  },
+  "KHUNG_NHOM_CANH_KINH_20x20": {
+    "name": "Khung Nhôm Cánh Kính Slim 20x20",
+    "category": "canh_kinh",
+    "width": 20,
+    "height": 20,
+    "material": "Nhom_Den_Nham",
+    "bar_length": 3,
+    "points": [
+      [
+        0,
+        0
+      ],
+      [
+        20,
+        0
+      ],
+      [
+        20,
+        14
+      ],
+      [
+        14,
+        14
+      ],
+      [
+        14,
+        19
+      ],
+      [
+        8,
+        19
+      ],
+      [
+        8,
+        14
+      ],
+      [
+        2,
+        14
+      ],
+      [
+        2,
+        20
+      ],
+      [
+        0,
+        20
+      ]
+    ],
+    "description": "Thanh nhôm cánh kính viền siêu mỏng 20x20 có hèm ngậm kính cường lực 5mm.",
+    "id": "KHUNG_NHOM_CANH_KINH_20x20"
+  },
+  "KHUNG_NHOM_CANH_KINH_20x45": {
+    "name": "Khung Nhôm Cánh Kính Tiêu Chuẩn 20x45",
+    "category": "canh_kinh",
+    "width": 20,
+    "height": 45,
+    "material": "Nhom_Den_Nham",
+    "bar_length": 3,
+    "points": [
+      [
+        0,
+        0
+      ],
+      [
+        20,
+        0
+      ],
+      [
+        20,
+        38
+      ],
+      [
+        14,
+        38
+      ],
+      [
+        14,
+        43
+      ],
+      [
+        8,
+        43
+      ],
+      [
+        8,
+        38
+      ],
+      [
+        2,
+        38
+      ],
+      [
+        2,
+        45
+      ],
+      [
+        0,
+        45
+      ]
+    ],
+    "description": "Thanh nhôm cánh kính bản 45mm chịu lực tốt cho cánh tủ áo kịch trần cao 2.8m.",
+    "id": "KHUNG_NHOM_CANH_KINH_20x45"
+  },
+  "KHUNG_NHOM_CANH_KINH_CO_TAY_NAM": {
+    "name": "Khung Nhôm Cánh Kính Liền Tay Nắm Móc",
+    "category": "canh_kinh",
+    "width": 26,
+    "height": 45,
+    "material": "Nhom_Den_Nham",
+    "bar_length": 3,
+    "points": [
+      [
+        0,
+        0
+      ],
+      [
+        20,
+        0
+      ],
+      [
+        26,
+        15
+      ],
+      [
+        24,
+        22
+      ],
+      [
+        20,
+        18
+      ],
+      [
+        20,
+        38
+      ],
+      [
+        14,
+        38
+      ],
+      [
+        14,
+        43
+      ],
+      [
+        8,
+        43
+      ],
+      [
+        8,
+        38
+      ],
+      [
+        2,
+        38
+      ],
+      [
+        2,
+        45
+      ],
+      [
+        0,
+        45
+      ]
+    ],
+    "description": "Khung nhôm cánh kính tích hợp gờ móc tay nắm liền khối suốt chiều dài cánh.",
+    "id": "KHUNG_NHOM_CANH_KINH_CO_TAY_NAM"
+  },
+  "CHI_KHUNG_TRANH_40x15": {
+    "name": "Chỉ Phào Lưng Tường Tân Cổ Điển 40x15",
+    "category": "chi_tuong",
+    "width": 40,
+    "height": 15,
+    "material": "Go_Son_Trang",
+    "bar_length": 2.4,
+    "points": [
+      [
+        -20,
+        0
+      ],
+      [
+        20,
+        0
+      ],
+      [
+        20,
+        5
+      ],
+      [
+        15,
+        10
+      ],
+      [
+        8,
+        15
+      ],
+      [
+        -8,
+        15
+      ],
+      [
+        -15,
+        10
+      ],
+      [
+        -20,
+        5
+      ]
+    ],
+    "description": "Chỉ phân tầng hoặc chạy viền lưng tường phòng ngủ, phòng khách tân cổ điển.",
+    "id": "CHI_KHUNG_TRANH_40x15"
+  },
+  "CHI_VIEN_O_TUONG_25x12": {
+    "name": "Chỉ Viền Ô Tranh Tường Tân Cổ Điển 25x12",
+    "category": "chi_tuong",
+    "width": 25,
+    "height": 12,
+    "material": "Go_Son_Trang",
+    "bar_length": 2.4,
+    "points": [
+      [
+        -12.5,
+        0
+      ],
+      [
+        12.5,
+        0
+      ],
+      [
+        12.5,
+        4
+      ],
+      [
+        9,
+        8
+      ],
+      [
+        4,
+        12
+      ],
+      [
+        -4,
+        12
+      ],
+      [
+        -9,
+        8
+      ],
+      [
+        -12.5,
+        4
+      ]
+    ],
+    "description": "Chỉ ô tường tinh tế đóng khung tranh và vách đầu giường tân cổ điển.",
+    "id": "CHI_VIEN_O_TUONG_25x12"
+  }
+};
+
+</script>
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // 0. BỘ DỮ LIỆU TỔ HỢP MẪU CHUẨN (DEFAULT ASSEMBLIES)
+    window.DEFAULT_ASSEMBLIES = {
+      "ASM_PHAO_NOC_CO_DIEN": {
+        "id": "ASM_PHAO_NOC_CO_DIEN",
+        "name": "Tổ Hợp Phào Nóc Tân Cổ Điển + Hoa Góc Đúc 90°",
+        "category": "assembly",
+        "main_profile_id": "PHAO_NOC_CO_DIEN_60x60",
+        "justification": "bottom_left",
+        "material": "Go_Son_Trang",
+        "corner_component": "Hoa_Van_Goc_Duc_90",
+        "spacing_mm": 0,
+        "description": "Phào nóc tân cổ điển kết hợp khối hoa văn góc đúc vuông 90 độ tại các điểm góc tường/tủ."
+      },
+      "ASM_MANG_LED_TAI_LO_XO": {
+        "id": "ASM_MANG_LED_TAI_LO_XO",
+        "name": "Tổ Hợp Máng LED Định Hình + Tai Kẹp Lò Xo + Nắp Bịt",
+        "category": "assembly",
+        "main_profile_id": "MANG_LED_NHOM_AM_17",
+        "justification": "top_center",
+        "material": "Nhom_Anode_Bac",
+        "clip_component": "Tai_Kep_Inox_Lo_Xo",
+        "spacing_mm": 500,
+        "end_caps": true,
+        "description": "Máng nhôm LED lắp âm kèm tai kẹp lò xo phân bổ đều 500mm/chiếc và nắp bịt đầu hồi 2 bên."
+      },
+      "ASM_CANH_KINH_SLIM_BAN_LE": {
+        "id": "ASM_CANH_KINH_SLIM_BAN_LE",
+        "name": "Tổ Hợp Khung Nhôm Cánh Kính Slim + Bản Lề Góc 180°",
+        "category": "assembly",
+        "main_profile_id": "CANH_KINH_SLIM_20x20",
+        "justification": "bottom_left",
+        "material": "Nhom_Den",
+        "corner_component": "Ke_Goc_Bat_Vit_Slim",
+        "spacing_mm": 0,
+        "description": "Khung nhôm cánh kính cao cấp kèm ke góc bắt vít ẩn và bản lề chuyên dụng trên/dưới."
+      },
+      "ASM_GOLA_J_KE_GOC": {
+        "id": "ASM_GOLA_J_KE_GOC",
+        "name": "Tổ Hợp Gola Chữ J + Ke Góc Nhôm 90° + Nắp Chụp",
+        "category": "assembly",
+        "main_profile_id": "GOLA_CHU_J_NHOM",
+        "justification": "top_left",
+        "material": "Nhom_Anode_Bac",
+        "corner_component": "Ke_Goc_Gola_90",
+        "spacing_mm": 0,
+        "end_caps": true,
+        "description": "Hệ tay nắm Gola chữ J cánh tủ dưới kèm ke góc liên kết 90 độ và nắp bịt đầu hồi bảo vệ."
+      }
+    };
+
+    // Global State
+    let allProfiles = {};
+    let allAssemblies = {};
+    let selectedProfileId = 'PHAO_NOC_HIEN_DAI_40x40';
+    let selectedAssemblyId = 'ASM_PHAO_NOC_CO_DIEN';
+    let activeJustification = 'bottom_left';
+    let isMirrorX = false;
+    let isMirrorY = false;
+    let currentRotation = 0;
+    let licenseInfo = {};
+    let currentCategory = 'all';
+    let searchQuery = '';
+    let activeTab = 'setup';
+    let activeHoleType = 'circle';
+
+    // 1. Khởi tạo từ Ruby callback hoặc nạp mặc định
+    window.initProfilePro = function(payload) {
+      if (!payload) return;
+      allProfiles = payload.profiles || window.DEFAULT_PROFILES || {};
+      allAssemblies = payload.assemblies || window.DEFAULT_ASSEMBLIES || {};
+      licenseInfo = payload.license || {};
+      
+      updateLicenseUI(licenseInfo);
+      renderProfileList();
+      renderAssemblyList();
+      
+      const profKeys = Object.keys(allProfiles);
+      if (profKeys.length > 0 && !allProfiles[selectedProfileId]) {
+        selectedProfileId = profKeys[0];
+      }
+      selectProfile(selectedProfileId);
+
+      const asmKeys = Object.keys(allAssemblies);
+      if (asmKeys.length > 0 && !allAssemblies[selectedAssemblyId]) {
+        selectedAssemblyId = asmKeys[0];
+      }
+
+      if (payload.estimation) {
+        renderEstimation(payload.estimation);
+      }
+    };
+
+    // 2. Chuyển Tab (4 Tab: setup, asm, tools, bom)
+    function switchTab(tab) {
+      activeTab = tab;
+      const tabs = ['setup', 'asm', 'tools', 'bom'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const view = document.getElementById(`view-${t}`);
+        if (btn) btn.classList.toggle('active', t === tab);
+        if (view) view.classList.toggle('active', t === tab);
+      });
+
+      if (tab === 'bom') {
+        refreshEstimation();
+      } else if (tab === 'asm') {
+        renderAssemblyList();
+      }
+    }
+
+    // 3. Lọc Chủng Loại & Tìm kiếm
+    function filterCategory(cat, elem) {
+      currentCategory = cat;
+      document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+      if (elem) elem.classList.add('active');
+      renderProfileList();
+    }
+
+    function onSearchInput() {
+      searchQuery = document.getElementById('search-input').value.trim().toLowerCase();
+      renderProfileList();
+    }
+
+    // 4. Render Danh Sách Profile
+    function renderProfileList() {
+      const container = document.getElementById('profile-list-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      let count = 0;
+      Object.keys(allProfiles).forEach(id => {
+        const item = allProfiles[id];
+        if (currentCategory !== 'all' && item.category !== currentCategory) {
+          return;
+        }
+
+        if (searchQuery) {
+          const matchName = (item.name || '').toLowerCase().includes(searchQuery);
+          const matchCat = (item.category || '').toLowerCase().includes(searchQuery);
+          const matchDesc = (item.description || '').toLowerCase().includes(searchQuery);
+          if (!matchName && !matchCat && !matchDesc) return;
+        }
+
+        count++;
+        const card = document.createElement('div');
+        card.className = `profile-card ${id === selectedProfileId ? 'selected' : ''}`;
+        card.onclick = () => selectProfile(id);
+
+        const catName = getCategoryLabel(item.category);
+        const deleteBtn = item.category === 'tu_ve' ? `
+          <span onclick="deleteCustomProfile('${id}', event)" title="Xóa mặt cắt tự vẽ này" style="cursor: pointer; font-size: 11px; margin-left: 6px; opacity: 0.7;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🗑️</span>
+        ` : '';
+
+        card.innerHTML = `
+          <div class="profile-card-header">
+            <span class="profile-name">${escapeHtml(item.name)}</span>
+            <div style="display: flex; align-items: center;">
+              <span class="profile-tag">${catName}</span>
+              ${deleteBtn}
+            </div>
+          </div>
+          <div class="profile-meta">
+            <span>📐 ${item.width} x ${item.height} mm</span>
+            <span>📏 Cây: ${item.bar_length || 2.5}m</span>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      const countLabel = document.getElementById('profile-count-label');
+      if (countLabel) countLabel.textContent = `${count} Mẫu`;
+    }
+
+    function getCategoryLabel(cat) {
+      switch(cat) {
+        case 'phao_noc':  return 'Phào nóc/trần';
+        case 'len_chan':  return 'Len chân';
+        case 'nep_nhom':  return 'Nẹp T/U/V/L';
+        case 'mang_led':  return 'Máng LED';
+        case 'tay_nam':   return 'Tay nắm/Gola';
+        case 'canh_kinh': return 'Cánh kính';
+        case 'chi_tuong': return 'Chỉ tường PU';
+        case 'tu_ve':     return 'Tự vẽ';
+        case 'assembly':  return 'Tổ hợp';
+        default:          return 'Định hình';
+      }
+    }
+
+    // 5. Chọn Profile
+    function selectProfile(id) {
+      selectedProfileId = id;
+      const item = allProfiles[id];
+      if (!item) return;
+
+      document.querySelectorAll('.profile-card').forEach(c => c.classList.remove('selected'));
+      renderProfileList();
+
+      document.getElementById('active-profile-title').textContent = item.name;
+      document.getElementById('active-profile-desc').textContent = item.description || '';
+      document.getElementById('active-profile-dim').textContent = `${item.width} x ${item.height} mm (Dài cây: ${item.bar_length || 2.5}m)`;
+      
+      const ribName = document.getElementById('ribbon-active-name');
+      if (ribName) ribName.textContent = item.name;
+      const ribDim = document.getElementById('ribbon-active-dim');
+      if (ribDim) ribDim.textContent = `${item.width} x ${item.height} mm`;
+
+      if (item.material) {
+        const matSelect = document.getElementById('material-select');
+        if (matSelect) {
+          for (let i = 0; i < matSelect.options.length; i++) {
+            if (matSelect.options[i].value === item.material) {
+              matSelect.selectedIndex = i;
+              break;
+            }
+          }
+        }
+      }
+
+      updateSvgPreview();
+    }
+
+    // 6. Điểm Neo & Biến Đổi Hình Học (Mirror, Rotation)
+    function selectJustification(just) {
+      activeJustification = just;
+      document.querySelectorAll('.matrix-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-just') === just);
+      });
+      const lbl = document.getElementById('active-just-label');
+      if (lbl) lbl.textContent = formatJustLabel(just);
+      updateSvgPreview();
+    }
+
+    function formatJustLabel(just) {
+      return (just || 'bottom_left').split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('-');
+    }
+
+    function formatJustCode(just) {
+      switch(just) {
+        case 'top_left': return 'TL';
+        case 'top_center': return 'TC';
+        case 'top_right': return 'TR';
+        case 'mid_left': return 'ML';
+        case 'center': return 'C';
+        case 'mid_right': return 'MR';
+        case 'bottom_left': return 'BL';
+        case 'bottom_center': return 'BC';
+        case 'bottom_right': return 'BR';
+        default: return 'BL';
+      }
+    }
+
+    function toggleMirrorX() {
+      isMirrorX = !isMirrorX;
+      document.getElementById('btn-mirror-x').classList.toggle('active', isMirrorX);
+      updateSvgPreview();
+    }
+
+    function toggleMirrorY() {
+      isMirrorY = !isMirrorY;
+      document.getElementById('btn-mirror-y').classList.toggle('active', isMirrorY);
+      updateSvgPreview();
+    }
+
+    function setRotation(deg) {
+      currentRotation = parseInt(deg, 10);
+      document.querySelectorAll('.rot-btn').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.getAttribute('data-rot'), 10) === currentRotation);
+      });
+      updateSvgPreview();
+    }
+
+    function resetOffsets() {
+      document.getElementById('offset-x').value = '0.0';
+      document.getElementById('offset-y').value = '0.0';
+      updateSvgPreview();
+    }
+
+    // 7. XEM TRƯỚC BẢN VẼ KỸ THUẬT BLUEPRINT (ICONIC CAD VISUALIZER LIKE PROFILE BUILDER 4)
+    function updateSvgPreview() {
+      const item = allProfiles[selectedProfileId];
+      if (!item || !item.points || item.points.length === 0) return;
+
+      const svg = document.getElementById('profile-svg');
+      if (!svg) return;
+      svg.innerHTML = '';
+
+      // 1. Áp dụng Mirror
+      let pts = item.points.map(p => [
+        isMirrorX ? -p[0] : p[0],
+        isMirrorY ? -p[1] : p[1]
+      ]);
+
+      // 2. Áp dụng Rotation
+      if (currentRotation !== 0) {
+        const rad = currentRotation * Math.PI / 180.0;
+        const cosA = Math.cos(rad);
+        const sinA = Math.sin(rad);
+        pts = pts.map(p => [
+          p[0] * cosA - p[1] * sinA,
+          p[0] * sinA + p[1] * cosA
+        ]);
+      }
+
+      const xs = pts.map(p => p[0]);
+      const ys = pts.map(p => p[1]);
+
+      const minX = Math.min(...xs);
+      const maxX = Math.max(...xs);
+      const minY = Math.min(...ys);
+      const maxY = Math.max(...ys);
+
+      const midX = (minX + maxX) / 2.0;
+      const midY = (minY + maxY) / 2.0;
+
+      const widthMm = (maxX - minX);
+      const heightMm = (maxY - minY);
+
+      // Ma trận 9 điểm neo (CAD Coordinates)
+      const anchorPoints = {
+        'top_left':      { x: minX, y: maxY, code: 'TL' },
+        'top_center':    { x: midX, y: maxY, code: 'TC' },
+        'top_right':     { x: maxX, y: maxY, code: 'TR' },
+        'mid_left':      { x: minX, y: midY, code: 'ML' },
+        'center':        { x: midX, y: midY, code: 'C'  },
+        'mid_right':     { x: maxX, y: midY, code: 'MR' },
+        'bottom_left':   { x: minX, y: minY, code: 'BL' },
+        'bottom_center': { x: midX, y: minY, code: 'BC' },
+        'bottom_right':  { x: maxX, y: minY, code: 'BR' }
+      };
+
+      const baseAnchor = anchorPoints[activeJustification] || anchorPoints['bottom_left'];
+
+      // Đọc offset (mm)
+      const offX = parseFloat(document.getElementById('offset-x')?.value) || 0.0;
+      const offY = parseFloat(document.getElementById('offset-y')?.value) || 0.0;
+
+      // Điểm đặt thực tế (Placement Point với Offset)
+      const placementX = baseAnchor.x + offX;
+      const placementY = baseAnchor.y + offY;
+
+      // Tính ViewBox đủ rộng cho Dimension Lines và Placement Point
+      const extXMin = Math.min(minX, placementX);
+      const extXMax = Math.max(maxX, placementX);
+      const extYMin = Math.min(minY, placementY);
+      const extYMax = Math.max(maxY, placementY);
+
+      const spanX = Math.max(extXMax - extXMin, 12);
+      const spanY = Math.max(extYMax - extYMin, 12);
+      const maxDim = Math.max(spanX, spanY);
+
+      // Khoảng đệm cho thước đo CAD
+      const padLeft   = maxDim * 0.38;
+      const padRight  = maxDim * 0.25;
+      const padTop    = maxDim * 0.35;
+      const padBottom = maxDim * 0.30;
+
+      const vbX = extXMin - padLeft;
+      const vbY = -extYMax - padTop;
+      const vbW = (extXMax - extXMin) + padLeft + padRight;
+      const vbH = (extYMax - extYMin) + padTop + padBottom;
+
+      svg.setAttribute('viewBox', `${vbX} ${vbY} ${vbW} ${vbH}`);
+
+      // ======================================================================
+      // DEFS: Mũi tên CAD & Marker
+      // ======================================================================
+      const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+      defs.innerHTML = `
+        <marker id="cad-arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#0284c7" />
+        </marker>
+        <marker id="offset-arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#f97316" />
+        </marker>
+        <filter id="soft-glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#0f172a" flood-opacity="0.12" />
+        </filter>
+      `;
+      svg.appendChild(defs);
+
+      // ======================================================================
+      // 1. LƯỚI TRỤC TỌA ĐỘ CAD (Subtle Reference Axes)
+      // ======================================================================
+      const gridGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      gridGroup.setAttribute("opacity", "0.25");
+      gridGroup.innerHTML = `
+        <line x1="${vbX}" y1="0" x2="${vbX + vbW}" y2="0" stroke="#64748b" stroke-dasharray="3,3" stroke-width="${maxDim * 0.008}" />
+        <line x1="0" y1="${vbY}" x2="0" y2="${vbY + vbH}" stroke="#64748b" stroke-dasharray="3,3" stroke-width="${maxDim * 0.008}" />
+      `;
+      svg.appendChild(gridGroup);
+
+      // ======================================================================
+      // 2. THƯỚC ĐO KÍCH THƯỚC KỸ THUẬT CAD (DIMENSIONS)
+      // ======================================================================
+      const dimGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      const dimGap = maxDim * 0.16;
+      const dimExt = maxDim * 0.06;
+      const strokeW = Math.max(maxDim * 0.012, 0.8);
+      const fontSize = Math.max(maxDim * 0.08, 3.8);
+
+      // 2A. KÍCH THƯỚC CHIỀU NGANG (WIDTH DIMENSION: W mm)
+      const dimYPos = -(maxY + dimGap);
+      const dimWHtml = `
+        <g class="cad-dim">
+          <!-- Đường gióng 2 đầu -->
+          <line x1="${minX}" y1="${-maxY}" x2="${minX}" y2="${dimYPos - dimExt}" stroke="#94a3b8" stroke-width="${strokeW * 0.8}" stroke-dasharray="2,2"/>
+          <line x1="${maxX}" y1="${-maxY}" x2="${maxX}" y2="${dimYPos - dimExt}" stroke="#94a3b8" stroke-width="${strokeW * 0.8}" stroke-dasharray="2,2"/>
+          <!-- Đường kích thước có mũi tên 2 chiều -->
+          <line x1="${minX}" y1="${dimYPos}" x2="${maxX}" y2="${dimYPos}" stroke="#0284c7" stroke-width="${strokeW}" marker-start="url(#cad-arrow)" marker-end="url(#cad-arrow)"/>
+          <!-- Nhãn kích thước -->
+          <rect x="${midX - maxDim * 0.22}" y="${dimYPos - fontSize * 0.75}" width="${maxDim * 0.44}" height="${fontSize * 1.3}" fill="#ffffff" rx="2" stroke="#e2e8f0" stroke-width="0.5"/>
+          <text x="${midX}" y="${dimYPos + fontSize * 0.2}" font-family="JetBrains Mono, monospace" font-size="${fontSize}" font-weight="700" fill="#0284c7" text-anchor="middle">W: ${widthMm.toFixed(1)} mm</text>
+        </g>
+      `;
+
+      // 2B. KÍCH THƯỚC CHIỀU CAO (HEIGHT DIMENSION: H mm)
+      const dimXPos = minX - dimGap;
+      const dimHHtml = `
+        <g class="cad-dim">
+          <!-- Đường gióng 2 đầu -->
+          <line x1="${minX}" y1="${-minY}" x2="${dimXPos - dimExt}" y2="${-minY}" stroke="#94a3b8" stroke-width="${strokeW * 0.8}" stroke-dasharray="2,2"/>
+          <line x1="${minX}" y1="${-maxY}" x2="${dimXPos - dimExt}" y2="${-maxY}" stroke="#94a3b8" stroke-width="${strokeW * 0.8}" stroke-dasharray="2,2"/>
+          <!-- Đường kích thước có mũi tên 2 chiều -->
+          <line x1="${dimXPos}" y1="${-minY}" x2="${dimXPos}" y2="${-maxY}" stroke="#0284c7" stroke-width="${strokeW}" marker-start="url(#cad-arrow)" marker-end="url(#cad-arrow)"/>
+          <!-- Nhãn kích thước -->
+          <g transform="translate(${dimXPos - fontSize * 0.75}, ${-midY}) rotate(-90)">
+            <rect x="${-maxDim * 0.22}" y="${-fontSize * 0.65}" width="${maxDim * 0.44}" height="${fontSize * 1.3}" fill="#ffffff" rx="2" stroke="#e2e8f0" stroke-width="0.5"/>
+            <text x="0" y="${fontSize * 0.25}" font-family="JetBrains Mono, monospace" font-size="${fontSize}" font-weight="700" fill="#0284c7" text-anchor="middle">H: ${heightMm.toFixed(1)} mm</text>
+          </g>
+        </g>
+      `;
+      dimGroup.innerHTML = dimWHtml + dimHHtml;
+      svg.appendChild(dimGroup);
+
+      // ======================================================================
+      // 3. ĐA GIÁC BIÊN DẠNG CHÍNH (Profile Cross-Section Polygon)
+      // ======================================================================
+      const polyGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      const ptsAttr = pts.map(p => `${p[0]},${-p[1]}`).join(" ");
+      const profilePoly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+      profilePoly.setAttribute("points", ptsAttr);
+      profilePoly.setAttribute("fill", "rgba(245, 158, 11, 0.16)");
+      profilePoly.setAttribute("stroke", "#d97706");
+      profilePoly.setAttribute("stroke-width", `${Math.max(maxDim * 0.018, 1.2)}`);
+      profilePoly.setAttribute("stroke-linejoin", "round");
+      polyGroup.appendChild(profilePoly);
+
+      // Điểm mút đỉnh hình học (Vertices)
+      pts.forEach(p => {
+        const vCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        vCircle.setAttribute("cx", p[0]);
+        vCircle.setAttribute("cy", -p[1]);
+        vCircle.setAttribute("r", `${Math.max(maxDim * 0.012, 0.9)}`);
+        vCircle.setAttribute("fill", "#b45309");
+        polyGroup.appendChild(vCircle);
+      });
+      svg.appendChild(polyGroup);
+
+      // ======================================================================
+      // 4. VECTƠ CHỈ HƯỚNG OFFSET (NẾU CÓ OFFSET != 0)
+      // ======================================================================
+      if (Math.abs(offX) > 0.05 || Math.abs(offY) > 0.05) {
+        const offsetGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        offsetGroup.innerHTML = `
+          <line x1="${baseAnchor.x}" y1="${-baseAnchor.y}" x2="${placementX}" y2="${-placementY}" 
+                stroke="#f97316" stroke-width="${strokeW * 1.2}" stroke-dasharray="3,2" marker-end="url(#offset-arrow)"/>
+          <circle cx="${baseAnchor.x}" cy="${-baseAnchor.y}" r="${maxDim * 0.02}" fill="#94a3b8"/>
+        `;
+        svg.appendChild(offsetGroup);
+      }
+
+      // ======================================================================
+      // 5. 9 ĐIỂM NEO TRỰC QUAN TƯƠNG TÁC (9 INTERACTIVE ANCHORS ON BOUNDING BOX)
+      // ======================================================================
+      const anchorsGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      Object.keys(anchorPoints).forEach(key => {
+        const anc = anchorPoints[key];
+        const isCurrent = (key === activeJustification);
+        if (isCurrent) return; // Điểm hiện tại vẽ target riêng nổi bật ở bước sau
+
+        const dot = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        dot.style.cursor = "pointer";
+        dot.onclick = (e) => {
+          e.stopPropagation();
+          selectJustification(key);
+        };
+
+        const rDot = Math.max(maxDim * 0.022, 1.8);
+        dot.innerHTML = `
+          <circle cx="${anc.x}" cy="${-anc.y}" r="${rDot * 1.8}" fill="transparent" />
+          <circle cx="${anc.x}" cy="${-anc.y}" r="${rDot}" fill="#ffffff" stroke="#64748b" stroke-width="${rDot * 0.4}" />
+          <title>Nhấn để chọn điểm neo ${anc.code} (${formatJustLabel(key)})</title>
+        `;
+        anchorsGroup.appendChild(dot);
+      });
+      svg.appendChild(anchorsGroup);
+
+      // ======================================================================
+      // 6. TÂM NEO ĐỎ BIỂU TƯỢNG (ICONIC RED PLACEMENT POINT TARGET - PB4 STYLE)
+      // ======================================================================
+      const targetGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      targetGroup.setAttribute("filter", "url(#soft-glow)");
+      
+      const rOuter = Math.max(maxDim * 0.065, 4.5);
+      const rInner = rOuter * 0.45;
+      const crossLen = rOuter * 1.8;
+
+      targetGroup.innerHTML = `
+        <!-- Vòng hào quang đỏ -->
+        <circle cx="${placementX}" cy="${-placementY}" r="${rOuter}" fill="rgba(239, 68, 68, 0.12)" stroke="#ef4444" stroke-width="${rOuter * 0.2}" stroke-dasharray="${rOuter * 0.5},${rOuter * 0.3}"/>
+        <!-- Tâm chữ thập đỏ CAD -->
+        <line x1="${placementX - crossLen}" y1="${-placementY}" x2="${placementX + crossLen}" y2="${-placementY}" stroke="#ef4444" stroke-width="${rOuter * 0.18}"/>
+        <line x1="${placementX}" y1="${-placementY - crossLen}" x2="${placementX}" y2="${-placementY + crossLen}" stroke="#ef4444" stroke-width="${rOuter * 0.18}"/>
+        <!-- Khối tròn đỏ tâm -->
+        <circle cx="${placementX}" cy="${-placementY}" r="${rInner}" fill="#ef4444" stroke="#ffffff" stroke-width="${rInner * 0.35}"/>
+        <!-- Chấm tâm trắng tinh xảo -->
+        <circle cx="${placementX}" cy="${-placementY}" r="${rInner * 0.3}" fill="#ffffff"/>
+        <!-- Nhãn Placement Point -->
+        <g transform="translate(${placementX + rOuter * 1.3}, ${-placementY + rOuter * 0.4})">
+          <rect x="0" y="${-fontSize * 0.75}" width="${maxDim * 0.34}" height="${fontSize * 1.25}" fill="#ef4444" rx="3"/>
+          <text x="${maxDim * 0.17}" y="${fontSize * 0.15}" font-family="JetBrains Mono, monospace" font-size="${fontSize * 0.85}" font-weight="800" fill="#ffffff" text-anchor="middle">TÂM NEO (${anchorPoints[activeJustification]?.code || 'BL'})</text>
+        </g>
+      `;
+      svg.appendChild(targetGroup);
+
+      // ======================================================================
+      // 7. TRỤC TỌA ĐỘ CAD GÓC DƯỚI (+X ĐỎ, +Y XANH LÁ, +Z XANH DƯƠNG)
+      // ======================================================================
+      const axesGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      const axOriginX = vbX + maxDim * 0.12;
+      const axOriginY = (vbY + vbH) - maxDim * 0.12;
+      const axLen = maxDim * 0.14;
+
+      axesGroup.innerHTML = `
+        <!-- Trục X (Đỏ) -->
+        <line x1="${axOriginX}" y1="${axOriginY}" x2="${axOriginX + axLen}" y2="${axOriginY}" stroke="#dc2626" stroke-width="${strokeW * 1.3}"/>
+        <polygon points="${axOriginX + axLen},${axOriginY} ${axOriginX + axLen - 2},${axOriginY - 1.5} ${axOriginX + axLen - 2},${axOriginY + 1.5}" fill="#dc2626"/>
+        <text x="${axOriginX + axLen + 2}" y="${axOriginY + 1.5}" font-family="JetBrains Mono, monospace" font-size="${fontSize * 0.75}" font-weight="800" fill="#dc2626">+X</text>
+        <!-- Trục Y (Xanh lá) -->
+        <line x1="${axOriginX}" y1="${axOriginY}" x2="${axOriginX}" y2="${axOriginY - axLen}" stroke="#16a34a" stroke-width="${strokeW * 1.3}"/>
+        <polygon points="${axOriginX},${axOriginY - axLen} ${axOriginX - 1.5},${axOriginY - axLen + 2} ${axOriginX + 1.5},${axOriginY - axLen + 2}" fill="#16a34a"/>
+        <text x="${axOriginX - 1}" y="${axOriginY - axLen - 2}" font-family="JetBrains Mono, monospace" font-size="${fontSize * 0.75}" font-weight="800" fill="#16a34a">+Y</text>
+        <!-- Gốc tọa độ -->
+        <circle cx="${axOriginX}" cy="${axOriginY}" r="${maxDim * 0.015}" fill="#0f172a"/>
+      `;
+      svg.appendChild(axesGroup);
+    }
+
+    // 8. Chạy Phào 1-Click (Build Profile Member)
+    function triggerBuildProfile() {
+      const btn = document.getElementById('btn-build');
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳ ĐANG ĐÙN KHỐI 3D...</span>';
+
+      const offX = parseFloat(document.getElementById('offset-x')?.value) || 0.0;
+      const offY = parseFloat(document.getElementById('offset-y')?.value) || 0.0;
+      const mat = document.getElementById('material-select')?.value || 'Nhom_Anode_Bac';
+
+      showStatus("Đang quét cạnh và ghép góc mòi 3D...", "info");
+
+      if (window.sketchup && window.sketchup.build_profile) {
+        window.sketchup.build_profile(selectedProfileId, activeJustification, offX, offY, mat, isMirrorX, isMirrorY, currentRotation);
+      } else {
+        setTimeout(() => {
+          onBuildFinished({
+            result: { success: true, length_m: 4.8, message: 'Chạy phào mô phỏng thành công!' },
+            estimation: { total_length_m: 4.8, total_bars: 2, total_cost: 300000, items: [] }
+          });
+        }, 500);
+      }
+    }
+
+    // 9. Cập Nhật Đối Tượng Đã Dựng (Update Selected Member)
+    function triggerUpdateProfile() {
+      const btn = document.getElementById('btn-update');
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳ ĐANG CẬP NHẬT...</span>';
+
+      const offX = parseFloat(document.getElementById('offset-x')?.value) || 0.0;
+      const offY = parseFloat(document.getElementById('offset-y')?.value) || 0.0;
+      const mat = document.getElementById('material-select')?.value || 'Nhom_Anode_Bac';
+
+      showStatus("Đang cập nhật lại khối phào nẹp đang chọn...", "info");
+
+      if (window.sketchup && window.sketchup.update_profile) {
+        window.sketchup.update_profile(selectedProfileId, activeJustification, offX, offY, mat, isMirrorX, isMirrorY, currentRotation);
+      } else {
+        setTimeout(() => {
+          onBuildFinished({
+            result: { success: true, length_m: 3.6, message: 'Cập nhật đối tượng mô phỏng thành công!' },
+            estimation: { total_length_m: 3.6, total_bars: 2, total_cost: 250000, items: [] }
+          });
+        }, 500);
+      }
+    }
+
+    window.onBuildFinished = function(payload) {
+      const btnBuild = document.getElementById('btn-build');
+      if (btnBuild) {
+        btnBuild.disabled = false;
+        btnBuild.innerHTML = '<span>🟢 DỰNG THEO ĐƯỜNG DẪN</span>';
+      }
+      const btnUpdate = document.getElementById('btn-update');
+      if (btnUpdate) {
+        btnUpdate.disabled = false;
+        btnUpdate.innerHTML = '<span>🔄 CẬP NHẬT ĐÃ CHỌN</span>';
+      }
+
+      if (payload && payload.result) {
+        if (payload.result.success) {
+          showStatus(payload.result.message || "Thao tác thành công!", "success");
+        } else {
+          showStatus(payload.result.message || "Lỗi thao tác!", "error");
+        }
+      }
+
+      if (payload && payload.estimation) {
+        renderEstimation(payload.estimation);
+      }
+    };
+
+    // 10. Lấy Mặt Cắt Từ Face Đang Chọn & Quản lý Mặt Cắt Tự Vẽ
+    function saveCustomFacePrompt() {
+      const name = prompt("Nhập tên cho mặt cắt tự vẽ mới:", "Phao_Go_Tu_Ve_" + Math.floor(Math.random()*1000));
+      if (name === null) return;
+
+      if (window.sketchup && window.sketchup.save_custom_face) {
+        window.sketchup.save_custom_face(name);
+      } else {
+        const customId = "CUSTOM_" + Date.now();
+        const mockCustom = {
+          id: customId,
+          name: name,
+          category: 'tu_ve',
+          width: 50.0,
+          height: 35.0,
+          material: 'Nhom_Tuy_Chon',
+          bar_length: 2.5,
+          points: [
+            [0.0, 0.0], [50.0, 0.0], [50.0, 10.0], [35.0, 20.0],
+            [35.0, 35.0], [0.0, 35.0]
+          ],
+          description: "Mặt cắt tự vẽ (50x35mm) trích xuất từ Face 3D mô hình."
+        };
+        onCustomProfileAdded(mockCustom);
+      }
+    }
+
+    function deleteCustomProfile(id, ev) {
+      if (ev) ev.stopPropagation();
+      if (!confirm("Bạn có chắc chắn muốn xóa mặt cắt tự vẽ này khỏi Thư viện?")) return;
+      if (window.sketchup && window.sketchup.delete_custom_profile) {
+        window.sketchup.delete_custom_profile(id);
+      } else {
+        delete allProfiles[id];
+        renderProfileList();
+        const keys = Object.keys(allProfiles);
+        if (keys.length > 0) selectProfile(keys[0]);
+        showStatus("Đã xóa mặt cắt tự vẽ thành công!", "success");
+      }
+    }
+
+    window.onCustomProfileDeleted = function(id) {
+      if (allProfiles[id]) {
+        delete allProfiles[id];
+        renderProfileList();
+        const keys = Object.keys(allProfiles);
+        if (keys.length > 0) selectProfile(keys[0]);
+        showStatus("Đã xóa mặt cắt khỏi thư viện!", "success");
+      }
+    };
+
+    window.onCustomProfileAdded = function(customProfile) {
+      if (!customProfile) return;
+      allProfiles[customProfile.id] = customProfile;
+      renderProfileList();
+      selectProfile(customProfile.id);
+      showStatus(`Đã thêm mặt cắt tự vẽ [${customProfile.name}] vào thư viện!`, "success");
+    };
+
+    // ========================================================================
+    // 11. TỔ HỢP THÔNG MINH (SMART ASSEMBLIES LOGIC)
+    // ========================================================================
+    function renderAssemblyList() {
+      const container = document.getElementById('asm-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const asmKeys = Object.keys(allAssemblies);
+      if (asmKeys.length === 0) {
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 30px;">Chưa có tổ hợp nào được định nghĩa.</div>`;
+        return;
+      }
+
+      asmKeys.forEach(id => {
+        const asm = allAssemblies[id];
+        const isSelected = (id === selectedAssemblyId);
+        const card = document.createElement('div');
+        card.className = `asm-card ${isSelected ? 'selected' : ''}`;
+        card.onclick = () => selectAssembly(id);
+
+        const mainProf = allProfiles[asm.main_profile_id] || { name: asm.main_profile_id, width: 0, height: 0 };
+        
+        let componentsHtml = `
+          <div class="asm-comp-row">
+            <span class="asm-comp-name">📐 Thanh chính: ${escapeHtml(mainProf.name)}</span>
+            <span class="asm-comp-badge">Profile Member</span>
+          </div>
+        `;
+
+        if (asm.corner_component) {
+          componentsHtml += `
+            <div class="asm-comp-row">
+              <span class="asm-comp-name">🧩 Phụ kiện góc: ${escapeHtml(asm.corner_component)}</span>
+              <span class="asm-comp-badge">Corner</span>
+            </div>
+          `;
+        }
+
+        if (asm.clip_component) {
+          componentsHtml += `
+            <div class="asm-comp-row">
+              <span class="asm-comp-name">📎 Kẹp định vị: ${escapeHtml(asm.clip_component)} (${asm.spacing_mm}mm)</span>
+              <span class="asm-comp-badge">Infill</span>
+            </div>
+          `;
+        }
+
+        if (asm.end_caps) {
+          componentsHtml += `
+            <div class="asm-comp-row">
+              <span class="asm-comp-name">🛑 Nắp bịt đầu hồi 2 bên</span>
+              <span class="asm-comp-badge">End-Cap</span>
+            </div>
+          `;
+        }
+
+        card.innerHTML = `
+          <div>
+            <div class="asm-header">
+              <div class="asm-title">${escapeHtml(asm.name)}</div>
+              <span class="badge-tag tool-tag" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;">Assembly</span>
+            </div>
+            <div class="asm-desc">${escapeHtml(asm.description || '')}</div>
+            <div class="asm-components-list">
+              ${componentsHtml}
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 10px; margin-top: 6px;">
+            <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Neo: ${formatJustLabel(asm.justification || 'bottom_left')}</span>
+            <button class="btn-main" onclick="event.stopPropagation(); selectAssembly('${id}'); triggerBuildAssembly();" style="padding: 6px 14px; font-size: 11px;">
+              <span>🟢 Dựng Ngay</span>
+            </button>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function selectAssembly(id) {
+      selectedAssemblyId = id;
+      const cards = document.querySelectorAll('.asm-card');
+      const asmKeys = Object.keys(allAssemblies);
+      cards.forEach((c, idx) => {
+        c.classList.toggle('selected', asmKeys[idx] === id);
+      });
+      showToast(`Đã chọn tổ hợp: ${allAssemblies[id]?.name || id}`);
+    }
+
+    function triggerBuildAssembly() {
+      const asm = allAssemblies[selectedAssemblyId];
+      if (!asm) {
+        showToast("Vui lòng chọn một tổ hợp trước khi dựng!");
+        return;
+      }
+
+      showStatus(`Đang tính toán phân bổ tổ hợp [${asm.name}]...`, "info");
+      if (window.sketchup && window.sketchup.build_assembly) {
+        window.sketchup.build_assembly(selectedAssemblyId);
+      } else {
+        setTimeout(() => {
+          onBuildFinished({
+            result: { success: true, length_m: 6.4, message: `Dựng tổ hợp [${asm.name}] thành công!` },
+            estimation: { total_length_m: 6.4, total_bars: 3, total_cost: 450000, items: [] }
+          });
+        }, 600);
+      }
+    }
+
+    // ========================================================================
+    // 12. CÔNG CỤ KHOÉT LỖ & GỌT VÁT (HOLE TOOL, EXTEND, JOIN, SMART-PATH)
+    // ========================================================================
+    function setHoleType(type) {
+      activeHoleType = type;
+      document.getElementById('hole-type-circle').classList.toggle('active', type === 'circle');
+      document.getElementById('hole-type-rect').classList.toggle('active', type === 'rect');
+
+      const p2Group = document.getElementById('group-hole-p2');
+      const p1Label = document.getElementById('label-hole-p1');
+
+      if (type === 'circle') {
+        p2Group.style.display = 'none';
+        p1Label.textContent = 'Đường kính Ø (mm):';
+      } else {
+        p2Group.style.display = 'block';
+        p1Label.textContent = 'Chiều rộng W (mm):';
+      }
+    }
+
+    function quickHole(dia, type) {
+      setHoleType(type || 'circle');
+      document.getElementById('hole-p1').value = dia;
+    }
+
+    function quickHoleRect(w, h) {
+      setHoleType('rect');
+      document.getElementById('hole-p1').value = w;
+      document.getElementById('hole-p2').value = h;
+    }
+
+    function triggerCutHole() {
+      const p1 = parseFloat(document.getElementById('hole-p1').value) || 35.0;
+      const p2 = parseFloat(document.getElementById('hole-p2').value) || 45.0;
+      const offset = parseFloat(document.getElementById('hole-offset').value) || 100.0;
+
+      showStatus(`Đang khoét lỗ ${activeHoleType === 'circle' ? 'Ø' + p1 : p1 + 'x' + p2}mm xuyên qua đối tượng...`, "info");
+
+      if (window.sketchup && window.sketchup.cut_hole) {
+        window.sketchup.cut_hole(activeHoleType, p1, p2, offset);
+      } else {
+        setTimeout(() => {
+          showStatus(`Khoét lỗ ${activeHoleType === 'circle' ? 'Ø' + p1 : p1 + 'x' + p2}mm mô phỏng thành công!`, "success");
+        }, 400);
+      }
+    }
+
+    function triggerExtendMember() {
+      const startExt = parseFloat(document.getElementById('extend-start').value) || 0.0;
+      const endExt = parseFloat(document.getElementById('extend-end').value) || 0.0;
+
+      showStatus(`Đang kéo dài đối tượng (+${startExt}mm / +${endExt}mm)...`, "info");
+
+      if (window.sketchup && window.sketchup.extend_member) {
+        window.sketchup.extend_member(startExt, endExt);
+      } else {
+        setTimeout(() => {
+          showStatus(`Kéo dài thanh phào mô phỏng thành công (+${startExt}mm, +${endExt}mm)!`, "success");
+        }, 400);
+      }
+    }
+
+    function triggerJoinMembers() {
+      showStatus("Đang hàn nối 2 thanh phào nẹp tiếp giáp thành 1 khối liên tục...", "info");
+
+      if (window.sketchup && window.sketchup.join_members) {
+        window.sketchup.join_members();
+      } else {
+        setTimeout(() => {
+          showStatus("Hàn nối 2 thanh phào thành công!", "success");
+        }, 400);
+      }
+    }
+
+    function triggerSmartPath() {
+      showStatus("Đang tự động truy vết đường dẫn liên tục theo chuỗi cạnh 3D...", "info");
+
+      if (window.sketchup && window.sketchup.smart_path_select) {
+        window.sketchup.smart_path_select();
+      } else {
+        setTimeout(() => {
+          showToast("⚡ Smart-Path: Đã tìm thấy chuỗi 4 cạnh liên tục (Loop Path)!");
+          showStatus("Smart-Path: Đã tự động chọn toàn bộ chuỗi cạnh liên tục xung quanh đỉnh tủ!", "success");
+        }, 300);
+      }
+    }
+
+    // ========================================================================
+    // 13. DỰ TOÁN BẢNG VẬT TƯ (BOM) & XUẤT EXCEL
+    // ========================================================================
+    function renderEstimation(est) {
+      if (!est) return;
+
+      document.getElementById('stat-total-length').textContent = `${est.total_length_m || 0.0} m`;
+      document.getElementById('stat-total-bars').textContent = `${est.total_bars || 0} Cây`;
+      document.getElementById('stat-total-cost').textContent = `${formatMoney(est.total_cost || 0)} đ`;
+
+      const tbody = document.getElementById('bom-table-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (!est.items || est.items.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 30px;">
+              Chưa có dữ liệu phào nẹp trong mô hình. Hãy dùng công cụ dựng phào nẹp trước!
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      est.items.forEach((item, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="text-align: center;">${idx + 1}</td>
+          <td><strong style="color: #0f172a;">${escapeHtml(item.name)}</strong></td>
+          <td style="text-align: center;">${getCategoryLabel(item.category)}</td>
+          <td style="text-align: center;">${item.bar_len}m / cây</td>
+          <td style="text-align: right; font-weight: 600;">${item.length_m} m</td>
+          <td style="text-align: center; color: var(--warning);">5%</td>
+          <td style="text-align: right; font-weight: 700; color: var(--primary);">${item.bars_to_buy}</td>
+          <td style="text-align: right;">${formatMoney(item.unit_price)} đ</td>
+          <td style="text-align: right; font-weight: 700; color: #0f172a;">${formatMoney(item.cost)} đ</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function refreshEstimation() {
+      if (window.sketchup && window.sketchup.refresh_estimation) {
+        window.sketchup.refresh_estimation();
+      }
+    }
+
+    window.onEstimationUpdated = function(est) {
+      renderEstimation(est);
+    };
+
+    function exportExcel() {
+      if (window.sketchup && window.sketchup.export_excel) {
+        window.sketchup.export_excel();
+      } else {
+        alert("Xuất Excel mô phỏng thành công!");
+      }
+    }
+
+    function exportCsv() {
+      if (window.sketchup && window.sketchup.export_csv) {
+        window.sketchup.export_csv();
+      } else {
+        alert("Xuất CSV mô phỏng thành công!");
+      }
+    }
+
+    window.onExportSuccess = function(filePath, type) {
+      showStatus(`Đã xuất file ${type} thành công tại: ${filePath}`, "success");
+    };
+
+    // ========================================================================
+    // 14. BẢN QUYỀN HỆ THỐNG
+    // ========================================================================
+    function updateLicenseUI(lic) {
+      const badge = document.getElementById('license-badge');
+      if (badge) {
+        if (lic.is_valid) {
+          badge.className = 'badge-master';
+          badge.textContent = lic.type === 'HOST_DEVELOPER_MASTER' ? 'HOST MASTER: VĨNH VIỄN' : 'PRO: ĐÃ KÍCH HOẠT';
+        } else {
+          badge.className = 'badge-master';
+          badge.style.background = 'rgba(239, 68, 68, 0.15)';
+          badge.style.color = '#f87171';
+          badge.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+          badge.textContent = 'CHƯA KÍCH HOẠT (CLICK ĐỂ MỞ KHÓA)';
+        }
+      }
+      const hwidElem = document.getElementById('modal-hwid');
+      if (hwidElem) {
+        hwidElem.textContent = lic.machine_id || 'Đang quét HWID...';
+      }
+    }
+
+    function openLicenseModal() {
+      document.getElementById('modal-license').classList.add('active');
+    }
+
+    function closeLicenseModal() {
+      document.getElementById('modal-license').classList.remove('active');
+    }
+
+    function copyHwid() {
+      const text = document.getElementById('modal-hwid').textContent;
+      navigator.clipboard.writeText(text);
+      alert("Đã sao chép Machine ID: " + text);
+    }
+
+    function submitActivation() {
+      const key = document.getElementById('license-key-input').value.trim();
+      if (!key) {
+        alert("Vui lòng nhập License Key!");
+        return;
+      }
+      if (window.sketchup && window.sketchup.activate_license) {
+        window.sketchup.activate_license(key);
+      }
+    }
+
+    window.onActivationResult = function(success, message, info) {
+      alert(message);
+      if (success && info) {
+        licenseInfo = info;
+        updateLicenseUI(info);
+        closeLicenseModal();
+      }
+    };
+
+    window.onLicenseRequired = function() {
+      openLicenseModal();
+    };
+
+    // ========================================================================
+    // 15. HÀM TIỆN ÍCH DÙNG CHUNG
+    // ========================================================================
+    function showStatus(text, type) {
+      const banner = document.getElementById('status-banner');
+      if (!banner) return;
+      banner.className = `status-banner ${type || 'info'}`;
+      document.getElementById('status-text').textContent = text;
+      banner.style.display = 'flex';
+      clearTimeout(window.__statusTimer);
+      window.__statusTimer = setTimeout(() => {
+        banner.style.display = 'none';
+      }, 5000);
+    }
+
+    function formatMoney(num) {
+      return (num || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, function(m) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#039;'
+        }[m];
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.style.display = "block";
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        toast.style.display = "none";
+      }, 3000);
+    }
+
+    // Call Ruby on DOMContentLoaded
+    document.addEventListener("DOMContentLoaded", function() {
+      // 1. Tự động tải ngay 28 mẫu chuẩn để khi mở file HTML độc lập trên trình duyệt không bị trắng
+      if (window.DEFAULT_PROFILES) {
+        initProfilePro({
+          profiles: window.DEFAULT_PROFILES,
+          assemblies: window.DEFAULT_ASSEMBLIES,
+          license: {
+            is_valid: true,
+            type: "HOST_DEVELOPER_MASTER",
+            machine_id: "NTPRO-DEVELOPER-MASTER-HOST",
+            license_key: "NTPRO-HOST-DEVELOPER-MASTER-LIFETIME"
+          },
+          estimation: {
+            total_length_m: 12.8,
+            total_bars: 5,
+            total_cost: 650000,
+            items: [
+              { id: "PHAO_NOC_HIEN_DAI_40x40", name: "Phào Nóc Hộp Hiện Đại 40x40", category: "phao_noc", bar_len: 2.44, length_m: 4.8, bars_to_buy: 2, unit_price: 150000, cost: 300000 },
+              { id: "MANG_LED_NHOM_AM_17", name: "Máng LED Âm Tủ Bếp Có Tai 17.5x7mm", category: "mang_led", bar_len: 3.0, length_m: 5.2, bars_to_buy: 2, unit_price: 75000, cost: 150000 },
+              { id: "NHOM_GOLA_CHU_C", name: "Nhôm Gola Chữ C (Ngăn Kéo Giữa)", category: "tay_nam", bar_len: 3.0, length_m: 2.8, bars_to_buy: 1, unit_price: 120000, cost: 120000 }
+            ]
+          }
+        });
+      }
+
+      // 2. Nếu đang chạy thực tế trong SketchUp, đồng bộ dữ liệu trực tiếp từ 3D
+      if (window.sketchup && window.sketchup.app_ready) {
+        window.sketchup.app_ready();
+      }
+    });
+  </script>
+  <div id="toast"></div>
+</body>
+</html>

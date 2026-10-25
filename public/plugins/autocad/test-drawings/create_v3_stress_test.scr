@@ -1,0 +1,43 @@
+;; Script tạo các đối tượng kiểm thử 7 tính năng nâng cấp V3.0
+layer new HOI_TU
+layer set HOI_TU
+;; 1. Hồi tủ chuẩn 600x2400
+rectang 0,0 600,2400
+
+;; 2. Nét vẽ đè (Duplicate) đúng vị trí hồi tủ 600x2400 để thử nghiệm lọc trùng
+rectang 0,0 600,2400
+
+;; 3. Nét vẽ rời (4 đoạn LINE độc lập tạo thành đợt tủ 566x500)
+layer new DOT_TU
+layer set DOT_TU
+line 700,0 1266,0
+line 1266,0 1266,500
+line 1266,500 700,500
+line 700,500 700,0
+
+;; 4. Cánh tủ có vân dọc (CANH_TU) kích thước Ngang 800 x Cao 500 (Vân chạy theo chiều đứng 500)
+layer new CANH_TU
+layer set CANH_TU
+rectang 1400,0 2200,500
+
+;; 5. Mặt ngăn kéo có vân ngang (NGAN_KEO) Ngang 800 x Cao 200
+layer new NGAN_KEO
+layer set NGAN_KEO
+rectang 1400,600 2200,800
+
+;; 6. Ván hậu 6mm (VAN_HAU_6) 1200x2400 (Không dán chỉ)
+layer new VAN_HAU_6
+layer set VAN_HAU_6
+rectang 2300,0 3500,2400
+
+;; 7. Chi tiết bo góc / Cạnh cong: Mặt bàn bo góc R=200
+layer new MAT_BAN_CONG
+layer set MAT_BAN_CONG
+pline 3600,0 w 0 0 4800,0 4800,600 a 4600,800 l 3600,800 c
+
+;; 8. Layer có tag dán chỉ trực tiếp: VAN_17_DAN2D1R
+layer new VAN_17_DAN2D1R
+layer set VAN_17_DAN2D1R
+rectang 700,600 1266,1100
+
+zoom extents

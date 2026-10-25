@@ -1,0 +1,51 @@
+================================================================================
+HƯỚNG DẪN CÀI ĐẶT & SỬ DỤNG BỘ PLUGIN AUTOCAD NỘI THẤT PRO
+Áp dụng: AutoCAD 2014, 2018, 2020, 2022, 2024, 2026 (64-bit Windows)
+================================================================================
+
+1. GIỚI THIỆU CÁC LỆNH
+--------------------------------------------------------------------------------
+- Lệnh: QC (Quick Cutlist) -> File: AutoCutlist_Pro.lsp
+  + Tính năng: Bóc tách kích thước Dài, Rộng, Dày, Cạnh dán chỉ của từng tấm ván
+    từ các hình chữ nhật 2D (Polyline) hoặc khối tủ 3D Solid trên bản vẽ.
+  + Đầu ra: File .CSV chuẩn 8 cột có mã UTF-8 BOM, không lỗi font tiếng Việt, 
+    kéo thả trực tiếp vào Web Báo Giá: https://webnoithatpro.vn/quoting.
+
+- Lệnh: SD (Smart Dim) -> File: SmartDim_Furniture.lsp
+  + Tính năng: Tự động đo lọt lòng khoang đợt tủ, tim ngăn kéo và gán nhãn cạnh dán chỉ.
+  + Bản quyền: Khóa theo mã Volume Serial Number ổ cứng máy tính (C:).
+
+2. CÁCH NẠP LISP VÀO AUTOCAD ĐỂ DÙNG NGAY (TẠM THỜI)
+--------------------------------------------------------------------------------
+Cách 1: Kéo thả trực tiếp
+  - Mở AutoCAD lên với bản vẽ cần bóc tách.
+  - Kéo file 'AutoCutlist_Pro.lsp' từ thư mục máy tính thả thẳng vào màn hình làm việc AutoCAD.
+  - Nhìn dòng lệnh Command bên dưới hiện: "[ĐÃ NẠP AUTOCUTLIST PRO] - Gõ lệnh 'QC' để bắt đầu".
+
+Cách 2: Dùng lệnh APPLOAD
+  - Gõ lệnh 'AP' hoặc 'APPLOAD' rồi nhấn Enter.
+  - Tìm chọn file 'AutoCutlist_Pro.lsp' hoặc 'SmartDim_Furniture.lsp'.
+  - Bấm nút "Load" -> Thấy chữ "AutoCutlist_Pro.lsp successfully loaded." là xong.
+
+3. CÁCH CÀI ĐẶT TỰ ĐỘNG KHỞI ĐỘNG CÙNG AUTOCAD (DÙNG VĨNH VIỄN)
+--------------------------------------------------------------------------------
+Nếu bạn muốn mỗi khi mở AutoCAD lên là lệnh 'QC' và 'SD' có sẵn mà không cần kéo thả lại:
+  Bước 1: Gõ lệnh 'APPLOAD' -> Enter.
+  Bước 2: Nhìn góc dưới bên phải hộp thoại, tại mục "Startup Suite", bấm vào biểu tượng chiếc cặp xách (Contents...).
+  Bước 3: Bấm nút "Add..." -> Chọn file 'AutoCutlist_Pro.lsp' và 'SmartDim_Furniture.lsp'.
+  Bước 4: Bấm "Close" -> "Close".
+  => Từ nay trở đi, mỗi lần mở CAD là bạn chỉ cần gõ 'QC' hoặc 'SD' để làm việc!
+
+4. CÁCH LẤY MÃ MÁY (VOLUME ID) ĐỂ KÍCH HOẠT BẢN QUYỀN
+--------------------------------------------------------------------------------
+- Gõ lệnh 'SD' trong AutoCAD lần đầu tiên.
+- Hộp thoại xuất hiện sẽ hiển thị chính xác mã máy của bạn (Ví dụ: 4A2B-8C1D).
+- Sao chép mã máy này dán vào trang: https://webnoithatpro.vn/cad-store
+- Sau khi thanh toán VietQR, hệ thống sẽ cấp ngay cho bạn License Key tương ứng.
+- Dán Key này vào AutoCAD -> Bấm OK để kích hoạt trọn đời.
+
+================================================================================
+HỖ TRỢ KỸ THUẬT XƯỞNG NỘI THẤT PRO:
+- Website: https://webnoithatpro.vn
+- Hotline/Zalo Kỹ Thuật: 0988 123 456
+================================================================================

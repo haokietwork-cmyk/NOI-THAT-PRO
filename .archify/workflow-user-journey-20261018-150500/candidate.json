@@ -1,0 +1,105 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Kiến Trúc Luồng Người Dùng & Động Cơ Tính Toán NỘI THẤT PRO",
+    "animation": "trace",
+    "quality_profile": "standard",
+    "output": ".archify/workflow-user-journey-20261018-150500/user-journey.html"
+  },
+  "lanes": [
+    { "id": "ui", "label": "Trải Nghiệm Web & Giao Diện Thao Tác (Web UX)" },
+    { "id": "ingest", "label": "Thu Thập & Bắt Lỗi Dữ Liệu (Ingestion & Errors)" },
+    { "id": "engine", "label": "Động Cơ Giá Vốn & Dữ Liệu (Costing & Supabase)" },
+    { "id": "output", "label": "BOM Đặt Hàng & Vận Hành Xưởng (Production)" }
+  ],
+  "phases": [
+    { "id": "p1", "label": "1. Khám Phá & Nạp Dữ Liệu", "fromCol": 0, "toCol": 1 },
+    { "id": "p2", "label": "2. Tiền Xử Lý & Bắt Lỗi Cột", "fromCol": 2, "toCol": 2, "variant": "emphasis" },
+    { "id": "p3", "label": "3. Động Cơ Giá Vốn 5 Thành Phần", "fromCol": 3, "toCol": 3, "variant": "emphasis" },
+    { "id": "p4", "label": "4. Góc Nhìn Kép & Đàm Phán", "fromCol": 4, "toCol": 4 },
+    { "id": "p5", "label": "5. Chốt Đơn & Lệnh Sản Xuất", "fromCol": 5, "toCol": 5, "variant": "dashed" }
+  ],
+  "groups": [
+    { "id": "grp_in", "label": "Cổng Nạp Dữ Liệu Không Rào Cản", "lane": "ingest", "fromCol": 0, "toCol": 1 },
+    { "id": "grp_check", "label": "Vòng Lặp Bắt Lỗi Cột & Giá", "lane": "ingest", "fromCol": 2, "toCol": 2, "variant": "emphasis" },
+    { "id": "grp_cost", "label": "Bóc Tách Toàn Diện: Ván, Chỉ, Phụ Kiện, Thợ", "lane": "engine", "fromCol": 1, "toCol": 3, "variant": "emphasis" },
+    { "id": "grp_prod", "label": "Hai Đầu Ra & Vòng Đời Dự Án", "lane": "output", "fromCol": 4, "toCol": 5, "variant": "dashed" }
+  ],
+  "mainPath": [
+    "landing",
+    "demo_48",
+    "smart_map",
+    "cost_calc",
+    "client_quote",
+    "negotiate_rev",
+    "order_prod"
+  ],
+  "nodes": [
+    { "id": "landing", "lane": "ui", "col": 0, "type": "frontend", "label": "Trang Chủ", "sublabel": "Zero-barrier", "tag": "Khám phá", "width": 132 },
+    { "id": "demo_48", "lane": "ingest", "col": 0, "type": "backend", "label": "⚡ Mẫu 48 Tấm", "sublabel": "Nạp 1-click", "tag": "Demo tức thì", "width": 132 },
+
+    { "id": "upload_box", "lane": "ui", "col": 1, "type": "frontend", "label": "Kéo Thả Excel", "sublabel": "Tự lập / ABF", "tag": "Đa kênh", "width": 132 },
+    { "id": "cad_plugin", "lane": "ingest", "col": 1, "type": "backend", "label": "AutoCAD Lisp", "sublabel": "Lệnh QC (Option)", "tag": "Addon mở rộng", "width": 132 },
+    { "id": "auth_gate", "lane": "engine", "col": 1, "type": "security", "label": "Auth Gate", "sublabel": "Lưu RLS / Logo", "tag": "Supabase Auth", "width": 132 },
+
+    { "id": "map_fallback", "lane": "ui", "col": 2, "type": "frontend", "label": "Ánh Xạ Cột", "sublabel": "Sửa tiêu đề lạ", "tag": "Fallback Loop", "width": 132 },
+    { "id": "smart_map", "lane": "ingest", "col": 2, "type": "backend", "label": "Nhận Diện Cột", "sublabel": "Tự động 8 trường", "tag": "Smart Engine", "width": 132 },
+    { "id": "snapshot_db", "lane": "engine", "col": 2, "type": "database", "label": "Khóa Giá Vốn", "sublabel": "Snapshot bảo lưu", "tag": "RLS Thư viện", "width": 132 },
+
+    { "id": "price_warn", "lane": "ui", "col": 3, "type": "frontend", "label": "Cảnh Báo Giá", "sublabel": "Gán giá tức thì", "tag": "Price Alert", "width": 132 },
+    { "id": "cost_calc", "lane": "engine", "col": 3, "type": "backend", "label": "Giá Vốn 5 Mục", "sublabel": "Ván, chỉ, phụ, thợ", "tag": "Core Costing", "width": 132 },
+
+    { "id": "client_quote", "lane": "ui", "col": 4, "type": "frontend", "label": "Báo Giá A4", "sublabel": "Markup lợi nhuận", "tag": "In PDF A4", "width": 132 },
+    { "id": "workshop_bom", "lane": "output", "col": 4, "type": "backend", "label": "BOM Xưởng", "sublabel": "Số tấm, cuộn chỉ", "tag": "Xuất Excel", "width": 132 },
+
+    { "id": "negotiate_rev", "lane": "ui", "col": 5, "type": "frontend", "label": "Đàm Phán Giá", "sublabel": "Sửa tạo v1, v2", "tag": "Revision Loop", "width": 132 },
+    { "id": "order_prod", "lane": "output", "col": 5, "type": "backend", "label": "Lệnh Xưởng", "sublabel": "Chốt đặt vật tư", "tag": "Sản Xuất", "width": 132 }
+  ],
+  "edges": [
+    { "id": "e_land_to_demo", "from": "landing", "to": "demo_48", "label": "1-click thử", "variant": "emphasis" },
+    { "id": "e_land_to_up", "from": "landing", "to": "upload_box", "label": "File riêng", "variant": "default" },
+    { "id": "e_cad_to_up", "from": "cad_plugin", "to": "upload_box", "label": "Xuất CSV", "variant": "default" },
+    { "id": "e_auth_to_snap", "from": "auth_gate", "to": "snapshot_db", "label": "RLS Thư viện", "variant": "dashed" },
+
+    { "id": "e_demo_to_map", "from": "demo_48", "to": "smart_map", "label": "Nạp 48 tấm", "variant": "emphasis" },
+    { "id": "e_up_to_map", "from": "upload_box", "to": "smart_map", "label": "Phân tích file", "variant": "emphasis" },
+
+    { "id": "e_map_err", "from": "smart_map", "to": "map_fallback", "label": "Tiêu đề lạ", "variant": "dashed" },
+    { "id": "e_map_fix", "from": "map_fallback", "to": "cost_calc", "label": "Ánh xạ xong", "variant": "dashed" },
+
+    { "id": "e_map_warn", "from": "smart_map", "to": "price_warn", "label": "Mã ván lạ", "variant": "dashed" },
+    { "id": "e_price_fix", "from": "price_warn", "to": "cost_calc", "label": "Gán giá nhanh", "variant": "dashed" },
+
+    { "id": "e_map_to_cost", "from": "smart_map", "to": "cost_calc", "label": "8 cột chuẩn", "variant": "emphasis" },
+    { "id": "e_snap_to_cost", "from": "snapshot_db", "to": "cost_calc", "label": "Giá xưởng", "variant": "default" },
+
+    { "id": "e_cost_to_bom", "from": "cost_calc", "to": "workshop_bom", "label": "Giá vốn nội bộ", "variant": "emphasis" },
+    { "id": "e_cost_to_quote", "from": "cost_calc", "to": "client_quote", "label": "Markup", "variant": "emphasis" },
+
+    { "id": "e_quote_to_neg", "from": "client_quote", "to": "negotiate_rev", "label": "Khách phản hồi", "variant": "default" },
+    { "id": "e_neg_to_cost", "from": "negotiate_rev", "to": "cost_calc", "label": "Tính lại v2", "variant": "dashed" },
+    { "id": "e_neg_to_order", "from": "negotiate_rev", "to": "order_prod", "label": "Duyệt chốt", "variant": "emphasis" },
+    { "id": "e_bom_to_order", "from": "workshop_bom", "to": "order_prod", "label": "Khóa BOM", "variant": "emphasis" }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Bóc Tách Giá Vốn Toàn Diện (Không Thiếu Sót Chi Phí)",
+      "items": [
+        "1. Ván tấm: Quy đổi khổ chuẩn 1220x2440mm (hoặc Jumbo 1830x2440mm), cộng hao hụt thực tế (+15%) theo năng lực cưa xưởng",
+        "2. Chỉ dán cạnh: Tính tổng chu vi cạnh dán (D1, D2, R1, R2), cộng hao hụt dán máy (+8%), gợi ý số cuộn đặt mua",
+        "3. Phụ kiện & Thợ: Bản lề Inox 304, ray trượt âm, nhân công thợ xưởng (120.000 đ/tấm quy đổi) và công lắp đặt công trình"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Hành Trình Khép Kín: Từ Khách Vãng Lai Đến Lệnh Sản Xuất",
+      "items": [
+        "Zero-Barrier Demo: Dùng thử ngay với 48 tấm mẫu hoặc file Excel riêng, không ép đăng nhập và không cần cài AutoCAD",
+        "Auth Gate khi cần thiết: Đăng nhập khi muốn lưu dự án dài hạn, in báo giá có Logo/Hotline xưởng hoặc bảo mật đơn giá qua Supabase RLS",
+        "Vòng đời dự án: Báo giá Nháp -> Tạo phiên bản (v1, v2) sau đàm phán -> Khách duyệt chốt -> Khóa cứng BOM chuyển thành Đơn Xưởng"
+      ]
+    }
+  ]
+}

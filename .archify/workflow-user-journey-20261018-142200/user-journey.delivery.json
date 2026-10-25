@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "4281b214-08ce-4b43-aa30-8a1f9ad5e303",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "C:\\Users\\KIET_PC\\Desktop\\Web nội thất\\.archify\\workflow-user-journey-20261018-142200\\candidate.json",
+  "output": "C:\\Users\\KIET_PC\\Desktop\\Web nội thất\\.archify\\workflow-user-journey-20261018-142200\\user-journey.html",
+  "specification": {
+    "sha256": "369cf6bdb3dd6d16957980949a4ebfed80e8d780dd56d017c4c67bdcf6922bc9",
+    "bytes": 6137
+  },
+  "artifact": {
+    "sha256": "f89abcf50aca95defbe5882eef3eb4807dc003fffd3107a9ec99c7cfcd8e8755",
+    "bytes": 833693
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Kiến Trúc Luồng Người Dùng & Quản Trị Giá Vốn NỘI THẤT PRO",
+    "animation": "trace",
+    "quality_profile": "standard",
+    "output": "public/user-journey.html",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    { "id": "ui", "label": "Trải Nghiệm Web & Thao Tác (Web UX - Designer & Xưởng)" },
+    { "id": "ingest", "label": "Tiền Xử Lý & Vòng Lặp Xử Lý Lỗi (Validation & Ingestion)" },
+    { "id": "engine", "label": "Động Cơ Định Mức & Giá Vốn (Costing & Production Engine)" },
+    { "id": "data", "label": "Dữ Liệu Cá Nhân, Cloud & Snapshot (Database & Storage)" }
+  ],
+  "phases": [
+    { "id": "p1", "label": "1. Khám Phá & Nạp Cutlist", "fromCol": 0, "toCol": 0 },
+    { "id": "p2", "label": "2. Nhận Diện Cột & Bóc Tách", "fromCol": 1, "toCol": 1, "variant": "emphasis" },
+    { "id": "p3", "label": "3. Sửa Lỗi, Giá Riêng & Auth", "fromCol": 2, "toCol": 2 },
+    { "id": "p4", "label": "4. Định Mức & Dự Án Cloud", "fromCol": 3, "toCol": 3, "variant": "emphasis" },
+    { "id": "p5", "label": "5. Góc Nhìn Kép: BOM & Báo Giá", "fromCol": 4, "toCol": 4 },
+    { "id": "p6", "label": "6. Đàm Phán v2 & Chốt Lệnh", "fromCol": 5, "toCol": 5, "variant": "emphasis" }
+  ],
+  "groups": [
+    { "id": "grp_in", "label": "Cổng Nạp & Tiền Xử Lý Dữ Liệu", "lane": "ingest", "fromCol": 0, "toCol": 2 },
+    { "id": "grp_auth", "label": "Tài Khoản & Dữ Liệu Riêng (Supabase RLS)", "lane": "data", "fromCol": 2, "toCol": 3 },
+    { "id": "grp_calc", "label": "Động Cơ Bóc Tách 5 Mục & Khóa BOM", "lane": "engine", "fromCol": 3, "toCol": 4, "variant": "emphasis" },
+    { "id": "grp_prod", "label": "Vòng Đời Dự Án & Ký Hợp Đồng A4", "lane": "ui", "fromCol": 4, "toCol": 5, "variant": "dashed" }
+  ],
+  "mainPath": [
+    "landing",
+    "upload_gateway",
+    "smart_map",
+    "workspace_table",
+    "cost_engine",
+    "client_quote",
+    "contract_sign",
+    "order_freeze"
+  ],
+  "nodes": [
+    { "id": "landing", "lane": "ui", "col": 0, "type": "frontend", "label": "Trang Chủ", "sublabel": "Khám phá & Demo", "tag": "Zero-barrier", "width": 132 },
+    { "id": "upload_gateway", "lane": "ingest", "col": 0, "type": "backend", "label": "Cổng Nạp Cutlist", "sublabel": "Mẫu 48 tấm / Excel / CAD", "tag": "Đa nguồn", "width": 132 },
+    { "id": "demo_prices", "lane": "data", "col": 0, "type": "database", "label": "Giá Mẫu Mặc Định", "sublabel": "Seed data (Chưa login)", "tag": "Demo Không Chặn", "width": 132 },
+
+    { "id": "workspace_table", "lane": "ui", "col": 1, "type": "frontend", "label": "Bàn Bóc Tách", "sublabel": "Sửa kích thước & chi tiết", "tag": "Workspace", "width": 132 },
+    { "id": "smart_map", "lane": "ingest", "col": 1, "type": "backend", "label": "Nhận Diện Cột", "sublabel": "Tự động 8 trường chuẩn", "tag": "Smart Map", "width": 132 },
+
+    { "id": "auth_gate", "lane": "ui", "col": 2, "type": "security", "label": "Auth Gate", "sublabel": "Khi Lưu Cloud / Logo", "tag": "Email / SĐT", "width": 132 },
+    { "id": "error_recovery", "lane": "ingest", "col": 2, "type": "backend", "label": "Vòng Lỗi & Sửa Cột", "sublabel": "Cột lạ / Bù giá mã lạ", "tag": "Error Loop", "width": 132 },
+    { "id": "materials_lib", "lane": "data", "col": 2, "type": "database", "label": "Thư Viện Vật Tư", "sublabel": "Giá & Hao hụt từng mã", "tag": "Hao hụt động", "width": 132 },
+
+    { "id": "cost_engine", "lane": "engine", "col": 3, "type": "backend", "label": "Động Cơ Định Mức", "sublabel": "Net × Hao hụt mã / Khổ tấm", "tag": "Core Costing", "width": 132 },
+    { "id": "projects_cloud", "lane": "data", "col": 3, "type": "database", "label": "Kho Dự Án Cloud", "sublabel": "Cutlist, Snapshot, Status", "tag": "Bảng Projects", "width": 132 },
+
+    { "id": "client_quote", "lane": "ui", "col": 4, "type": "frontend", "label": "Báo Giá A4", "sublabel": "Gom tủ + Markup lợi nhuận", "tag": "In PDF A4", "width": 132 },
+    { "id": "workshop_bom", "lane": "engine", "col": 4, "type": "backend", "label": "BOM Đặt Vật Tư", "sublabel": "Theo bản v1 hoặc v2", "tag": "Gắn phiên bản", "width": 132 },
+
+    { "id": "revision_v2", "lane": "data", "col": 5, "type": "database", "label": "Bản Sửa Đổi v2", "sublabel": "Nhân bản Cutlist & Snapshot", "tag": "Độc lập v1", "width": 132 },
+    { "id": "contract_sign", "lane": "ui", "col": 5, "type": "frontend", "label": "Khách Duyệt Chốt", "sublabel": "Ký hợp đồng theo bản duyệt", "tag": "Chốt Báo Giá", "width": 132 },
+    { "id": "order_freeze", "lane": "engine", "col": 5, "type": "backend", "label": "Lệnh Xưởng CNC", "sublabel": "Khóa BOM theo bản đã chốt", "tag": "Sản Xuất", "width": 132 }
+  ],
+  "edges": [
+    { "id": "e_land_to_in", "from": "landing", "to": "upload_gateway", "label": "1-click / Chọn file", "variant": "emphasis" },
+    { "id": "e_in_to_map", "from": "upload_gateway", "to": "smart_map", "label": "Đọc file Cutlist", "variant": "emphasis" },
+
+    { "id": "e_map_to_ws", "from": "smart_map", "to": "workspace_table", "label": "Đủ 8 cột chuẩn", "variant": "emphasis", "fromSide": "top", "toSide": "bottom" },
+    { "id": "e_map_to_err", "from": "smart_map", "to": "error_recovery", "label": "Tiêu đề lạ / Mã lạ", "variant": "dashed" },
+    { "id": "e_err_to_ws", "from": "error_recovery", "to": "workspace_table", "label": "Ánh xạ xong", "variant": "dashed" },
+
+    { "id": "e_demo_to_cost", "from": "demo_prices", "to": "cost_engine", "label": "Giá mặc định (Demo ẩn danh)", "variant": "dashed" },
+    { "id": "e_err_to_lib", "from": "error_recovery", "to": "materials_lib", "label": "Lưu giá mới (Khi login)", "variant": "dashed" },
+
+    { "id": "e_ws_to_auth", "from": "workspace_table", "to": "auth_gate", "label": "Bấm 'Lưu Cloud'", "variant": "dashed" },
+    { "id": "e_auth_to_lib", "from": "auth_gate", "to": "materials_lib", "label": "Xác thực Email / SĐT", "variant": "emphasis" },
+    { "id": "e_lib_to_cloud", "from": "materials_lib", "to": "projects_cloud", "label": "Copy đơn giá xưởng", "variant": "emphasis" },
+
+    { "id": "e_ws_to_cost", "from": "workspace_table", "to": "cost_engine", "label": "Thông số chi tiết tấm", "variant": "emphasis" },
+    { "id": "e_cloud_to_cost", "from": "projects_cloud", "to": "cost_engine", "label": "Snapshot v1 dự án", "variant": "emphasis" },
+
+    { "id": "e_cost_to_bom", "from": "cost_engine", "to": "workshop_bom", "label": "Bóc trần 5 mục", "variant": "emphasis" },
+    { "id": "e_cost_to_quote", "from": "cost_engine", "to": "client_quote", "label": "Gom hạng mục & Lời", "variant": "emphasis" },
+    { "id": "e_quote_to_auth", "from": "client_quote", "to": "auth_gate", "label": "In Logo riêng xưởng", "variant": "dashed" },
+
+    { "id": "e_quote_to_ws", "from": "client_quote", "to": "workspace_table", "label": "Khách sửa: Sửa chi tiết", "variant": "dashed", "role": "return" },
+    { "id": "e_cloud_to_v2", "from": "projects_cloud", "to": "revision_v2", "label": "Nhân bản Snapshot v1", "variant": "emphasis" },
+    { "id": "e_v2_to_cost", "from": "revision_v2", "to": "cost_engine", "label": "Tính lại v2 độc lập", "variant": "dashed" },
+
+    { "id": "e_quote_to_sign", "from": "client_quote", "to": "contract_sign", "label": "Khách chốt bản v1 hoặc v2", "variant": "emphasis" },
+    { "id": "e_sign_to_order", "from": "contract_sign", "to": "order_freeze", "label": "Ký HĐ: Phát Lệnh Sản Xuất", "variant": "emphasis" },
+    { "id": "e_bom_to_order", "from": "workshop_bom", "to": "order_freeze", "label": "Khóa BOM theo bản đã chốt", "variant": "emphasis" }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Cơ Chế Giá Demo Mặc Định & Hao Hụt Động Từng Vật Tư",
+      "items": [
+        "1. Đường demo không bị chặn: Khách vãng lai bấm 'Mẫu 48 tấm' nhận ngay giá từ 'Giá Mẫu Mặc Định' (Seed Data) để chạy Core Costing tức thì mà không vướng Auth Gate hay RLS.",
+        "2. Hao hụt động: Hệ số hao hụt không cố định 1.15 mà gắn riêng cho từng mã vật tư trong Thư viện (MDF chống ẩm 1.15, MDF hậu 6mm 1.12, Chỉ dán cạnh 1.08, Khổ Jumbo 1.18).",
+        "3. Đa đối tượng: Nền tảng phục vụ cả Xưởng sản xuất, Kiến trúc sư, Freelance Designer và Thợ mộc tự do."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Quản Trị Vòng Đời Bản Vẽ, Hợp Đồng & Lệnh Xưởng",
+      "items": [
+        "Lưu Cloud lưu trọn gói: Bảng 'projects' & 'project_items' lưu toàn bộ Cutlist, Snapshot giá, hệ số Markup, lịch sử phiên bản và trạng thái hợp đồng.",
+        "Dữ liệu v2 hoàn chỉnh: Sửa thông số tấm thực hiện tại Bàn Bóc Tách, đồng thời nhân bản Snapshot giá từ v1 sang v2 để bảo toàn tuyệt đối giá gốc đã chào ban đầu.",
+        "Ràng buộc hợp đồng: Lệnh xưởng CNC chỉ được phát hành sau khi Khách duyệt chốt hợp đồng (A4). BOM vật tư chuyển sang máy cắt CNC được khóa cứng theo đúng phiên bản đã ký duyệt."
+      ]
+    }
+  ]
+}

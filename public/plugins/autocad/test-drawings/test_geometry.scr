@@ -1,0 +1,57 @@
+(setq ss (ssget "X" '((0 . "LWPOLYLINE,POLYLINE"))))
+(setq count (sslength ss))
+(princ (strcat "\n================ TESTING " (itoa count) " POLYLINES ================"))
+
+(setq i 0)
+(while (< i count)
+  (setq ent (ssname ss i))
+  (setq elist (entget ent))
+  
+  ;; Lay danh sach cac toa do dinh (Vertex list)
+  (setq pts nil)
+  (foreach item elist
+    (if (= (car item) 10)
+      (setq pts (cons (cdr item) pts))
+    )
+  )
+  (setq pts (reverse pts))
+  (setq numPts (length pts))
+
+  ;; Phuong phap 1: Axis-Aligned Bounding Box (AABB)
+  (setq minX (apply 'min (mapcar 'car pts)))
+  (setq maxX (apply 'max (mapcar 'car pts)))
+  (setq minY (apply 'min (mapcar 'cadr pts)))
+  (setq maxY (apply 'max (mapcar 'cadr pts)))
+  (setq aabbL (fix (+ 0.5 (max (- maxX minX) (- maxY minY)))))
+  (setq aabbW (fix (+ 0.5 (min (- maxX minX) (- maxY minY)))))
+
+  ;; Phuong phap 2: Tinh do dai cac canh thuc te (Edge Vector) neu la 4 dinh
+  (if (= numPts 4)
+    (progn
+      (setq p0 (nth 0 pts))
+      (setq p1 (nth 1 pts))
+      (setq p2 (nth 2 pts))
+      (setq d1 (distance p0 p1))
+      (setq d2 (distance p1 p2))
+      (setq trueL (fix (+ 0.5 (max d1 d2))))
+      (setq trueW (fix (+ 0.5 (min d1 d2))))
+      (setq method "4-Dinh (Do theo vector canh)")
+    )
+    (progn
+      (setq trueL aabbL)
+      (setq trueW aabbW)
+      (setq method (strcat (itoa numPts) "-Dinh (Tấm khoét/giật cấp - Lấy phôi lớn nhất)"))
+    )
+  )
+
+  (princ (strcat "\n[Tam " (itoa (1+ i)) "] " method))
+  (princ (strcat " -> AABB (Cu): " (itoa aabbL) " x " (itoa aabbW)))
+  (princ (strcat " | Kich Thuoc Thuc Te (Moi): " (itoa trueL) " x " (itoa trueW)))
+  (if (or (/= aabbL trueL) (/= aabbW trueW))
+    (princ " *** [PHAT HIEN SAI LECH DO XOAY GOC!] ***")
+  )
+
+  (setq i (1+ i))
+)
+(princ "\n=================================================================\n")
+(princ)

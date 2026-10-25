@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal"><Font ss:FontName="Segoe UI" ss:Size="11" ss:Color="#1E293B"/></Style>
+  <Style ss:ID="TitleStyle"><Font ss:FontName="Segoe UI" ss:Size="16" ss:Bold="1" ss:Color="#0F172A"/><Alignment ss:Horizontal="Left" ss:Vertical="Center"/></Style>
+  <Style ss:ID="SubTitleStyle"><Font ss:FontName="Segoe UI" ss:Size="10" ss:Italic="1" ss:Color="#64748B"/></Style>
+  <Style ss:ID="HeaderStyle"><Font ss:FontName="Segoe UI" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#0F766E" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#042F2E"/></Borders></Style>
+  <Style ss:ID="SectionStyle"><Font ss:FontName="Segoe UI" ss:Size="12" ss:Bold="1" ss:Color="#0F766E"/><Interior ss:Color="#F0FDFA" ss:Pattern="Solid"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#99F6E4"/></Borders></Style>
+  <Style ss:ID="DataLeft"><Alignment ss:Horizontal="Left" ss:Vertical="Center"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/></Borders></Style>
+  <Style ss:ID="DataCenter"><Alignment ss:Horizontal="Center" ss:Vertical="Center"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/></Borders></Style>
+  <Style ss:ID="DataNumber"><Alignment ss:Horizontal="Right" ss:Vertical="Center"/><NumberFormat ss:Format="#,##0"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/></Borders></Style>
+  <Style ss:ID="DataDecimal"><Alignment ss:Horizontal="Right" ss:Vertical="Center"/><NumberFormat ss:Format="#,##0.000"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/></Borders></Style>
+  <Style ss:ID="DataMoney"><Alignment ss:Horizontal="Right" ss:Vertical="Center"/><NumberFormat ss:Format="#,##0 &quot;đ&quot;"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/></Borders></Style>
+  <Style ss:ID="TotalStyle"><Font ss:FontName="Segoe UI" ss:Size="11" ss:Bold="1" ss:Color="#0F172A"/><Interior ss:Color="#E0F2FE" ss:Pattern="Solid"/><Alignment ss:Horizontal="Right" ss:Vertical="Center"/><Borders><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="2" ss:Color="#0284C7"/><Border ss:Position="Bottom" ss:LineStyle="Double" ss:Weight="3" ss:Color="#0284C7"/></Borders></Style>
+ </Styles>
+ <Worksheet ss:Name="Danh_Muc_Tam_Cat">
+  <Table ss:DefaultRowHeight="20">
+   <Column ss:Width="35"/>
+   <Column ss:Width="140"/>
+   <Column ss:Width="160"/>
+   <Column ss:Width="65"/>
+   <Column ss:Width="65"/>
+   <Column ss:Width="50"/>
+   <Column ss:Width="45"/>
+   <Column ss:Width="75"/>
+   <Column ss:Width="85"/>
+   <Column ss:Width="140"/>
+   <Column ss:Width="100"/>
+   <Column ss:Width="70"/>
+   <Column ss:Width="90"/>
+   <Row ss:Height="30">
+    <Cell ss:MergeAcross="12" ss:StyleID="TitleStyle"><Data ss:Type="String">BẢNG KÊ BÓC TÁCH VẬT TƯ &amp; QUY CÁCH CẮT VÁN NỘI THẤT</Data></Cell>
+   </Row>
+   <Row ss:Height="18">
+    <Cell ss:MergeAcross="12" ss:StyleID="SubTitleStyle"><Data ss:Type="String">Thời gian xuất: 20:50:22 18/10/2026 | Phần mềm: NoiThatPro Cutlist &amp; BOM V1.0</Data></Cell>
+   </Row>
+   <Row ss:Height="10"/>
+   <Row ss:Height="24">
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">STT</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Hạng Mục</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Tên Chi Tiết</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Dài (mm)</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Rộng (mm)</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Dày</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">SL</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">S (m²)</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Tổng S (m²)</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Mã Vật Tư</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Dán Chỉ PVC</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Mét Chỉ</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Ghi Chú</Data></Cell>
+   </Row>
+   <Row ss:Height="20">
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Tu_Bep_Duoi_800</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Hoi_Trai</Data></Cell>
+    <Cell ss:StyleID="DataNumber"><Data ss:Type="Number">810</Data></Cell>
+    <Cell ss:StyleID="DataNumber"><Data ss:Type="Number">580</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">17</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.470</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.470</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">MDF_CHONG_AM_17</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="String">1_DAI</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.87</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="String"></Data></Cell>
+   </Row>
+   <Row ss:Height="20">
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Tu_Bep_Duoi_800</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Hoi_Phai</Data></Cell>
+    <Cell ss:StyleID="DataNumber"><Data ss:Type="Number">810</Data></Cell>
+    <Cell ss:StyleID="DataNumber"><Data ss:Type="Number">580</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">17</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.470</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.470</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">MDF_CHONG_AM_17</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="String">1_DAI</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.87</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="String"></Data></Cell>
+   </Row>
+   <Row ss:Height="20">
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">3</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Tu_Bep_Duoi_800</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Day_Tu</Data></Cell>
+    <Cell ss:StyleID="DataNumber"><Data ss:Type="Number">766</Data></Cell>
+    <Cell ss:StyleID="DataNumber"><Data ss:Type="Number">580</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">17</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.444</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.444</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">MDF_CHONG_AM_17</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="String">1_DAI</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.83</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="String"></Data></Cell>
+   </Row>
+   <Row ss:Height="20">
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">4</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Tu_Bep_Duoi_800</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Dot_Tu</Data></Cell>
+    <Cell ss:StyleID="DataNumber"><Data ss:Type="Number">766</Data></Cell>
+    <Cell ss:StyleID="DataNumber"><Data ss:Type="Number">560</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">17</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.429</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.429</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">MDF_CHONG_AM_17</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="String">2_DAI_1_RONG</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">2.26</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="String"></Data></Cell>
+   </Row>
+   <Row ss:Height="20">
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">5</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Tu_Bep_Duoi_800</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Van_Hau_6mm</Data></Cell>
+    <Cell ss:StyleID="DataNumber"><Data ss:Type="Number">790</Data></Cell>
+    <Cell ss:StyleID="DataNumber"><Data ss:Type="Number">750</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">6</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.593</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.593</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">MDF_VAN_HAU_6</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="String">KHONG_DAN</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.00</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="String"></Data></Cell>
+   </Row>
+   <Row ss:Height="20">
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">6</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Mat_Ngan_Keo</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Mat_Ngan_Keo</Data></Cell>
+    <Cell ss:StyleID="DataNumber"><Data ss:Type="Number">794</Data></Cell>
+    <Cell ss:StyleID="DataNumber"><Data ss:Type="Number">250</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">17</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.199</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.199</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">MDF_CHONG_AM_17</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="String">4_CANH</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">2.26</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="String"></Data></Cell>
+   </Row>
+   <Row ss:Height="20">
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">7</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Tu_Bep_Duoi_800</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Canh_Tu_Trai</Data></Cell>
+    <Cell ss:StyleID="DataNumber"><Data ss:Type="Number">520</Data></Cell>
+    <Cell ss:StyleID="DataNumber"><Data ss:Type="Number">396</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">17</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.206</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.206</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">MDF_CHONG_AM_17</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="String">4_CANH</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">1.98</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="String"></Data></Cell>
+   </Row>
+   <Row ss:Height="20">
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">8</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Tu_Bep_Duoi_800</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Canh_Tu_Phai</Data></Cell>
+    <Cell ss:StyleID="DataNumber"><Data ss:Type="Number">520</Data></Cell>
+    <Cell ss:StyleID="DataNumber"><Data ss:Type="Number">396</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">17</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.206</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.206</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">MDF_CHONG_AM_17</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="String">4_CANH</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">1.98</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="String"></Data></Cell>
+   </Row>
+   <Row ss:Height="20">
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">9</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Mat_Ban_Bar</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Mat_Ban_Bar_Bo_Cong</Data></Cell>
+    <Cell ss:StyleID="DataNumber"><Data ss:Type="Number">1500</Data></Cell>
+    <Cell ss:StyleID="DataNumber"><Data ss:Type="Number">600</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">25</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.900</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.900</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">MDF_CHONG_AM_25</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="String">1_DAI</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">1.62</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="String">Bo Cong R</Data></Cell>
+   </Row>
+   <Row ss:Height="22">
+    <Cell ss:MergeAcross="7" ss:StyleID="TotalStyle"><Data ss:Type="String">TỔNG CỘNG:</Data></Cell>
+    <Cell ss:StyleID="TotalStyle"><Data ss:Type="Number">3.916</Data></Cell>
+    <Cell ss:StyleID="TotalStyle"><Data ss:Type="String"></Data></Cell>
+    <Cell ss:StyleID="TotalStyle"><Data ss:Type="String"></Data></Cell>
+    <Cell ss:StyleID="TotalStyle"><Data ss:Type="Number">12.67</Data></Cell>
+    <Cell ss:StyleID="TotalStyle"><Data ss:Type="String"></Data></Cell>
+   </Row>
+  </Table>
+ </Worksheet>
+ <Worksheet ss:Name="Tong_Hop_Dat_Hang">
+  <Table ss:DefaultRowHeight="22">
+   <Column ss:Width="40"/>
+   <Column ss:Width="220"/>
+   <Column ss:Width="110"/>
+   <Column ss:Width="110"/>
+   <Column ss:Width="110"/>
+   <Column ss:Width="140"/>
+   <Row ss:Height="30">
+    <Cell ss:MergeAcross="5" ss:StyleID="TitleStyle"><Data ss:Type="String">TỔNG HỢP VẬT TƯ ĐẶT HÀNG ĐẠI LÝ &amp; DỰ TOÁN GIÁ VỐN</Data></Cell>
+   </Row>
+   <Row ss:Height="18">
+    <Cell ss:MergeAcross="5" ss:StyleID="SubTitleStyle"><Data ss:Type="String">Khổ ván chuẩn: 1220 x 2440 mm (2.977 m²) | Hệ số hao hụt ván: 15% | Hao hụt chỉ: 8%</Data></Cell>
+   </Row>
+   <Row ss:Height="10"/>
+   <Row ss:Height="24">
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">STT</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Loại Vật Tư / Công Việc</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Khối Lượng Net</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Số Lượng Đặt Mua</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Đơn Vị Tính</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Ghi Chú</Data></Cell>
+   </Row>
+   <Row>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Ván MDF 17mm chống ẩm (Thùng, Cánh)</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">2.42</Data></Cell>
+    <Cell ss:StyleID="DataNumber"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="String">Tấm (1220x2440)</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Đã gồm 15% hao hụt</Data></Cell>
+   </Row>
+   <Row>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Ván Hậu MDF 6mm (Đáy kéo, Hậu tủ)</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">0.59</Data></Cell>
+    <Cell ss:StyleID="DataNumber"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="String">Tấm (1220x2440)</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Đã gồm 15% hao hụt</Data></Cell>
+   </Row>
+   <Row>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="Number">3</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Chỉ dán cạnh PVC 21x1.0mm</Data></Cell>
+    <Cell ss:StyleID="DataDecimal"><Data ss:Type="Number">12.7</Data></Cell>
+    <Cell ss:StyleID="DataNumber"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="DataCenter"><Data ss:Type="String">Cuộn (100m)</Data></Cell>
+    <Cell ss:StyleID="DataLeft"><Data ss:Type="String">Đã gồm 8% hao hụt chỉ</Data></Cell>
+   </Row>
+   <Row ss:Height="12"/>
+   <Row>
+    <Cell ss:MergeAcross="3" ss:StyleID="SectionStyle"><Data ss:Type="String">DỰ TOÁN GIÁ THÀNH XƯỞNG (THAM KHẢO)</Data></Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="SectionStyle"><Data ss:Type="String"></Data></Cell>
+   </Row>
+   <Row>
+    <Cell ss:MergeAcross="2" ss:StyleID="DataLeft"><Data ss:Type="String">Tổng Giá Vốn Sản Xuất (Vật tư + Nhân công)</Data></Cell>
+    <Cell ss:StyleID="DataMoney"><Data ss:Type="Number">2150000</Data></Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="DataLeft"><Data ss:Type="String">Chi phí tại xưởng</Data></Cell>
+   </Row>
+   <Row>
+    <Cell ss:MergeAcross="2" ss:StyleID="DataLeft"><Data ss:Type="String">Báo Giá Đề Xuất Gửi Khách Hàng (Biên lợi nhuận 35%)</Data></Cell>
+    <Cell ss:StyleID="TotalStyle"><Data ss:Type="Number">2900000</Data></Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="DataLeft"><Data ss:Type="String">Giá chốt hợp đồng</Data></Cell>
+   </Row>
+  </Table>
+ </Worksheet>
+</Workbook>

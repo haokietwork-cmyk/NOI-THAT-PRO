@@ -1,0 +1,108 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Kiến Trúc Luồng Người Dùng & Động Cơ Tính Giá NỘI THẤT PRO",
+    "animation": "trace",
+    "quality_profile": "standard",
+    "output": "public/user-journey.html"
+  },
+  "lanes": [
+    { "id": "ui", "label": "Trải Nghiệm Web & Giao Diện Thao Tác (Web UX)" },
+    { "id": "ingest", "label": "Tiền Xử Lý & Vòng Lặp Xử Lý Lỗi (Validation & Ingestion)" },
+    { "id": "engine", "label": "Động Cơ Định Mức & Giá Vốn (Costing Engine & Rules)" },
+    { "id": "data", "label": "Dữ Liệu Xưởng & Bảo Mật RLS (Workshop Data & State)" }
+  ],
+  "phases": [
+    { "id": "p1", "label": "1. Khám Phá & Nạp Cutlist", "fromCol": 0, "toCol": 0 },
+    { "id": "p2", "label": "2. Nhận Diện & Sửa Lỗi Cột", "fromCol": 1, "toCol": 1, "variant": "emphasis" },
+    { "id": "p3", "label": "3. Dữ Liệu Xưởng & Auth Gate", "fromCol": 2, "toCol": 2 },
+    { "id": "p4", "label": "4. Khóa Snapshot & Định Mức Ván", "fromCol": 3, "toCol": 3, "variant": "emphasis" },
+    { "id": "p5", "label": "5. Góc Nhìn Kép: BOM & Báo Giá A4", "fromCol": 4, "toCol": 4 },
+    { "id": "p6", "label": "6. Đàm Phán v2 & Lệnh Sản Xuất", "fromCol": 5, "toCol": 5, "variant": "emphasis" }
+  ],
+  "groups": [
+    { "id": "grp_in", "label": "Cổng Nạp & Tiền Xử Lý Dữ Liệu", "lane": "ingest", "fromCol": 0, "toCol": 2 },
+    { "id": "grp_auth", "label": "Thiết Lập Xưởng & Bảo Mật RLS", "lane": "data", "fromCol": 2, "toCol": 3 },
+    { "id": "grp_calc", "label": "Động Cơ Bóc Tách 5 Thành Phần Giá Vốn", "lane": "engine", "fromCol": 3, "toCol": 4, "variant": "emphasis" },
+    { "id": "grp_prod", "label": "Vòng Đời Dự Án & Chốt Hợp Đồng", "lane": "ui", "fromCol": 4, "toCol": 5, "variant": "dashed" }
+  ],
+  "mainPath": [
+    "landing",
+    "upload_gateway",
+    "smart_map",
+    "workspace_table",
+    "cost_engine",
+    "client_quote",
+    "contract_sign",
+    "order_freeze"
+  ],
+  "nodes": [
+    { "id": "landing", "lane": "ui", "col": 0, "type": "frontend", "label": "Trang Chủ", "sublabel": "Khám phá & Demo", "tag": "Zero-barrier", "width": 132 },
+    { "id": "upload_gateway", "lane": "ingest", "col": 0, "type": "backend", "label": "Cổng Nạp Cutlist", "sublabel": "Excel / Mẫu 48 / Lisp", "tag": "Đa kênh", "width": 132 },
+
+    { "id": "workspace_table", "lane": "ui", "col": 1, "type": "frontend", "label": "Bàn Bóc Tách", "sublabel": "Bảng chi tiết tấm", "tag": "Workspace", "width": 132 },
+    { "id": "smart_map", "lane": "ingest", "col": 1, "type": "backend", "label": "Nhận Diện Cột", "sublabel": "Tự động 8 trường", "tag": "Smart Map", "width": 132 },
+
+    { "id": "auth_gate", "lane": "ui", "col": 2, "type": "security", "label": "Auth Gate", "sublabel": "Khi Lưu Cloud / Logo", "tag": "Xác thực Xưởng", "width": 132 },
+    { "id": "error_recovery", "lane": "ingest", "col": 2, "type": "backend", "label": "Vòng Lỗi & Sửa Cột", "sublabel": "Fallback / Bù mã lạ", "tag": "Error Loop", "width": 132 },
+    { "id": "materials_lib", "lane": "data", "col": 2, "type": "database", "label": "Thư Viện Vật Tư", "sublabel": "Bảng giá gốc & Khổ phôi", "tag": "Supabase RLS", "width": 132 },
+
+    { "id": "cost_engine", "lane": "engine", "col": 3, "type": "backend", "label": "Định Mức Ván & Giá", "sublabel": "Net × 1.15 / Khổ 1220", "tag": "Core Costing", "width": 132 },
+    { "id": "snapshot_v1", "lane": "data", "col": 3, "type": "database", "label": "Snapshot Giá v1", "sublabel": "Khóa giá vốn dự án", "tag": "Bảo toàn giá", "width": 132 },
+
+    { "id": "client_quote", "lane": "ui", "col": 4, "type": "frontend", "label": "Báo Giá A4", "sublabel": "Markup thành phẩm", "tag": "In PDF A4", "width": 132 },
+    { "id": "workshop_bom", "lane": "engine", "col": 4, "type": "backend", "label": "BOM Xưởng", "sublabel": "Số tấm, cuộn chỉ, thợ", "tag": "Xuất Excel", "width": 132 },
+
+    { "id": "snapshot_v2", "lane": "data", "col": 5, "type": "database", "label": "Tạo Bản v2", "sublabel": "Nhân bản Snapshot riêng", "tag": "Độc lập v1", "width": 132 },
+    { "id": "contract_sign", "lane": "ui", "col": 5, "type": "frontend", "label": "Khách Duyệt Chốt", "sublabel": "Ký hợp đồng A4", "tag": "Chốt Hợp Đồng", "width": 132 },
+    { "id": "order_freeze", "lane": "engine", "col": 5, "type": "backend", "label": "Lệnh Xưởng CNC", "sublabel": "Khóa cứng đơn & Cắt", "tag": "Sản Xuất", "width": 132 }
+  ],
+  "edges": [
+    { "id": "e_land_to_in", "from": "landing", "to": "upload_gateway", "label": "1-click / Chọn file", "variant": "emphasis" },
+    { "id": "e_in_to_map", "from": "upload_gateway", "to": "smart_map", "label": "Phân tích cấu trúc", "variant": "emphasis" },
+
+    { "id": "e_map_to_ws", "from": "smart_map", "to": "workspace_table", "label": "Đủ 8 cột chuẩn", "variant": "emphasis", "fromSide": "top", "toSide": "bottom" },
+    { "id": "e_map_to_err", "from": "smart_map", "to": "error_recovery", "label": "Tiêu đề lạ / Mã lạ", "variant": "dashed" },
+    { "id": "e_err_to_ws", "from": "error_recovery", "to": "workspace_table", "label": "Ánh xạ xong", "variant": "dashed" },
+    { "id": "e_err_to_lib", "from": "error_recovery", "to": "materials_lib", "label": "Bổ sung đơn giá", "variant": "dashed" },
+
+    { "id": "e_ws_to_auth", "from": "workspace_table", "to": "auth_gate", "label": "Bấm Lưu Cloud", "variant": "dashed" },
+    { "id": "e_auth_to_lib", "from": "auth_gate", "to": "materials_lib", "label": "Xác thực RLS xưởng", "variant": "emphasis" },
+    { "id": "e_lib_to_snap1", "from": "materials_lib", "to": "snapshot_v1", "label": "Copy đơn giá xưởng", "variant": "emphasis" },
+
+    { "id": "e_ws_to_cost", "from": "workspace_table", "to": "cost_engine", "label": "Dữ liệu 48 tấm", "variant": "emphasis" },
+    { "id": "e_snap1_to_cost", "from": "snapshot_v1", "to": "cost_engine", "label": "Áp giá vốn v1", "variant": "emphasis" },
+
+    { "id": "e_cost_to_bom", "from": "cost_engine", "to": "workshop_bom", "label": "Bóc trần 5 mục", "variant": "emphasis" },
+    { "id": "e_cost_to_quote", "from": "cost_engine", "to": "client_quote", "label": "Gom nhóm tủ & Lời", "variant": "emphasis" },
+    { "id": "e_quote_to_auth", "from": "client_quote", "to": "auth_gate", "label": "Lưu / In Logo riêng", "variant": "dashed" },
+
+    { "id": "e_quote_to_snap2", "from": "client_quote", "to": "snapshot_v2", "label": "Khách sửa: Tạo bản v2", "variant": "default" },
+    { "id": "e_snap2_to_cost", "from": "snapshot_v2", "to": "cost_engine", "label": "Tính lại v2 độc lập", "variant": "dashed" },
+
+    { "id": "e_quote_to_sign", "from": "client_quote", "to": "contract_sign", "label": "Khách đồng ý chốt", "variant": "emphasis" },
+    { "id": "e_sign_to_order", "from": "contract_sign", "to": "order_freeze", "label": "Khóa cứng hợp đồng", "variant": "emphasis" },
+    { "id": "e_bom_to_order", "from": "workshop_bom", "to": "order_freeze", "label": "Lệnh xưởng CNC", "variant": "emphasis" }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Quy Tắc Định Mức Ván & Giá Vốn (Costing Waste Factor)",
+      "items": [
+        "1. Quy tắc ván: Net m² = (Dài × Rộng × SL)/10⁶. Gross m² = Net × 1.15 (+15% hao hụt xưởng). Số tấm cần mua = ⌈Gross / 2.9768⌉ (Khổ chuẩn 1220×2440mm) hoặc ⌈Gross / 4.4652⌉ (Khổ Jumbo 1830×2440mm).",
+        "2. Quy tắc chỉ dán cạnh: Mét dài = (Chu vi cạnh dán D1, D2, R1, R2 × SL)/1000 × 1.08 (+8% hao hụt bo góc máy dán cạnh).",
+        "3. Phạm vi dự toán: Đây là định mức dự toán giá vốn kinh doanh (Costing Waste). Sơ đồ sắp xếp cắt tấm chi tiết (Nesting CAM) do phần mềm máy CNC phụ trách."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Bảo Toàn Giá Vốn & Quản Lý Phiên Bản (v1, v2 -> Lệnh Xưởng)",
+      "items": [
+        "Auth Gate có điều kiện: Khách vãng lai dùng thử 1-click không cần login. Khi bấm 'Lưu dự án lên Cloud' hoặc 'In bản báo giá có Logo riêng' thì Auth Gate mới kích hoạt bảo vệ RLS.",
+        "Thư viện vật tư độc lập: Chủ xưởng cấu hình bảng giá thị trường tại /materials. Khi tạo dự án, giá được sao chép vào Snapshot riêng để bảo vệ giá lịch sử.",
+        "Độc lập phiên bản: Bấm 'Tạo bản v2' sinh ra Snapshot_v2 riêng, bảo toàn 100% số liệu bản v1. Khi khách duyệt chốt, hệ thống khóa cứng đơn hàng chuyển sang Lệnh xưởng CNC."
+      ]
+    }
+  ]
+}

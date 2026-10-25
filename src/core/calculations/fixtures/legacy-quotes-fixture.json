@@ -1,0 +1,33 @@
+{
+  "description": "Baseline kết quả tính toán của CODE CŨ trước Bước 2 (lưu làm Regression Fixture)",
+  "dataset_48_parts": {
+    "totalBoardCost": 11140000,
+    "totalEdgeCost": 618520,
+    "totalHardwareCost": 2311000,
+    "totalLaborCost": 2220000,
+    "totalCost": 16289520,
+    "totalQuotePrice_k135": 21990852,
+    "grossProfit_k135": 5701332,
+    "totalSheets": 18.5
+  },
+  "dataset_tu_ao_18_parts": {
+    "totalBoardCost": 5660000,
+    "totalEdgeCost": 275485,
+    "totalHardwareCost": 1177000,
+    "totalLaborCost": 1140000,
+    "totalCost": 8252485,
+    "totalQuotePrice_k135": 11140855,
+    "grossProfit_k135": 2888370,
+    "totalSheets": 9.5
+  },
+  "dataset_tu_bep_16_parts": {
+    "totalBoardCost": 2740000,
+    "totalEdgeCost": 145705,
+    "totalHardwareCost": 657000,
+    "totalLaborCost": 540000,
+    "totalCost": 4082705,
+    "totalQuotePrice_k135": 5511652,
+    "grossProfit_k135": 1428947,
+    "totalSheets": 4.5
+  }
+}

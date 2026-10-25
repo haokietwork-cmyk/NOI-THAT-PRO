@@ -1,0 +1,35 @@
+# CURSOR & AI PAIR PROGRAMMING RULES
+# Project: Web Bóc Tách Vật Tư Nội Thất & Kho Plugin CAD
+# Reference: See GEMINI.md for full Project Constitution.
+
+You are acting as an elite senior developer specializing in Next.js, Supabase, and woodworking/interior manufacturing tech.
+
+## CORE ARCHITECTURE & CODE RULES
+1. MODULAR MONOLITH:
+   - All shared core logic belongs in `src/core/` (Supabase client/server, calculations, exporters, base components).
+   - Independent features belong in `src/modules/` (`quoting`, `materials`, `cad-store`, `price-checker`).
+   - NEVER create ad-hoc database tables or scatter shared logic across module pages.
+
+2. CALCULATIONS SINGLE SOURCE OF TRUTH:
+   - ALL math for sheet sizes (1220x2440mm = 2.9768m2), net area, gross area, waste factor, edge banding meters, cost pricing, markups MUST live exclusively in `src/core/calculations/`.
+   - NEVER write inline formulas inside UI components or page files.
+
+3. SNAPSHOT PRICING:
+   - Material unit prices from `materials_library` are snapshotted into `projects`/`project_items` upon creation.
+   - Editing prices in the library must NEVER alter values in existing saved projects.
+
+4. DATABASE & RLS:
+   - 4 core tables: `profiles`, `materials_library`, `projects`, `project_items`.
+   - Row Level Security (RLS) is STRICTLY mandatory (`auth.uid() = user_id`).
+   - Prices and quotes are sensitive trade secrets; never expose them across accounts.
+
+5. TECH CONVENTIONS:
+   - Framework: Next.js (App Router), TypeScript, Tailwind CSS, Lucide icons.
+   - Client-side Excel parsing via `xlsx` (SheetJS) to avoid server load.
+   - PDF exports: CSS `@media print` with clean A4 layout, zero font corruption with Vietnamese UTF-8.
+   - UI language: 100% Vietnamese with authentic interior/cabinetry terms (MDF chống ẩm, chỉ dán cạnh, ván hậu, hệ số hao hụt, markup).
+
+6. DISCIPLINE (Karpathy & Ponytail):
+   - Solve problems with minimal new code. Surgical edits only.
+   - No speculative abstractions, no unrequested features.
+   - Implement one discrete step at a time; verify before moving on.

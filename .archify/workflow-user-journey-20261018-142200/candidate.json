@@ -1,0 +1,83 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Sơ Đồ Quy Trình Sử Dụng Nền Tảng NỘI THẤT PRO",
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "output": ".archify/workflow-user-journey-20261018-142200/user-journey.html"
+  },
+  "lanes": [
+    { "id": "cad", "label": "AutoCAD & Bổ Kỹ Thuật (Lisp Suite)" },
+    { "id": "ui", "label": "Giao Diện Web App (Nội Thất Pro)" },
+    { "id": "core", "label": "Động Cơ Tính Toán & Dữ Liệu (Core Engine)" },
+    { "id": "output", "label": "BOM Đặt Hàng Vật Tư (Gia Công Mộc)" }
+  ],
+  "phases": [
+    { "id": "phase_setup", "label": "1. Khám Phá & Thiết Lập", "fromCol": 0, "toCol": 1 },
+    { "id": "phase_cad", "label": "2. Thiết Kế & Bóc Cutlist CAD", "fromCol": 2, "toCol": 3 },
+    { "id": "phase_core", "label": "3. Nạp Excel & Tính Lõi", "fromCol": 4, "toCol": 4, "variant": "emphasis" },
+    { "id": "phase_output", "label": "4. Góc Nhìn Kép & Bàn Giao", "fromCol": 5, "toCol": 5, "variant": "dashed" }
+  ],
+  "groups": [
+    { "id": "grp_cad", "label": "AutoLISP Tiện Ích CAD", "lane": "cad", "fromCol": 1, "toCol": 3, "variant": "emphasis" },
+    { "id": "grp_ui", "label": "Thao Tác Web App", "lane": "ui", "fromCol": 0, "toCol": 4 },
+    { "id": "grp_core", "label": "Quy Tắc Quy Đổi Mộc 1220x2440", "lane": "core", "fromCol": 2, "toCol": 4, "variant": "emphasis" },
+    { "id": "grp_output", "label": "Đầu Ra BOM Xưởng", "lane": "output", "fromCol": 5, "toCol": 5, "variant": "dashed" }
+  ],
+  "mainPath": [
+    "landing",
+    "cad_tools",
+    "cad_draw",
+    "cad_export",
+    "cutlist_file",
+    "web_quoting",
+    "calc_engine",
+    "workshop_bom"
+  ],
+  "nodes": [
+    { "id": "landing", "lane": "ui", "col": 0, "type": "frontend", "label": "Landing Page", "sublabel": "Dự toán thử Bước 0", "tag": "Trải nghiệm", "width": 140 },
+    { "id": "mat_lib", "lane": "ui", "col": 1, "type": "frontend", "label": "Thư Viện Vật Tư", "sublabel": "Đơn giá & hao hụt", "tag": "Thiết lập", "width": 140 },
+    { "id": "cad_tools", "lane": "cad", "col": 1, "type": "backend", "label": "Nạp Lisp (APPLOAD)", "sublabel": "License theo Volume ID", "tag": "AutoLISP", "width": 140 },
+    { "id": "cad_draw", "lane": "cad", "col": 2, "type": "backend", "label": "Bản Vẽ Thi Công", "sublabel": "Khối tủ 2D / 3D Solid", "width": 140 },
+    { "id": "cad_export", "lane": "cad", "col": 3, "type": "backend", "label": "Lệnh QC (AutoCutlist)", "sublabel": "Quét chọn chi tiết tủ", "tag": "Xuất CSV", "width": 140 },
+    { "id": "storage_sync", "lane": "core", "col": 2, "type": "database", "label": "Storage & Supabase", "sublabel": "Bảo mật RLS từng xưởng", "width": 140 },
+    { "id": "cutlist_file", "lane": "core", "col": 3, "type": "database", "label": "File Cutlist Excel", "sublabel": "CSV UTF-8 BOM chuẩn", "tag": "Dữ liệu mộc", "width": 140 },
+    { "id": "web_quoting", "lane": "ui", "col": 4, "type": "frontend", "label": "Không Gian Quoting", "sublabel": "Kéo-thả nạp file Excel", "tag": "Client-side", "width": 140 },
+    { "id": "calc_engine", "lane": "core", "col": 4, "type": "backend", "label": "Trái Tim Tính Toán", "sublabel": "Khổ 1220x2440, hao hụt", "tag": "Core Engine", "width": 140 },
+    { "id": "workshop_bom", "lane": "output", "col": 5, "type": "backend", "label": "BOM Đặt Hàng Xưởng", "sublabel": "Bóc trần số ván & mét chỉ", "tag": "Xuất .xlsx", "width": 140 },
+    { "id": "client_pdf", "lane": "ui", "col": 5, "type": "frontend", "label": "Báo Giá A4 Khách", "sublabel": "Gom Hạng mục & Markup", "tag": "In PDF A4", "width": 140 }
+  ],
+  "edges": [
+    { "id": "land_to_mat", "from": "landing", "to": "mat_lib", "variant": "default" },
+    { "id": "land_to_cad", "from": "landing", "to": "cad_tools", "label": "Tải Lisp", "variant": "default" },
+    { "id": "mat_to_storage", "from": "mat_lib", "to": "storage_sync", "label": "Lưu đơn giá xưởng", "variant": "dashed" },
+    { "id": "cad_to_draw", "from": "cad_tools", "to": "cad_draw", "label": "Kích hoạt lệnh", "variant": "default" },
+    { "id": "draw_to_qc", "from": "cad_draw", "to": "cad_export", "label": "Quét tủ", "variant": "emphasis" },
+    { "id": "qc_to_csv", "from": "cad_export", "to": "cutlist_file", "label": "Tạo CSV", "variant": "emphasis" },
+    { "id": "csv_to_web", "from": "cutlist_file", "to": "web_quoting", "label": "Nạp Cutlist", "variant": "emphasis" },
+    { "id": "storage_to_calc", "from": "storage_sync", "to": "calc_engine", "label": "Snapshot giá", "variant": "dashed" },
+    { "id": "web_to_calc", "from": "web_quoting", "to": "calc_engine", "label": "Bóc tách tự động", "variant": "emphasis" },
+    { "id": "calc_to_workshop", "from": "calc_engine", "to": "workshop_bom", "label": "Góc nhìn Xưởng", "variant": "emphasis" },
+    { "id": "calc_to_client", "from": "calc_engine", "to": "client_pdf", "label": "Góc nhìn Khách", "variant": "emphasis" }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Nguyên Tắc Bóc Tách: Một Đầu Vào - Hai Đầu Ra",
+      "items": [
+        "Đầu vào: File Excel Cutlist 8 cột chuẩn ngành gỗ hoặc xuất tự động từ AutoCAD",
+        "Đầu ra 1 (BOM Xưởng): Bóc trần từng tấm ván tiêu chuẩn 1220x2440mm (+15% hao hụt), mét chỉ dán cạnh (+8%), phụ kiện gửi đại lý vật tư",
+        "Đầu ra 2 (Báo Giá Khách): Đóng gói theo Hạng mục phòng (Tủ áo, Tủ bếp...), ẩn số tấm lẻ, tùy chỉnh hệ số lợi nhuận (Markup x1.2 - x1.8) và in PDF A4"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Bảo Mật Giá Vốn & Kích Hoạt Bản Quyền Tự Động",
+      "items": [
+        "Snapshot Pricing: Đơn giá được sao chép nguyên bản vào từng dự án, bảo toàn giá trị hợp đồng cũ",
+        "VietQR Napas 247: Tự động nâng cấp Pro và cấp License Key máy tính xưởng trong 5 giây qua Webhook"
+      ]
+    }
+  ]
+}
