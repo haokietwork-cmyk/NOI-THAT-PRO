@@ -215,4 +215,23 @@ Khi viết công cụ CAD hỗ trợ để bán trên web hoặc xuất dữ li�
    - Khi người dùng yêu cầu kiểm tra mô hình 3D, bóc tách khối lượng, dựng hình phào nẹp, tạo tấm ván 3D, chụp ảnh viewport hoặc chạy code Ruby: Antigravity chủ động sử dụng các công cụ thuộc server `sketchup` (`status`, `eval`, `get_selection`, `create_box`, `create_face`, `screenshot`, `run_cutlist`, `run_profile`, `open_dialog`).
    - Nếu SketchUp chưa kết nối, hướng dẫn người dùng dán `load 'sketchup_mcp_bridge.rb'` vào Ruby Console hoặc mở file `Kich_Hoat_SketchUp_MCP.bat` trên Desktop.
 
+8. **16 Quy Tắc Kỷ Luật SaaS AutoCutlist (Bắt Buộc Theo Runbook v3):**
+   1. Làm theo các cổng kiểm soát (G1-G6) và vòng lặp tự kiểm. Khi mơ hồ hoặc có rủi ro mất dữ liệu/tiền: hỏi.
+   2. Mọi phép tính tiền/diện tích/mét chỉ ở `src/core/calculations/`. Một engine duy nhất. Mọi đơn giá cấu hình được, không gán cứng.
+   3. Database chỉ qua migration trong `supabase/migrations/` (tên `YYYYMMDDHHMMSS_ten.sql`, 14 chữ số, có rollback, không trùng version, lưu UTF-8). KHÔNG chạy lên DB thật. Luôn bật RLS, vai trò `authenticated`, dùng `(select auth.uid())`.
+   4. Bảo mật: không đưa service role key/bí mật vào code, log, `NEXT_PUBLIC_*`; không in nội dung `.env*`; mọi API route phải xác thực, kiểm tra input bằng schema, giới hạn kích thước và tần suất; không nuốt lỗi; không log dữ liệu cá nhân (tên, SĐT, địa chỉ khách).
+   5. Mỗi thay đổi logic tính toán kèm unit test; mỗi thay đổi RLS kèm test RLS (SQL mô tả).
+   6. Giao diện tiếng Việt, thuật ngữ thân thiện, import từ `terms.ts`.
+   7. Mỗi việc một commit; cuối mỗi việc chạy VERIFY rồi báo cáo kèm output lệnh.
+   8. Không thêm thư viện mới, không đổi cấu trúc khi chưa hỏi (G4).
+   9. Từ khi có khách thật lưu dự án đầu tiên: đổi công thức phải tăng `calc_version` và giữ engine bản cũ.
+   10. Báo cáo theo mẫu: [việc] → đã làm gì → bằng chứng (lệnh + output) → còn tồn đọng. Không tuyên bố "100%" khi chưa có bằng chứng.
+   11. Số liệu trong báo cáo phải trích từ output lệnh vừa chạy; không tự tính nhẩm. Nếu ước tính thì ghi rõ.
+   12. Không phá Snapshot Pricing: dự án đã lưu mở lại phải ra đúng số cũ. Muốn số mới thì tạo bản mới hoặc nâng cấp có xem trước mức chênh, không đổi âm thầm.
+   13. Từ ngày có khách thật: mọi thay đổi database là migration có thứ tự, kiểm thử trên bản preview rồi mới lên prod, không sửa thẳng trên giao diện Supabase. Mỗi lần ra bản mới có changelog (`CHANGELOG.md`) và cách quay lại bản trước.
+   14. Tổng quát trước, cụ thể sau: KHÔNG thêm khóa cấu hình, cột DB, ô UI hay nhánh engine riêng cho một loại vật tư/phụ kiện/nhân công. Mọi khoản chi phí phát sinh là một dòng chi phí (dữ liệu) trong mô hình chung ở A+. Thấy mình sắp viết `if (item === 'ban le')` hoặc thêm trường kiểu `xxxPerSheet` thì dừng, dùng hoặc mở rộng mô hình chung (mở rộng mô hình thì hỏi G4).
+   15. Không bịa số: mọi đơn giá, định mức, hao hụt mặc định do agent đặt phải bằng 0/rỗng, hoặc gắn nhãn "mặc định tham khảo, hãy nhập số thực tế của xưởng". Con số dùng trong test phải là số GIẢ đặt tên rõ, không giả làm số thật của xưởng.
+   16. Mỗi loại quy tắc số lượng (`kind`) và mỗi loại hình dự án (có cutlist, theo m², dòng nhập tay...) có ít nhất một golden test riêng cùng ca biên.
+
+
 

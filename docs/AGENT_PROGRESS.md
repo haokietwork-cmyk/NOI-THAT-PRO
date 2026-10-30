@@ -13,8 +13,8 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - [x] **A3.** Cấu hình xưởng (v3: ẩn khỏi UI mọi ô chưa có tác dụng thật, giữ số vàng không đổi).
 - [x] **A4.** Hao hụt mặc định theo tài liệu sản phẩm (17mm: 1.15, 6mm: 1.12, Jumbo: 1.18), chạy lại engine trên seed, đối soát số liệu.
 - [x] **A5.** CI cùng phiên bản Node 24 với máy dev, biến môi trường build placeholder.
-- [ ] **A6.** Đồng bộ `docs/BACKLOG.md` (P0-10 migration nền và P1-4).
-- [ ] **A7.** Cập nhật Rules 11-16 vào `GEMINI.md` / rules.
+- [x] **A6.** Đồng bộ `docs/BACKLOG.md` (P0-10 migration nền và P1-4).
+- [x] **A7.** Cập nhật Rules 11-16 vào `GEMINI.md` / rules.
 - [ ] **A8.** Bộ test lõi tính toán (golden + ca biên cho board, edge, quote-engine, đo coverage).
 - [ ] **A9.** Tổng kiểm Giai đoạn A (chạy VERIFY đầy đủ, xác nhận số vàng).
 
