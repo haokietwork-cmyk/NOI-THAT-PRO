@@ -28,7 +28,7 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - [x] **AX5.** Danh mục vật tư tổng quát: mở rộng `MaterialCategory` 11 loại, `GeneralCatalogItem`, chuẩn hóa từ điển `terms.ts`.
 - [x] **AX6.** Nhiều cách nhập và nhiều hạng mục: `section-calculator.ts` hỗ trợ Cutlist chi tiết, báo nhanh m²/md, dòng nhập tay và xuất cảnh báo BOM xưởng rõ ràng.
 - [x] **AX7.** Bộ 7 golden đa dạng (seed 48 tấm, tủ bếp có đá, tủ áo, vách m², dòng nhập tay, VAT/giảm giá, cấu hình rỗng) và test tính chất toán học (59 tests pass).
-- [ ] **AX8.** Tổng kiểm A+.
+- [x] **AX8.** Tổng kiểm A+: toàn bộ 59 unit tests pass, số vàng seed 16.281.950 đ / 26.865.218 đ bất biến, cập nhật migration A2 CHECK chung an toàn (tối đa 100 dòng costLines, 32KB).
 
 ---
 
@@ -79,3 +79,4 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - *31/10/2026:* Hoàn tất AX3: Lõi engine tổng quát `src/core/calculations/cost-lines/` (types, resolver, engine), adapter `legacyConfigToLines`, bộ test đối chiếu bảo toàn số vàng tuyệt đối (44 tests pass).
 - *31/10/2026:* Hoàn tất AX4: Đưa bản lề, ray, keo, vật tư phụ vào mô hình chung (preset ván công nghiệp & thầu thi công trọn gói), test toàn diện ca biên `tiers` (đúng ngưỡng, dưới ngưỡng, kịch trần, rỗng) (48 tests pass).
 - *31/10/2026:* Hoàn tất AX5, AX6, AX7: Danh mục vật tư tổng quát (11 categories), thuật ngữ `terms.ts`, `section-calculator.ts` hỗ trợ 3 chế độ nhập kèm cảnh báo BOM, bộ 7 ca golden và 4 test tính chất toán học (59 tests pass).
+- *31/10/2026:* Hoàn tất AX8: Tổng kiểm Giai đoạn A+ (59 tests pass, build xanh, cập nhật CHECK tổng quát migration 20261025131700). Sẵn sàng chuyển sang Giai đoạn C (C1: PLAN Schema nền, tổ chức & RLS).

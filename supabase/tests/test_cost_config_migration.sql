@@ -65,3 +65,12 @@ SELECT public.is_valid_cost_config(('{"notes": "' || repeat('a', 4100) || '"}'):
 -- CA 11: KIỂM THỬ BACKFILL TÀI KHOẢN ĐÃ CÓ
 -- Mô tả: Lệnh INSERT INTO public.profiles ... ON CONFLICT DO NOTHING
 -- Kỳ vọng: Không sinh lỗi khi chạy lặp lại nhiều lần, không ghi đè dữ liệu hồ sơ đã có.
+
+-- CA 12: HỢP LỆ VỚI MÔ HÌNH DÒNG CHI PHÍ TỔNG QUÁT (COSTLINES JSONB)
+-- Kỳ vọng: is_valid_cost_config trả về TRUE với danh sách costLines hợp lệ
+SELECT public.is_valid_cost_config('{
+  "costLines": [
+    {"id": "line-1", "name": "Bản lề", "category": "hardware", "unitPrice": 28000, "enabled": true},
+    {"id": "line-2", "name": "Mặt đá", "category": "face_material", "unitPrice": 1200000, "enabled": true}
+  ]
+}'::jsonb) AS ca12_cost_lines_hop_le; -- Expected: TRUE

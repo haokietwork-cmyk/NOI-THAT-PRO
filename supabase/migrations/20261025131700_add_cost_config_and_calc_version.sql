@@ -89,12 +89,15 @@ IMMUTABLE
 AS $$
   SELECT CASE
     WHEN cfg IS NULL THEN true
-    WHEN jsonb_typeof(cfg) <> 'object' THEN false
-    WHEN octet_length(cfg::text) > 4096 THEN false
+    WHEN jsonb_typeof(cfg) NOT IN ('object', 'array') THEN false
+    WHEN octet_length(cfg::text) > 32768 THEN false
+    -- Kiểm tra tương thích: nếu có khóa số định mức thì không được âm và trong trần an toàn
     WHEN NOT public._cc_num_ok(cfg, 'suppliesRatePerSheet', 500000) THEN false
     WHEN NOT public._cc_num_ok(cfg, 'laborRatePerSheet', 1000000) THEN false
-    WHEN NOT public._cc_num_ok(cfg, 'hingesPerSheet', 20) THEN false
-    WHEN NOT public._cc_num_ok(cfg, 'slidesPerSheet', 10) THEN false
+    WHEN NOT public._cc_num_ok(cfg, 'hingesPerSheet', 50) THEN false
+    WHEN NOT public._cc_num_ok(cfg, 'slidesPerSheet', 20) THEN false
+    -- Nếu có danh sách dòng chi phí costLines thì kiểm tra cấu trúc mảng tối đa 100 dòng
+    WHEN cfg ? 'costLines' AND (jsonb_typeof(cfg->'costLines') <> 'array' OR jsonb_array_length(cfg->'costLines') > 100) THEN false
     ELSE true END;
 $$;
 
