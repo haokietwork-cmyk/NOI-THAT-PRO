@@ -33,7 +33,7 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 ---
 
 ### GIAI ĐOẠN B: AUDIT SẴN SÀNG RA MẮT (CHỈ ĐỌC - thực hiện trong lúc chờ G4)
-- [ ] **B.** Viết `docs/AUDIT_REPORT.md` (11 mục audit chi tiết) 🛑 **CỔNG G1: DỪNG CHỜ DUYỆT**.
+- [x] **B.** Viết `docs/AUDIT_REPORT.md` (11 mục audit chi tiết) 🛑 **CỔNG G1: DỪNG CHỜ DUYỆT**.
 
 ---
 
