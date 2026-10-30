@@ -178,14 +178,22 @@ export class StorageService {
 
           // Dùng .update() thay vì .upsert() vì bảng profiles đã REVOKE INSERT đối với authenticated users
           // Hàng profiles gốc được tạo tự động bởi database trigger khi người dùng đăng ký auth.users
-          const { error } = await supabase
+          const { data, error } = await supabase
             .from("profiles")
             .update(profilePayload)
-            .eq("id", user.id);
+            .eq("id", user.id)
+            .select("id");
 
           if (error) {
             console.error("Lỗi đồng bộ Supabase Profile:", error);
             return { success: false, error: error.message };
+          }
+
+          if (!data || data.length === 0) {
+            return {
+              success: false,
+              error: "Hồ sơ chưa được tạo trên Cloud. Vui lòng liên hệ quản trị viên.",
+            };
           }
         }
       } catch (err: any) {
@@ -413,6 +421,7 @@ export class StorageService {
             const { error: delErr } = await supabase.from("project_items").delete().eq("project_id", savedProj.id);
             if (delErr) {
               console.error("Lỗi xóa project_items cũ:", delErr);
+              return { success: false, error: delErr.message };
             }
 
             const { error: insErr } = await supabase.from("project_items").insert(items);

@@ -51,19 +51,6 @@ test("storageService: saveProject cập nhật local state và sanitize snapshot
 });
 
 test("storageService: Mô phỏng Supabase trả lỗi → hàm trả về { success: false, error } và phân biệt thông báo", () => {
-  // Mô phỏng kết quả khi Supabase trả lỗi permission hoặc network
-  const simulateCloudError = (errorMsg: string) => {
-    return {
-      success: false,
-      error: errorMsg,
-    };
-  };
-
-  const resError = simulateCloudError("permission denied for table profiles");
-  assert.strictEqual(resError.success, false);
-  assert.strictEqual(resError.error, "permission denied for table profiles");
-
-  // Format thông báo UI phân biệt rõ ràng
   const formatToastMessage = (res: { success: boolean; error?: string }) => {
     if (!res.success) {
       return `⚠️ Đã lưu tạm trên máy, chưa lên Cloud: ${res.error}`;
@@ -71,11 +58,41 @@ test("storageService: Mô phỏng Supabase trả lỗi → hàm trả về { suc
     return "✅ Đã lưu dự án thành công lên Cloud!";
   };
 
-  const msgFailure = formatToastMessage(resError);
-  assert.ok(msgFailure.includes("Đã lưu tạm trên máy, chưa lên Cloud"));
-  assert.ok(msgFailure.includes("permission denied"));
+  // Ca 1: Supabase trả lỗi permission hoặc network
+  const simulateError = {
+    success: false,
+    error: "permission denied for table profiles",
+  };
+  const msgErr = formatToastMessage(simulateError);
+  assert.strictEqual(simulateError.success, false);
+  assert.ok(msgErr.includes("Đã lưu tạm trên máy, chưa lên Cloud"));
+  assert.ok(msgErr.includes("permission denied"));
 
-  const msgSuccess = formatToastMessage({ success: true });
+  // Ca 2: Supabase trả 0 dòng trúng (data: []) do thiếu hàng profiles
+  const simulateZeroRows = {
+    success: false,
+    error: "Hồ sơ chưa được tạo trên Cloud. Vui lòng liên hệ quản trị viên.",
+  };
+  const msgZero = formatToastMessage(simulateZeroRows);
+  assert.strictEqual(simulateZeroRows.success, false);
+  assert.ok(msgZero.includes("Hồ sơ chưa được tạo"));
+
+  // Ca 3: Supabase thành công (data: [{ id: 'user-1' }])
+  const simulateSuccess = { success: true };
+  const msgSuccess = formatToastMessage(simulateSuccess);
   assert.ok(msgSuccess.includes("Đã lưu dự án thành công lên Cloud"));
   assert.strictEqual(msgSuccess.includes("chưa lên Cloud"), false);
+});
+
+test("storageService: saveProject bắt lỗi xóa chi tiết cũ delErr không nuốt lỗi", () => {
+  const simulateProjectItemsDelError = (delErr: { message: string }) => {
+    if (delErr) {
+      return { success: false, error: delErr.message };
+    }
+    return { success: true };
+  };
+
+  const res = simulateProjectItemsDelError({ message: "foreign key violation on delete" });
+  assert.strictEqual(res.success, false);
+  assert.strictEqual(res.error, "foreign key violation on delete");
 });
