@@ -38,7 +38,7 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 ---
 
 ### GIAI ĐOẠN C: SCHEMA NỀN, TỔ CHỨC & RLS
-- [ ] **C1.** PLAN tổ chức & RLS (`docs/PLAN_ORGANIZATION_RLS.md`) 🛑 **CỔNG G2: DỪNG CHỜ DUYỆT**.
+- [x] **C1.** PLAN tổ chức & RLS (`docs/PLAN_ORGANIZATION_RLS.md`) 🛑 **CỔNG G2: DỪNG CHỜ DUYỆT**.
 - [ ] **C2.** Migration nền sạch + test RLS (`supabase/tests/rls_*.sql`) + `docs/DB_RESET.md`.
 - [ ] **C3.** Cập nhật code theo schema mới (`storageService`, auth, org).
 
@@ -80,3 +80,4 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - *31/10/2026:* Hoàn tất AX4: Đưa bản lề, ray, keo, vật tư phụ vào mô hình chung (preset ván công nghiệp & thầu thi công trọn gói), test toàn diện ca biên `tiers` (đúng ngưỡng, dưới ngưỡng, kịch trần, rỗng) (48 tests pass).
 - *31/10/2026:* Hoàn tất AX5, AX6, AX7: Danh mục vật tư tổng quát (11 categories), thuật ngữ `terms.ts`, `section-calculator.ts` hỗ trợ 3 chế độ nhập kèm cảnh báo BOM, bộ 7 ca golden và 4 test tính chất toán học (59 tests pass).
 - *31/10/2026:* Hoàn tất AX8: Tổng kiểm Giai đoạn A+ (59 tests pass, build xanh, cập nhật CHECK tổng quát migration 20261025131700). Sẵn sàng chuyển sang Giai đoạn C (C1: PLAN Schema nền, tổ chức & RLS).
+- *31/10/2026:* Hoàn tất C1: Lập kế hoạch thiết kế schema nền đa thành viên, phân quyền 4 vai trò (owner, sales, viewer, anon) và kế hoạch kiểm thử RLS tại `docs/PLAN_ORGANIZATION_RLS.md`. DỪNG TẠI CỔNG G2.
