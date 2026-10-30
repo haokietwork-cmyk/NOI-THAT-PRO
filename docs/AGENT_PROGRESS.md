@@ -25,9 +25,9 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - [x] **AX2.** Kế hoạch PLAN mô hình chi phí tổng quát (`docs/PLAN_COST_MODEL.md`) 🛑 **CỔNG G4: DỪNG CHỜ DUYỆT**.
 - [x] **AX3.** Lõi engine tổng quát (sau G4): thư mục `cost-lines/` hàm thuần, adapter `legacyConfigToLines`, bộ test đối chiếu và 6 kind quy tắc, 44 tests pass.
 - [x] **AX4.** Đưa bản lề, ray, keo, vật tư phụ vào mô hình chung: tạo mẫu xưởng `createIndustrialWorkshopPreset`, `createTurnkeyContractorPreset`, kiểm thử ca biên `tiers` và tắt mở theo Rule 14, 15 (48 tests pass).
-- [ ] **AX5.** Danh mục vật tư tổng quát và UI.
-- [ ] **AX6.** Nhiều cách nhập và nhiều hạng mục.
-- [ ] **AX7.** Bộ golden đa dạng và test tính chất.
+- [x] **AX5.** Danh mục vật tư tổng quát: mở rộng `MaterialCategory` 11 loại, `GeneralCatalogItem`, chuẩn hóa từ điển `terms.ts`.
+- [x] **AX6.** Nhiều cách nhập và nhiều hạng mục: `section-calculator.ts` hỗ trợ Cutlist chi tiết, báo nhanh m²/md, dòng nhập tay và xuất cảnh báo BOM xưởng rõ ràng.
+- [x] **AX7.** Bộ 7 golden đa dạng (seed 48 tấm, tủ bếp có đá, tủ áo, vách m², dòng nhập tay, VAT/giảm giá, cấu hình rỗng) và test tính chất toán học (59 tests pass).
 - [ ] **AX8.** Tổng kiểm A+.
 
 ---
@@ -78,3 +78,4 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - *31/10/2026:* Khởi tạo file tiến độ từ `docs/AGENT_RUNBOOK.md` bản v3. Bắt đầu rà soát Giai đoạn A.
 - *31/10/2026:* Hoàn tất AX3: Lõi engine tổng quát `src/core/calculations/cost-lines/` (types, resolver, engine), adapter `legacyConfigToLines`, bộ test đối chiếu bảo toàn số vàng tuyệt đối (44 tests pass).
 - *31/10/2026:* Hoàn tất AX4: Đưa bản lề, ray, keo, vật tư phụ vào mô hình chung (preset ván công nghiệp & thầu thi công trọn gói), test toàn diện ca biên `tiers` (đúng ngưỡng, dưới ngưỡng, kịch trần, rỗng) (48 tests pass).
+- *31/10/2026:* Hoàn tất AX5, AX6, AX7: Danh mục vật tư tổng quát (11 categories), thuật ngữ `terms.ts`, `section-calculator.ts` hỗ trợ 3 chế độ nhập kèm cảnh báo BOM, bộ 7 ca golden và 4 test tính chất toán học (59 tests pass).

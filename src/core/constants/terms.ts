@@ -52,6 +52,40 @@ export const WORKSHOP_TERMS = {
     labelWithOriginal: "Hạng mục tủ thành phẩm",
     shortExplanation: "Khối sản phẩm đồ gỗ hoàn thiện trong công trình (như Tủ áo Master, Hệ tủ bếp dưới, Kệ TV...).",
   },
+
+  // 7. Input Modes (AX6)
+  cutlistMode: {
+    label: "Bóc tách chi tiết",
+    labelWithOriginal: "Bóc tách phôi tấm chi tiết (Cutlist Mode)",
+    shortExplanation: "Nhập danh sách phôi tấm Dài × Rộng × Dày từ AutoCAD / SketchUp hoặc Excel để bóc tách ván và chỉ dán cạnh.",
+  },
+  quickModuleMode: {
+    label: "Báo giá nhanh",
+    labelWithOriginal: "Báo giá nhanh theo m² / mét dài (Quick Mode)",
+    shortExplanation: "Dự toán sơ bộ khối lượng theo diện tích m² hoặc mét dài tủ khi chưa có bản vẽ chi tiết.",
+  },
+  manualLinesMode: {
+    label: "Dòng nhập tay",
+    labelWithOriginal: "Dòng chi phí nhập tay (Manual Lines)",
+    shortExplanation: "Bổ sung linh hoạt các hạng mục mua ngoài, thầu phụ đá/kính, thiết bị bếp và vận chuyển.",
+  },
+
+  // 8. Cost Sources (AX5)
+  defaultReferenceSource: {
+    label: "Mặc định tham khảo",
+    labelWithOriginal: "Mặc định tham khảo (Default Reference)",
+    shortExplanation: "Định mức hoặc đơn giá mẫu do hệ thống gợi ý, xưởng nên cập nhật lại theo thực tế.",
+  },
+  workshopEnteredSource: {
+    label: "Xưởng nhập",
+    labelWithOriginal: "Xưởng nhập thực tế (Workshop Entered)",
+    shortExplanation: "Đơn giá và định mức sản xuất do chính xưởng thiết lập.",
+  },
+  projectOverrideSource: {
+    label: "Ghi đè dự án",
+    labelWithOriginal: "Ghi đè riêng cho dự án (Project Override)",
+    shortExplanation: "Đơn giá hoặc khối lượng điều chỉnh riêng cho hợp đồng này, không ảnh hưởng thư viện gốc.",
+  },
 } as const;
 
 export type WorkshopTermKey = keyof typeof WORKSHOP_TERMS;

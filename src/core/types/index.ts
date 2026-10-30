@@ -54,7 +54,63 @@ export interface WorkshopProfile {
   updatedAt?: string;
 }
 
-export type MaterialCategory = 'board' | 'edge' | 'hardware' | 'labor';
+export type MaterialCategory =
+  | 'board'         // Ván gỗ tấm
+  | 'edge'          // Chỉ dán cạnh
+  | 'hardware'      // Phụ kiện kim khí
+  | 'supplies'      // Vật tư tiêu hao (ốc cam, vít, keo)
+  | 'surface'       // Bề mặt hoàn thiện (laminate, acrylic)
+  | 'face_material' // Vật liệu mặt bàn / vách (đá, kính, inox)
+  | 'equipment'     // Thiết bị và điện (bếp, hút mùi, LED)
+  | 'labor'         // Nhân công
+  | 'service'       // Dịch vụ (vận chuyển, khảo sát)
+  | 'subcontract'   // Mua ngoài & thầu phụ
+  | 'other';        // Chi phí khác
+
+export interface GeneralCatalogItem {
+  id: string;
+  code: string;
+  name: string;
+  category: MaterialCategory;
+  unit: string;
+  unitPrice: number;
+  priceIncludesVat?: boolean;
+  effectiveDate?: string;
+  packSize?: number;
+  packUnit?: string;
+  supplierName?: string;
+  source: 'default_reference' | 'workshop_entered' | 'project_override';
+  notes?: string;
+  standardLengthMm?: number;
+  standardWidthMm?: number;
+  thicknessMm?: number;
+  wasteFactor?: number;
+}
+
+export type ProjectInputMode = 'cutlist' | 'quick_module' | 'manual_lines' | 'hybrid';
+
+export interface ProjectSection {
+  id: string;
+  name: string;
+  inputMode: ProjectInputMode;
+  notes?: string;
+  quickCalc?: {
+    unitType: 'm2' | 'md' | 'module';
+    quantity: number;
+    unitPrice: number;
+    description?: string;
+  };
+  manualLines?: Array<{
+    id: string;
+    name: string;
+    category: MaterialCategory;
+    unit: string;
+    quantity: number;
+    unitPrice: number;
+    markupOverride?: number;
+    visibleOnQuote: boolean;
+  }>;
+}
 
 export interface MaterialItem {
   id: string;
