@@ -15,7 +15,7 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - [x] **A5.** CI cùng phiên bản Node 24 với máy dev, biến môi trường build placeholder.
 - [x] **A6.** Đồng bộ `docs/BACKLOG.md` (P0-10 migration nền và P1-4).
 - [x] **A7.** Cập nhật Rules 11-16 vào `GEMINI.md` / rules.
-- [ ] **A8.** Bộ test lõi tính toán (golden + ca biên cho board, edge, quote-engine, đo coverage).
+- [x] **A8.** Bộ test lõi tính toán (golden + ca biên cho board, edge, quote-engine, đo coverage).
 - [ ] **A9.** Tổng kiểm Giai đoạn A (chạy VERIFY đầy đủ, xác nhận số vàng).
 
 ---
