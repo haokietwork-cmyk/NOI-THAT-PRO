@@ -23,7 +23,7 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 ### GIAI ĐOẠN A+: TỔNG QUÁT HÓA MÔ HÌNH CHI PHÍ
 - [x] **AX1.** Kiểm kê chỗ "cục bộ" (CHỈ ĐỌC, ghi `docs/reports/AX1.md`). (Commit: `73d377a`)
 - [x] **AX2.** Kế hoạch PLAN mô hình chi phí tổng quát (`docs/PLAN_COST_MODEL.md`) 🛑 **CỔNG G4: DỪNG CHỜ DUYỆT**.
-- [ ] **AX3.** Lõi engine tổng quát (sau G4).
+- [x] **AX3.** Lõi engine tổng quát (sau G4): thư mục `cost-lines/` hàm thuần, adapter `legacyConfigToLines`, bộ test đối chiếu và 6 kind quy tắc, 44 tests pass.
 - [ ] **AX4.** Đưa bản lề, ray, keo, vật tư phụ vào mô hình chung.
 - [ ] **AX5.** Danh mục vật tư tổng quát và UI.
 - [ ] **AX6.** Nhiều cách nhập và nhiều hạng mục.
@@ -76,3 +76,4 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 
 ## NHẬT KÝ THỰC HIỆN
 - *31/10/2026:* Khởi tạo file tiến độ từ `docs/AGENT_RUNBOOK.md` bản v3. Bắt đầu rà soát Giai đoạn A.
+- *31/10/2026:* Hoàn tất AX3: Lõi engine tổng quát `src/core/calculations/cost-lines/` (types, resolver, engine), adapter `legacyConfigToLines`, bộ test đối chiếu bảo toàn số vàng tuyệt đối (44 tests pass).
