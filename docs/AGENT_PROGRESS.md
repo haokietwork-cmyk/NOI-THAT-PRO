@@ -10,7 +10,7 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 ### GIAI ĐOẠN A: NỀN TẢNG TÍNH GIÁ & HOÀN TẤT ĐỢT SỬA DỞ
 - [x] **A1.** `saveProfile` / `saveProject`: kiểm tra trúng 0 dòng với `.select('id')`, không nuốt lỗi, UI phân biệt thông báo Cloud vs Offline, test mô phỏng. (Commit: `bb255e6`)
 - [x] **A2.** Migration hợp nhất `20261025131700_add_cost_config_and_calc_version.sql` (v3: không thêm khóa riêng cho keo/bản lề vào CHECK, hàm `_cc_num_ok` + `is_valid_cost_config`, trigger `handle_new_user`, backfill, GRANT thẳng, bộ ca SQL test trong `supabase/tests/`).
-- [ ] **A3.** Cấu hình xưởng (v3: ẩn khỏi UI mọi ô chưa có tác dụng thật, giữ số vàng không đổi).
+- [x] **A3.** Cấu hình xưởng (v3: ẩn khỏi UI mọi ô chưa có tác dụng thật, giữ số vàng không đổi).
 - [ ] **A4.** Hao hụt mặc định theo tài liệu sản phẩm (17mm: 1.15, 6mm: 1.12, Jumbo: 1.18), chạy lại engine trên seed, đối soát số liệu.
 - [ ] **A5.** CI cùng phiên bản Node 24 với máy dev, biến môi trường build placeholder.
 - [ ] **A6.** Đồng bộ `docs/BACKLOG.md` (P0-10 migration nền và P1-4).

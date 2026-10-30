@@ -97,3 +97,13 @@ test("cost-config: Định mức keo mặc định là 0 (không gán cứng 0.0
   assert.strictEqual(defaultConfig.glueUnitPrice, 0, "Đơn giá keo mặc định là 0");
   assert.ok(Array.isArray(defaultConfig.hingeThresholds), "Ngưỡng bản lề mặc định là mảng cấu hình");
 });
+
+test("cost-config: Xác nhận số vàng seed không đổi với cấu hình chuẩn", async () => {
+  const { calculateProject } = await import("./engine.ts");
+  const { SEED_PARTS, SEED_MATERIALS } = await import("../services/seedData.ts");
+
+  const res = calculateProject(SEED_PARTS, SEED_MATERIALS);
+  assert.strictEqual(res.totalBaseCost, 16_281_950, "Giá vốn seed chuẩn 16.281.950 đ");
+  assert.strictEqual(res.totalQuotePrice, 26_865_218, "Giá bán seed chuẩn 26.865.218 đ");
+  assert.strictEqual(res.totalSheets, 18.5, "Tổng số tấm seed chuẩn 18.5");
+});
