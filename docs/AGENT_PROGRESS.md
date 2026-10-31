@@ -60,7 +60,7 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 
 ### GIAI ĐOẠN E: BƯỚC 4 — LUỒNG 3 BƯỚC & CHẾ ĐỘ NÂNG CAO
 - [x] **E1-E8.** Stepper 3 bước `/quoting` (1. Nhập Cutlist -> 2. Xem Báo Giá & BOM -> 3. Xuất File & In Ấn), Chế độ nâng cao (`advancedMode` ghi nhớ qua `localStorage`, đọc trong `useEffect`), badge cấu hình tùy chỉnh (`isCustomCostConfig`), bộ lọc 6 tiêu chí độc lập hiển thị (có unit test `filter-invariance.test.ts` chứng minh giá vốn & báo giá bất biến 100%), nhận diện bản v2 bằng `versionNo > 1 || Boolean(parentProjectId)` (loại bỏ hoàn toàn `includes("(v")`), bảo vệ bí mật kinh doanh khi in A4 (`no-print` che giấu lãi/giá vốn), đồng bộ query param `?step=1|2|3` và responsive 375px mobile.
-- [ ] **E9.** Dọn dẹp dependency chưa dùng (thực hiện theo cổng G4 sau khi duyệt).
+- [x] **E9.** Dọn dẹp dependency chưa dùng: Đã gỡ bỏ 13 gói thư viện thừa (`@dnd-kit/*`, `cmdk`, `react-day-picker`, `vaul`, `@radix-ui/react-separator`, `@radix-ui/react-accordion`, `radix-ui`, `date-fns`, `@date-fns/utc`, `@tanstack/react-query`), rút gọn còn đúng 21 gói cốt lõi, VERIFY 78 tests pass và bản dựng Next.js hoàn tất 24/24 routes.
 
 ---
 
