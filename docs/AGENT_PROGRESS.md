@@ -79,7 +79,9 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - [x] **H2.** Nhật ký thay đổi (audit log: Migration `20261031133000_project_audit_log.sql`, REVOKE ALL từ client, chỉ GRANT SELECT, trigger tự động ghi khi đổi giá/chốt BOM/đổi trạng thái, bộ test RLS `test_audit_log.sql`, module `audit-log.ts` khử PII, Tab 3 Nhật ký thay đổi trên UI chi tiết dự án, 90 tests pass).
 - [x] **H3.** Tính số bản lề/ray từ danh sách tấm (Nối `hingeThresholds` vào cấu hình xưởng `settings/profile`, quy tắc `tiers` theo chiều cao cánh, nhãn "Ước tính theo cấu hình xưởng" đồng bộ 100% trên giao diện BOM `/quoting`, chi tiết dự án `projects/[id]` và file Excel xuất ra).
 - [x] **H4.** Nâng cấp dự án nháp dùng công thức cũ (Module `legacy-upgrade.ts` kiểm tra `isLegacyCalculationProject`, modal xem trước mức chênh `calculateUpgradePreview` bảo toàn Rule 12 không đổi số âm thầm, đồng bộ cùng nguồn dữ liệu giữa Dashboard và Chi tiết dự án, 93 tests pass).
-- [ ] **H5.** Onboarding và điều hướng.
+- [x] **H5.** Onboarding và điều hướng (Cấu trúc lại Sidebar thành 3 khu vực gọn: Dự án & Báo giá, Thư viện Đơn giá, Cài đặt Xưởng & Gói cước; tạo hàm xuất file Excel mẫu vật tư `exportMaterialsTemplateExcel`; Banner Onboarding tại Bước 2 `/quoting` gợi ý tải file mẫu bảng giá hoặc đăng nhập sau lần trải nghiệm demo, 93 tests pass).
+- [ ] **H6.** Tối ưu điện thoại (rà soát 375px, Web Share API).
+- [ ] **H7.** Phân tích sử dụng ẩn danh (không PII).
 
 ---
 
@@ -109,3 +111,4 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - *31/10/2026:* Hoàn tất H2: Nhật ký thay đổi dự án Audit Log (Bảng `project_audit_log`, migration bảo mật chỉ cho phép trigger server ghi và RLS phân quyền theo tổ chức, test RLS `test_audit_log.sql`, module `audit-log.ts` khử sạch PII, tích hợp Tab 3 Dòng thời gian lịch sử dự án, 90 unit tests pass).
 - *31/10/2026:* Hoàn tất H3: Tính bản lề/ray theo danh sách tấm và cấu hình xưởng (Nối bảng ngưỡng chiều cao cánh `hingeThresholds` vào trang cấu hình xưởng, hiển thị đồng bộ nhãn "Ước tính theo cấu hình xưởng" kèm HelpTooltip trên giao diện BOM `/quoting`, `/projects/[id]` và file Excel xuất ra).
 - *31/10/2026:* Hoàn tất H4: Nâng cấp dự án nháp dùng công thức cũ (Module `legacy-upgrade.ts`, modal xem trước mức chênh tài chính minh bạch trước khi ghi đè, tuân thủ tuyệt đối Rule 12 Snapshot Pricing, thống nhất một nguồn số giữa Dashboard và Chi tiết dự án, 93 unit tests pass).
+- *31/10/2026:* Hoàn tất H5: Onboarding và tinh gọn điều hướng (Tái cấu trúc Sidebar thành 3 khu vực chức năng rõ ràng, xây dựng hàm xuất file Excel mẫu đơn giá xưởng `exportMaterialsTemplateExcel()`, hiển thị Banner Onboarding sau lần demo đầu tiên tại `/quoting` đúng thời điểm người dùng đã thấy giá trị của thuật toán, 93 unit tests pass).

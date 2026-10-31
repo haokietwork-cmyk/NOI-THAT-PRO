@@ -157,3 +157,77 @@ export function exportStandardCutlistExcel(projectName: string, items: CutlistIt
   const safeName = projectName.replace(/[^a-zA-Z0-9_\u00C0-\u024F\u1E00-\u1EFF]/g, "_");
   XLSX.writeFile(wb, `Cutlist_Chuan_${safeName}.xlsx`);
 }
+
+/**
+ * Xuất file Excel Mẫu Bảng Giá Vật Tư Xưởng (Materials Template) - H5
+ */
+export function exportMaterialsTemplateExcel() {
+  const wb = XLSX.utils.book_new();
+
+  const templateData = [
+    {
+      "Mã Vật Tư": "MDF_17_CHONG_AM",
+      "Tên Vật Liệu / Quy Cách": "Gỗ MDF chống ẩm lõi xanh HMR V313 dày 17mm",
+      "Danh Mục": "board",
+      "Đơn Vị": "tấm",
+      "Khổ Dài (mm)": 2440,
+      "Khổ Rộng (mm)": 1220,
+      "Độ Dày (mm)": 17,
+      "Hệ Số Hao Hụt": 1.15,
+      "Đơn Giá Xưởng (VNĐ)": 680000,
+      "Ghi Chú": "Cắt CNC ván thùng và cánh tủ",
+    },
+    {
+      "Mã Vật Tư": "MDF_6_HAU",
+      "Tên Vật Liệu / Quy Cách": "Gỗ MDF chống ẩm lõi xanh dày 6mm làm hậu tủ",
+      "Danh Mục": "board",
+      "Đơn Vị": "tấm",
+      "Khổ Dài (mm)": 2440,
+      "Khổ Rộng (mm)": 1220,
+      "Độ Dày (mm)": 6,
+      "Hệ Số Hao Hụt": 1.12,
+      "Đơn Giá Xưởng (VNĐ)": 320000,
+      "Ghi Chú": "Hậu tủ soi rãnh 9mm",
+    },
+    {
+      "Mã Vật Tư": "CHI_PVC_DONG_MAU",
+      "Tên Vật Liệu / Quy Cách": "Chỉ dán cạnh PVC đồng màu vân gỗ dày 1mm",
+      "Danh Mục": "edge",
+      "Đơn Vị": "md",
+      "Khổ Dài (mm)": 100000,
+      "Khổ Rộng (mm)": 22,
+      "Độ Dày (mm)": 1,
+      "Hệ Số Hao Hụt": 1.08,
+      "Đơn Giá Xưởng (VNĐ)": 3500,
+      "Ghi Chú": "Máy dán cạnh tự động lăn keo PUR",
+    },
+    {
+      "Mã Vật Tư": "BAN_LE_GIAM_CHAN",
+      "Tên Vật Liệu / Quy Cách": "Bản lề bật Inox 304 giảm chấn tháo lắp nhanh",
+      "Danh Mục": "hardware",
+      "Đơn Vị": "cái",
+      "Khổ Dài (mm)": 0,
+      "Khổ Rộng (mm)": 0,
+      "Độ Dày (mm)": 0,
+      "Hệ Số Hao Hụt": 1.0,
+      "Đơn Giá Xưởng (VNĐ)": 25000,
+      "Ghi Chú": "Hệ chén phi 35mm",
+    },
+    {
+      "Mã Vật Tư": "RAY_TRUOT_AM",
+      "Tên Vật Liệu / Quy Cách": "Ray trượt âm giảm chấn mở toàn phần 450mm",
+      "Danh Mục": "hardware",
+      "Đơn Vị": "bộ",
+      "Khổ Dài (mm)": 450,
+      "Khổ Rộng (mm)": 0,
+      "Độ Dày (mm)": 0,
+      "Hệ Số Hao Hụt": 1.0,
+      "Đơn Giá Xưởng (VNĐ)": 135000,
+      "Ghi Chú": "Tải trọng 35kg hộc kéo",
+    },
+  ];
+
+  const ws = XLSX.utils.json_to_sheet(templateData);
+  XLSX.utils.book_append_sheet(wb, ws, "Mau_Don_Gia_Vat_Tu");
+  XLSX.writeFile(wb, "Mau_Bang_Gia_Vat_Tu_Xuong.xlsx");
+}

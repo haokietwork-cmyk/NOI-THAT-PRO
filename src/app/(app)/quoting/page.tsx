@@ -37,7 +37,8 @@ import {
   RotateCcw,
   Eye,
   Table,
-  Share2
+  Share2,
+  User,
 } from "lucide-react";
 import { useAppStore, SEED_PARTS } from "@/core/store/useAppStore";
 import { useAuth } from "@/core/store/useAuth";
@@ -56,7 +57,11 @@ import {
 } from "@/core/calculations/profit-calculator";
 import { WORKSHOP_TERMS } from "@/core/constants/terms";
 import HelpTooltip from "@/core/components/HelpTooltip";
-import { exportWorkshopBOMExcel, exportStandardCutlistExcel } from "@/core/exporters/excel-exporter";
+import {
+  exportWorkshopBOMExcel,
+  exportStandardCutlistExcel,
+  exportMaterialsTemplateExcel,
+} from "@/core/exporters/excel-exporter";
 
 function QuotingWorkspace() {
   const router = useRouter();
@@ -1729,6 +1734,44 @@ function QuotingWorkspace() {
       {/* ================================================================== */}
       {currentStep === 2 && (
         <div className="space-y-6">
+          {/* Banner Onboarding H5: Gợi ý sau lần demo đầu tiên */}
+          {!isAuthenticated && (
+            <div className="no-print p-4 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 text-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-xs">
+                  ✨
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 text-xs">
+                    Bạn vừa trải nghiệm tính toán tự động với mẫu 48 tấm!
+                  </h4>
+                  <p className="text-[11px] text-slate-600 mt-0.5">
+                    Hãy tải file Excel Mẫu Bảng Giá để nhập đơn giá riêng của xưởng bạn, hoặc đăng nhập để lưu trữ dự án lên Cloud.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => exportMaterialsTemplateExcel()}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-800 bg-white hover:bg-slate-100 border border-slate-300 rounded-xl transition shadow-xs cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Tải Excel Mẫu Bảng Giá</span>
+                </button>
+
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition shadow-xs cursor-pointer"
+                >
+                  <User className="w-3.5 h-3.5" />
+                  <span>Đăng Nhập Ngay</span>
+                </Link>
+              </div>
+            </div>
+          )}
+
           <div className="space-y-4">
         
         {/* Tab switcher giữa 2 đầu ra (no-print) */}

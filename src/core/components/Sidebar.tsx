@@ -25,70 +25,81 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
 
-  const navItems = [
+  const navSections = [
     {
-      name: "Tổng quan",
-      sub: "Bảng điều khiển & Dự án",
-      href: "/dashboard",
-      icon: LayoutDashboard,
-      requiresAuth: true,
+      title: "1. DỰ ÁN & BÁO GIÁ",
+      items: [
+        {
+          name: "Tổng quan dự án",
+          sub: "Quản lý tiến độ & Hợp đồng",
+          href: "/dashboard",
+          icon: LayoutDashboard,
+          requiresAuth: true,
+        },
+        {
+          name: "Bóc tách & Báo giá",
+          sub: isAuthenticated ? `${WORKSHOP_TERMS.cutlist.label} -> Báo giá A4` : "⚡ Dùng thử mẫu 48 tấm",
+          href: "/quoting",
+          icon: FileSpreadsheet,
+          requiresAuth: false,
+          badge: isAuthenticated ? "Chủ lực" : "Dùng thử",
+          badgeColor: isAuthenticated
+            ? "bg-amber-50 text-amber-700 border-amber-200"
+            : "bg-emerald-50 text-emerald-700 border-emerald-200",
+        },
+      ],
     },
     {
-      name: "Bóc tách & Báo giá",
-      sub: isAuthenticated ? `${WORKSHOP_TERMS.cutlist.label} -> Báo giá A4` : "⚡ Dùng thử mẫu 48 tấm",
-      href: "/quoting",
-      icon: FileSpreadsheet,
-      requiresAuth: false, // Chức năng test cho phép dùng thử
-      badge: isAuthenticated ? "Chủ lực" : "Dùng thử",
-      badgeColor: isAuthenticated
-        ? "bg-amber-50 text-amber-700 border-amber-200"
-        : "bg-emerald-50 text-emerald-700 border-emerald-200",
+      title: "2. THƯ VIỆN ĐƠN GIÁ",
+      items: [
+        {
+          name: "Thư viện Vật tư & Giá",
+          sub: "Ván, Chỉ, Phụ kiện, Thợ",
+          href: "/materials",
+          icon: Boxes,
+          requiresAuth: true,
+        },
+      ],
     },
     {
-      name: "Thư viện Vật tư & Giá",
-      sub: "Ván, Chỉ, Phụ kiện, Thợ",
-      href: "/materials",
-      icon: Boxes,
-      requiresAuth: true,
+      title: "3. CÀI ĐẶT & GÓI CƯỚC",
+      items: [
+        {
+          name: "Hồ sơ xưởng & Bản in A4",
+          sub: "Logo, Hotline, Mẫu A4",
+          href: "/settings",
+          icon: Settings,
+          requiresAuth: true,
+        },
+        {
+          name: "Gói cước & VietQR",
+          sub: "Nâng cấp Xưởng Pro",
+          href: "/settings/billing",
+          icon: CreditCard,
+          requiresAuth: true,
+        },
+      ],
     },
     {
-      name: "Kho Plugin CAD",
-      sub: "AutoLISP bóc tách",
-      href: "/cad-store",
-      icon: ShoppingBag,
-      badge: "Lisp",
-      badgeColor: "bg-slate-100 text-slate-600 border-slate-200",
-      requiresAuth: false,
-    },
-    {
-      name: "Thẩm định giá",
-      sub: "Kiểm tra báo giá xưởng",
-      href: "/price-check",
-      icon: CircleDollarSign,
-      badge: "Sắp có",
-      badgeColor: "bg-slate-100 text-slate-500 border-slate-200",
-      requiresAuth: true,
-    },
-    {
-      name: "Tiện ích & Bản quyền",
-      sub: "Mã máy & File Lisp",
-      href: "/my-assets",
-      icon: Key,
-      requiresAuth: true,
-    },
-    {
-      name: "Hồ sơ Xưởng & Bản in",
-      sub: "Logo, Hotline, Mẫu A4",
-      href: "/settings",
-      icon: Settings,
-      requiresAuth: true,
-    },
-    {
-      name: "Gói cước & VietQR",
-      sub: "Nâng cấp Xưởng Pro",
-      href: "/settings/billing",
-      icon: CreditCard,
-      requiresAuth: true,
+      title: "TIỆN ÍCH & PLUGIN CAD",
+      items: [
+        {
+          name: "Kho Plugin CAD",
+          sub: "AutoLISP bóc tách",
+          href: "/cad-store",
+          icon: ShoppingBag,
+          badge: "Lisp",
+          badgeColor: "bg-slate-100 text-slate-600 border-slate-200",
+          requiresAuth: false,
+        },
+        {
+          name: "Tiện ích & Bản quyền",
+          sub: "Mã máy & File Lisp",
+          href: "/my-assets",
+          icon: Key,
+          requiresAuth: true,
+        },
+      ],
     },
   ];
 
@@ -163,57 +174,64 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Navigation Links */}
-      <nav className="flex-1 px-3 py-2 space-y-1">
-        {navItems.map((item) => {
-          const isActive =
-            pathname === item.href ||
-            (item.href !== "/dashboard" && pathname?.startsWith(item.href));
-          const Icon = item.icon;
-          const isLocked = !isAuthenticated && item.requiresAuth;
+      {/* Navigation Links Grouped by 3 Areas (H5) */}
+      <nav className="flex-1 px-3 py-2 space-y-4 overflow-y-auto">
+        {navSections.map((section, sIdx) => (
+          <div key={sIdx} className="space-y-1">
+            <div className="px-3.5 py-1 text-[10px] font-black uppercase tracking-wider text-slate-400">
+              {section.title}
+            </div>
+            {section.items.map((item) => {
+              const isActive =
+                pathname === item.href ||
+                (item.href !== "/dashboard" && pathname?.startsWith(item.href));
+              const Icon = item.icon;
+              const isLocked = !isAuthenticated && item.requiresAuth;
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all ${
-                isActive
-                  ? "bg-amber-50 text-amber-900 font-semibold border border-amber-200/80 shadow-sm"
-                  : isLocked
-                  ? "text-slate-400 hover:bg-slate-50 hover:text-slate-700 opacity-80"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Icon
-                  className={`w-4 h-4 shrink-0 ${
-                    isActive ? "text-amber-600" : isLocked ? "text-slate-400" : "text-slate-500"
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center justify-between px-3.5 py-2 rounded-xl transition-all ${
+                    isActive
+                      ? "bg-amber-50 text-amber-900 font-semibold border border-amber-200/80 shadow-xs"
+                      : isLocked
+                      ? "text-slate-400 hover:bg-slate-50 hover:text-slate-700 opacity-80"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                   }`}
-                />
-                <div>
-                  <div className="text-xs font-semibold leading-tight flex items-center gap-1.5">
-                    <span>{item.name}</span>
-                    {isLocked && <Lock className="w-3 h-3 text-slate-400" />}
-                  </div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">{item.sub}</div>
-                </div>
-              </div>
-
-              {isLocked ? (
-                <span className="text-[9px] px-1.5 py-0.5 rounded font-mono font-medium bg-slate-100 text-slate-500 border border-slate-200 flex items-center gap-0.5">
-                  <Lock className="w-2.5 h-2.5" />
-                  Khóa
-                </span>
-              ) : item.badge ? (
-                <span
-                  className={`text-[9px] px-2 py-0.5 rounded-md font-semibold border ${item.badgeColor}`}
                 >
-                  {item.badge}
-                </span>
-              ) : null}
-            </Link>
-          );
-        })}
+                  <div className="flex items-center gap-2.5">
+                    <Icon
+                      className={`w-4 h-4 shrink-0 ${
+                        isActive ? "text-amber-600" : isLocked ? "text-slate-400" : "text-slate-500"
+                      }`}
+                    />
+                    <div>
+                      <div className="text-xs font-semibold leading-tight flex items-center gap-1.5">
+                        <span>{item.name}</span>
+                        {isLocked && <Lock className="w-3 h-3 text-slate-400" />}
+                      </div>
+                      <div className="text-[10px] text-slate-400 mt-0.5">{item.sub}</div>
+                    </div>
+                  </div>
+
+                  {isLocked ? (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded font-mono font-medium bg-slate-100 text-slate-500 border border-slate-200 flex items-center gap-0.5">
+                      <Lock className="w-2.5 h-2.5" />
+                      Khóa
+                    </span>
+                  ) : item.badge ? (
+                    <span
+                      className={`text-[9px] px-2 py-0.5 rounded-md font-semibold border ${item.badgeColor}`}
+                    >
+                      {item.badge}
+                    </span>
+                  ) : null}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       {/* User Footer Panel */}
