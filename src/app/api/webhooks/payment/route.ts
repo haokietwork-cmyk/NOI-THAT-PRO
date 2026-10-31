@@ -130,8 +130,9 @@ export async function POST(request: Request) {
         amount,
         payload: body,
       });
-    } catch (dbErr) {
-      // Không để lỗi DB làm sập webhook response
+    } catch (dbErr: any) {
+      // Không để lỗi DB làm sập webhook response, ghi cảnh báo an toàn
+      console.warn("[Webhook Payment DB Warning]", dbErr?.message || "Lỗi ghi nhận payment_events");
     }
 
     return NextResponse.json({
