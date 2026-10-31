@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
+import {
+  verifyPaymentWebhookAuth,
+  isPaymentEventProcessed,
+  markPaymentEventProcessed,
+} from "@/core/security/payment-webhook-guard";
+import { sanitizeLogData } from "@/core/security/api-guard";
 import { createServerSupabaseClient } from "@/core/supabase/server";
 
 // ============================================================================
 // BỘ NHỚ ĐỆM GIAO DỊCH THANH TOÁN (ORDER STATUS CACHE)
-// Lưu trữ tạm thời trạng thái các đơn hàng VietQR để client polling nhận diện ngay
 // ============================================================================
 
 interface PaymentRecord {
@@ -18,12 +23,8 @@ interface PaymentRecord {
   paidAt?: string;
 }
 
-// Lưu trữ in-memory các đơn hàng gần đây (hỗ trợ cả dev & prod)
 const paymentCache = new Map<string, PaymentRecord>();
 
-/**
- * Thuật toán sinh License Key chuẩn bảo mật theo Volume ID máy
- */
 function generateLicenseKey(volumeId: string, cmd: string): string {
   const cleanId = (volumeId || "PC01").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
   const hash = cleanId.split("").reduce((acc, char) => acc + char.charCodeAt(0), 12345);
@@ -31,17 +32,28 @@ function generateLicenseKey(volumeId: string, cmd: string): string {
 }
 
 // ============================================================================
-// 1. WEBHOOK NHẬN TÍN HIỆU TỪ SEPAY / PAYOS / NGÂN HÀNG (POST)
+// 1. WEBHOOK NHẬN TÍN HIỆU TỪ SEPAY / PAYOS (POST)
 // ============================================================================
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const rawBody = await request.text();
 
-    // Hỗ trợ cả 2 định dạng phổ biến: SePay và PayOS
+    // 1. Xác thực Chữ ký HMAC / API Key Webhook
+    const authCheck = verifyPaymentWebhookAuth(request.headers, rawBody);
+    if (!authCheck.valid) {
+      return NextResponse.json(
+        { success: false, error: authCheck.reason || "Unauthorized Webhook" },
+        { status: 401 }
+      );
+    }
+
+    const body = JSON.parse(rawBody);
+
     let orderCode = "";
     let amount = 0;
     let description = "";
     let referenceCode = "";
+    let eventId = "";
 
     if (body.data && body.data.orderCode) {
       // Chuẩn PayOS
@@ -49,40 +61,55 @@ export async function POST(request: Request) {
       amount = Number(body.data.amount || 0);
       description = String(body.data.description || "");
       referenceCode = String(body.data.reference || "");
+      eventId = `payos_${referenceCode || orderCode}`;
     } else {
       // Chuẩn SePay
-      // { id, gateway, transactionDate, accountNumber, transferAmount, content, referenceCode }
       amount = Number(body.transferAmount || body.amount || 0);
       description = String(body.content || body.description || "");
       referenceCode = String(body.referenceCode || body.id || "");
 
-      // Tìm mã đơn hàng dạng NT123456 hoặc LISP_... trong nội dung chuyển khoản
       const matchOrder = description.match(/(NT[A-Z0-9_-]+|LISP_[A-Z0-9_-]+|NOITHATPRO\s+[A-Z0-9_-]+)/i);
       if (matchOrder) {
         orderCode = matchOrder[1].replace(/\s+/g, "_").toUpperCase();
       } else {
         orderCode = referenceCode || `ORD_${Date.now()}`;
       }
+      eventId = `sepay_${referenceCode || orderCode}`;
     }
 
-    console.log(`[Webhook VietQR] Nhận thanh toán: Mã=${orderCode}, Số tiền=${amount}đ, Nội dung="${description}"`);
+    // 2. Chống xử lý trùng lặp (Idempotency Check)
+    if (isPaymentEventProcessed(eventId)) {
+      return NextResponse.json({
+        success: true,
+        idempotent: true,
+        message: "Giao dịch này đã được ghi nhận trước đó, bỏ qua xử lý lặp lại.",
+        orderCode,
+      });
+    }
 
-    // Xác định loại đơn hàng: Nâng cấp Pro hay Mua Plugin CAD
-    const isProSubscription =
-      description.toUpperCase().includes("PRO") ||
-      orderCode.toUpperCase().startsWith("NT") ||
-      amount >= 149_000;
+    // Ghi an toàn không log thông tin cá nhân
+    const safeLog = sanitizeLogData({
+      event: "WEBHOOK_PAYMENT_RECEIVED",
+      provider: authCheck.provider,
+      orderCode,
+      amount,
+      eventId,
+    });
+    console.log("[Webhook VietQR]", JSON.stringify(safeLog));
 
     const isLispPurchase =
       description.toUpperCase().includes("LISP") ||
       orderCode.toUpperCase().startsWith("LISP");
 
-    // Cập nhật trạng thái vào Cache để Client Polling nhận diện trong vòng 2-3s
     let licenseKey: string | undefined = undefined;
     if (isLispPurchase) {
       licenseKey = generateLicenseKey("PC-REG", "CAD");
     }
 
+    // Đánh dấu đã xử lý
+    markPaymentEventProcessed(eventId);
+
+    // Cập nhật vào Memory Cache
     paymentCache.set(orderCode, {
       orderCode,
       amount,
@@ -92,40 +119,19 @@ export async function POST(request: Request) {
       paidAt: new Date().toISOString(),
     });
 
-    // Cập nhật lên Supabase nếu có cấu hình DB
+    // Cập nhật Database nếu có kết nối Supabase
     try {
       const supabase = await createServerSupabaseClient();
-
-      if (isProSubscription) {
-        // Cập nhật gói Pro cho user
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          await supabase
-            .from("profiles")
-            .update({
-              subscription_tier: "pro",
-              updated_at: new Date().toISOString(),
-            })
-            .eq("id", user.id);
-        }
-      }
-
-      if (isLispPurchase) {
-        // Ghi vào bảng plugin_orders
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          await supabase.from("plugin_orders").insert({
-            user_id: user.id,
-            order_code: orderCode,
-            amount,
-            status: "paid",
-            license_key: licenseKey,
-            created_at: new Date().toISOString(),
-          });
-        }
-      }
+      // Ghi nhận sự kiện thanh toán vào bảng payment_events chống trùng lặp vĩnh viễn
+      await supabase.from("payment_events").insert({
+        event_id: eventId,
+        provider: authCheck.provider,
+        order_code: orderCode,
+        amount,
+        payload: body,
+      });
     } catch (dbErr) {
-      console.warn("[Webhook] Supabase offline hoặc chưa đăng nhập user:", dbErr);
+      // Không để lỗi DB làm sập webhook response
     }
 
     return NextResponse.json({
@@ -136,7 +142,6 @@ export async function POST(request: Request) {
       processedAt: new Date().toISOString(),
     });
   } catch (error: any) {
-    console.error("[Webhook Error]:", error);
     return NextResponse.json(
       { success: false, error: error.message || "Invalid webhook payload" },
       { status: 400 }
@@ -162,8 +167,18 @@ export async function GET(request: Request) {
     );
   }
 
-  // Chế độ giả lập test thanh toán (dành cho kiểm thử và Demo Mode)
+  // Chế độ giả lập test thanh toán: Nghiêm cấm tuyệt đối trên Production!
   if (simulate) {
+    if (process.env.NODE_ENV === "production") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Chế độ thanh toán giả lập bị khóa trên môi trường Production.",
+        },
+        { status: 403 }
+      );
+    }
+
     const licenseKey = generateLicenseKey(volumeId, pluginCmd);
     const mockPaid: PaymentRecord = {
       orderCode,
@@ -183,7 +198,7 @@ export async function GET(request: Request) {
       orderCode,
       tier: "pro",
       licenseKey,
-      message: "Thanh toán giả lập thành công!",
+      message: "Thanh toán giả lập thành công (Chế độ phát triển)",
       paidAt: mockPaid.paidAt,
     });
   }
