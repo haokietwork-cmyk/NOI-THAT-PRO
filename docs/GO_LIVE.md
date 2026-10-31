@@ -14,8 +14,8 @@
 | :---: | :--- | :---: | :---: | :--- |
 | **1** | Project Supabase Production riêng biệt | 🟡 **CHỜ NGƯỜI** | Người dùng | Người tạo project mới trên [supabase.com](https://supabase.com); chạy migration theo `docs/DB_RESET.md`. |
 | **2** | Quản lý bí mật môi trường (Secrets) | 🟡 **CHỜ NGƯỜI** | Người dùng | Đặt biến môi trường trên Vercel/Hosting; xác nhận không commit `.env*` (`git ls-files .env*`). |
-| **3** | Hosting, Domain chính thức & HTTPS | ❓ **CẦN QUYẾT ĐỊNH** | Người dùng | Người chọn nền tảng hosting (Vercel/Cloudflare Pages) và cấu hình bản ghi DNS domain `webnoithatpro.vn`. |
-| **4** | Phương thức thanh toán gói cước & Webhook | ❓ **CẦN QUYẾT ĐỊNH** | Người dùng | Xác nhận dùng PayOS hay SePay hay VietQR quét tay để kích hoạt webhook `/api/webhooks/payment`. |
+| **3** | Hosting, Domain chính thức & HTTPS | 🟢 **ĐÃ CHỌN (Vercel)** | Người dùng | Triển khai qua Vercel kết nối GitHub repo; HTTPS tự động cấp phát, Edge Network Singapore. |
+| **4** | Phương thức thanh toán gói cước & Webhook | 🟢 **ĐÃ CHỌN (VietQR)** | Cả hai | Thanh toán quét mã VietQR Napas 24/7 trực tiếp; chủ xưởng kích hoạt gói cước cho khách hàng. |
 | **5** | Sao lưu tự động & Diễn tập phục hồi (Drill) | 🟡 **CHỜ NGƯỜI** | Người dùng | Bật PITR trên Supabase Pro hoặc cron pg_dump theo hướng dẫn tại `docs/OPERATIONS.md`. |
 | **6** | Giám sát lỗi (Error Monitoring) & Kênh hỗ trợ | 🟢 **ĐẠT** (Code) / 🟡 (Ops) | Cả hai | Đã có `error-logger.ts` lọc PII; Người dùng cấu hình Sentry DSN và số Zalo hỗ trợ kỹ thuật trên web. |
 | **7** | Thử nghiệm người dùng độc lập (UAT ngoài) | 🟡 **CHỜ NGƯỜI** | Người dùng | Mời 1 thợ mộc / chủ xưởng ngoài dùng thử trên iPhone/Android: tạo dự án, xem link, in A4. |
@@ -55,19 +55,26 @@
      * `NEXT_PUBLIC_APP_URL`: `https://webnoithatpro.vn`
   2. Tuyệt đối **KHÔNG** đặt `SUPABASE_SERVICE_ROLE_KEY` vào tiền tố `NEXT_PUBLIC_*`.
 
-### Mục 3: Hosting, Tên Miền & HTTPS
-- **Hiện trạng:** Đang chờ người dùng quyết định nền tảng triển khai.
-- **Khuyến nghị:**
-  * **Vercel Pro / Hobby:** Tối ưu 100% cho Next.js 16 App Router, tích hợp Edge Network tại Singapore, tự động cấp phát chứng chỉ SSL/HTTPS Let's Encrypt miễn phí.
-  * Trỏ bản ghi DNS của tên miền `webnoithatpro.vn`:
-    - CNAME: `cname.vercel-dns.com`
-    - A record: `76.76.21.21`
+### Mục 3: Hosting Trên Vercel, Tên Miền & HTTPS
+- **Quyết định:** Triển khai chính thức lên **Vercel** (Hobby/Pro).
+- **Lý do & Ưu điểm:** Tối ưu hóa 100% cho Next.js 16 App Router (Turbopack, Server Actions, Dynamic Routes), tự động phát hiện framework, hỗ trợ Edge Network tại Singapore (`sin1`) giúp tốc độ phản hồi cực nhanh cho xưởng mộc tại Việt Nam, cấp chứng chỉ SSL HTTPS miễn phí.
+- **Thao tác người thực hiện trên Vercel:**
+  1. Truy cập [vercel.com](https://vercel.com) > `Add New...` > `Project`.
+  2. Chọn kho lưu trữ GitHub `web-noi-that` (hoặc tên repo của bạn).
+  3. Cấu hình các biến môi trường tại phần **Environment Variables** (theo Mục 2).
+  4. Bấm **Deploy**. Sau khi build hoàn tất, gán tên miền chính thức:
+     - Settings > Domains > Nhập `webnoithatpro.vn` (hoặc subdomain mong muốn).
+     - Cấu hình DNS tại nhà đăng ký tên miền: CNAME trỏ về `cname.vercel-dns.com` hoặc A record trỏ về `76.76.21.21`.
 
-### Mục 4: Phương Thức Thu Tiền Gói Cước & Webhook
-- **Hiện trạng:** Đang chờ người dùng lựa chọn cổng thanh toán:
-  * **Phương án A (Tự động qua PayOS):** Cần đăng ký tài khoản doanh nghiệp hoặc hộ kinh doanh, tạo kênh thanh toán VietQR động, cấu hình Webhook URL `https://webnoithatpro.vn/api/webhooks/payment` với chữ ký HMAC.
-  * **Phương án B (Tự động qua SePay):** Kết nối thông báo biến động số dư tài khoản ngân hàng cá nhân/doanh nghiệp, truyền Header `Authorization: Apikey <KEY>`.
-  * **Phương án C (Thủ công ban đầu):** Quét mã QR tĩnh của chủ xưởng, gửi ủy nhiệm chi qua Zalo, quản trị viên kích hoạt gói cước trong bảng `subscriptions`.
+### Mục 4: Phương Thức Thu Tiền Gói Cước Bằng Mã VietQR
+- **Quyết định:** Thu tiền trực tiếp qua **Mã QR Ngân hàng (VietQR Napas 24/7)**.
+- **Quy trình vận hành:**
+  1. Khách hàng bấm nâng cấp gói cước Pro tại trang `/pricing` hoặc gian hàng CAD.
+  2. Hệ thống sinh mã đơn hàng duy nhất dạng `NTPRO_KHxxxx` và hiển thị mã VietQR động chứa số tiền chính xác và nội dung chuyển khoản.
+  3. Khách hàng mở ứng dụng ngân hàng quét mã và thanh toán tức thì.
+  4. **Kích hoạt tài khoản:**
+     - Ban đầu: Chủ nền tảng nhận biến động số dư qua app ngân hàng, đối chiếu nội dung `NTPRO_KHxxxx` và cập nhật gói cước trong Supabase Dashboard (bảng `subscriptions` hoặc `profiles`).
+     - Khi số lượng khách tăng: Bật Webhook tự động qua SePay hoặc PayOS (code xác thực HMAC và bảng chống trùng `payment_events` đã được xây dựng sẵn sàng 100% tại Giai đoạn D3).
 
 ### Mục 5: Sao Lưu Tự Động & Thử Nghiệm Phục Hồi (Backup Drill)
 - **Hiện trạng:** Quy trình đã được soạn thảo tại `docs/OPERATIONS.md`.
