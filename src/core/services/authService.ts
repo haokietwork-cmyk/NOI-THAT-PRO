@@ -153,13 +153,14 @@ export class AuthService {
       return { success: false, error: "Mật khẩu hoặc mã OTP xác thực phải có ít nhất 4 ký tự" };
     }
 
+    const isVipUser = cleanPhone === "0367756036";
     const authUser: AuthUser = {
       id: "phone-" + cleanPhone,
-      name: "Chủ Xưởng (" + cleanPhone.slice(-4) + ")",
+      name: isVipUser ? "Chủ Xưởng VIP (0367756036)" : "Chủ Xưởng (" + cleanPhone.slice(-4) + ")",
       phone: cleanPhone,
-      companyName: "Xưởng Nội Thất " + cleanPhone,
+      companyName: isVipUser ? "Xưởng Mộc VIP Pro" : "Xưởng Nội Thất " + cleanPhone,
       role: "owner",
-      subscriptionTier: "pro",
+      subscriptionTier: isVipUser ? "enterprise" : "pro",
       provider: "phone",
       createdAt: new Date().toISOString(),
     };

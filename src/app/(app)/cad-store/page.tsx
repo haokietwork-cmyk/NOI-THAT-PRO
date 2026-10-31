@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useAuth } from "@/core/store/useAuth";
 import { 
   Sparkles, 
   Download, 
@@ -44,6 +45,8 @@ interface PluginItem {
 }
 
 export default function CadStorePage() {
+  const { user } = useAuth();
+  const isVip = true; // Mở khóa đặc quyền VIP toàn bộ tính năng theo yêu cầu chủ xưởng
   const [showApploadGuide, setShowApploadGuide] = useState(false);
   const [selectedPlugin, setSelectedPlugin] = useState<PluginItem | null>(null);
   const [selectedPlatform, setSelectedPlatform] = useState<"all" | "autocad" | "sketchup">("all");
@@ -73,7 +76,7 @@ export default function CadStorePage() {
       desc: "Công cụ in & gộp PDF hàng loạt đỉnh cao cho AutoCAD (.NET C# / AutoCAD 2018-2026). Tự động nhận diện khung Block động, Polyline, sắp xếp Natural Sort (A-2 < A-10), in qua Named View chống lệch lề và gộp PDF tự động tạo Bookmark mục lục.",
       priceNumber: 399_000,
       priceText: "399.000 đ",
-      tag: "Flagship v2.0 - 63/63 Pass Oracle",
+      tag: "Công cụ chính thức v2.0 - 63/63 Pass Oracle",
       tagColor: "bg-amber-50 text-amber-800 border-amber-200",
       supportedCad: "AutoCAD 2018 - 2026",
       features: [
@@ -83,122 +86,6 @@ export default function CadStorePage() {
         "In qua Named View triệt tiêu 100% tình trạng lệch lề, mất nét",
         "Tự động gộp file PDF thành 1 tập duy nhất kèm Bookmark mục lục",
         "Quản lý bản quyền Machine ID (RSA), dùng thử 15 ngày & cập nhật ngầm",
-      ],
-    },
-    {
-      id: "autocutlist-pro",
-      code: "AutoCutlist_Pro.lsp",
-      cmd: "QC",
-      platform: "autocad",
-      title: "AutoCutlist Pro (Bóc tách Cutlist sang Web)",
-      desc: "Quét chọn toàn bộ khối tủ hoặc chi tiết trên Model/Layout. Tự động trích xuất Tên tấm, Dài, Rộng, Dày, Cạnh dán chỉ sang file CSV chuẩn UTF-8 nạp thẳng vào Web Báo Giá.",
-      priceNumber: 0,
-      priceText: "Miễn phí",
-      isFree: true,
-      tag: "Tặng cộng đồng xưởng",
-      tagColor: "bg-emerald-50 text-emerald-800 border-emerald-200",
-      supportedCad: "AutoCAD 2018 - 2026",
-      features: [
-        "Nhận diện Polyline 2D và 3D Solid ngành gỗ",
-        "Xuất file CSV UTF-8 có BOM, mở Excel 100% không lỗi tiếng Việt",
-        "Khớp chính xác 8 cột chuẩn của Web Nội Thất Pro",
-        "Bảo toàn biến hệ thống, hoàn tác 1 lần (Ctrl + Z)",
-      ],
-    },
-    {
-      id: "smartcabinet-sketchup",
-      code: "SmartCabinet_Parametric.rbz",
-      cmd: "SC3D",
-      platform: "sketchup",
-      title: "SmartCabinet Parametric 3D (Tự Sinh Thùng Tủ & Cam Chốt)",
-      desc: "Công cụ dựng tủ gỗ công nghiệp thông số cho SketchUp lấy cảm hứng từ Profile Builder 4. Kéo giãn kích thước (Dài x Rộng x Cao) linh hoạt, tự chia đợt, lùi hậu và đục liên kết cam chốt.",
-      priceNumber: 349_000,
-      priceText: "349.000 đ",
-      tag: "Cảm hứng Profile Builder",
-      tagColor: "bg-rose-50 text-rose-800 border-rose-200",
-      supportedCad: "SketchUp 2020 - 2026 (Win/Mac)",
-      features: [
-        "Kéo giãn kích thước tủ linh hoạt không làm biến dạng độ dày ván",
-        "Tự động tính độ dày ván chuẩn xưởng (17mm, 9mm, 6mm)",
-        "Gán nhãn cạnh dán chỉ D1, D2, R1, R2 trực quan bằng màu sắc",
-        "Bắn thẳng dữ liệu bóc tách lên Web Báo Giá chỉ bằng 1 cú click",
-      ],
-    },
-    {
-      id: "smartdim-furniture",
-      code: "SmartDim_Furniture.vlx",
-      cmd: "SD",
-      platform: "autocad",
-      title: "SmartDim Furniture (Ghi Kích Thước Tủ Thông Minh)",
-      desc: "Tự động đo tim đợt, lọt lòng khoang tủ, khe hở cánh và tạo chuỗi Dimension thi công chuẩn chỉ với 1 cú click. Tự động gán nhãn cạnh dán chỉ D1, D2, R1, R2.",
-      priceNumber: 199_000,
-      priceText: "199.000 đ",
-      tag: "Thợ kỹ thuật khuyên dùng",
-      tagColor: "bg-amber-50 text-amber-800 border-amber-200",
-      supportedCad: "AutoCAD 2018 - 2026",
-      features: [
-        "Tự động sắp xếp đường gióng kích thước không bị đè nét",
-        "Nhận diện độ dày ván tự động (17mm, 6mm, 9mm)",
-        "Tạo ghi chú cạnh dán chỉ trực tiếp lên bản vẽ",
-        "Cấp license vĩnh viễn theo mã ổ cứng máy tính (Volume ID)",
-      ],
-    },
-    {
-      id: "sketchup-cutlist-bridge",
-      code: "NoiThatPro_WebSync.rbz",
-      cmd: "WSYNC",
-      platform: "sketchup",
-      title: "SketchUp WebSync Bridge (Bóc Tách & Đẩy Thẳng Lên Web)",
-      desc: "Quét chọn toàn bộ Component/Group trong SketchUp. Trích xuất chính xác quy cách từng tấm ván và đẩy trực tiếp lên Web Báo Giá qua REST API mà không cần mở file Excel.",
-      priceNumber: 0,
-      priceText: "Miễn phí",
-      isFree: true,
-      tag: "Tặng cộng đồng SketchUp",
-      tagColor: "bg-teal-50 text-teal-800 border-teal-200",
-      supportedCad: "SketchUp 2019 - 2026 (Win/Mac)",
-      features: [
-        "Đọc cấu trúc Component cha-con (Tủ áo -> Hồi tủ, Đợt, Cánh)",
-        "Nhận diện thớ gỗ xoay ngang/dọc tự động",
-        "Xuất thẳng sang Bảng tính số tấm MDF và mét dài chỉ trên Web",
-        "Hoạt động song song và đồng bộ với ABF / SketchUcation",
-      ],
-    },
-    {
-      id: "batchplot-layout",
-      code: "BatchPlot_Layout.vlx",
-      cmd: "BP",
-      platform: "autocad",
-      title: "BatchPlot Layout (In Hàng Loạt Bản Vẽ Thi Công)",
-      desc: "Quét tự động toàn bộ khung tên trong Model và các tab Layout. Xuất 50 - 100 bản vẽ thi công sang file PDF duy nhất trong 30 giây không lệch tỷ lệ.",
-      priceNumber: 149_000,
-      priceText: "149.000 đ",
-      tag: "Tiết kiệm 90% thời gian in",
-      tagColor: "bg-indigo-50 text-indigo-800 border-indigo-200",
-      supportedCad: "AutoCAD 2018 - 2026",
-      features: [
-        "Tự động tìm khung tên và sắp xếp theo số hiệu bản vẽ",
-        "Hỗ trợ cả không gian Model và tab Layout",
-        "Gộp toàn bộ bản vẽ thành 1 file PDF A4/A3 duy nhất",
-        "Cài 1 lần dùng trọn đời trên máy kỹ thuật",
-      ],
-    },
-    {
-      id: "hardware-counter",
-      code: "Hardware_Counter.vlx",
-      cmd: "HC",
-      platform: "autocad",
-      title: "Hardware Counter (Thống Kê Phụ Kiện Kim Khí)",
-      desc: "Tự động đếm chính xác số lượng bản lề bật, ray trượt âm, chốt cam liên kết, tay nắm tủ theo block thuộc tính và xuất bảng đặt vật tư (BOM) gửi đại lý.",
-      priceNumber: 149_000,
-      priceText: "149.000 đ",
-      tag: "Chống sót phụ kiện xưởng",
-      tagColor: "bg-purple-50 text-purple-800 border-purple-200",
-      supportedCad: "AutoCAD 2018 - 2026",
-      features: [
-        "Đếm chính xác theo từng hạng mục thành phẩm (Tủ áo, Tủ bếp...)",
-        "Không bỏ sót phụ kiện ray âm hoặc ty ben nâng",
-        "Xuất bảng tổng hợp trực tiếp sang Excel gửi nhà cung cấp",
-        "Khóa bản quyền theo Volume Serial Number máy",
       ],
     },
   ];
@@ -700,34 +587,31 @@ end
             </div>
 
             {/* Bottom Actions */}
-            <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+            <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <span className="text-[10px] text-slate-400 block font-semibold">
-                  {p.isFree ? "Bản quyền vĩnh viễn" : "Bản quyền trọn đời / máy"}
+                  {isVip ? "Đặc quyền Tài khoản VIP" : p.isFree ? "Bản quyền vĩnh viễn" : "Bản quyền trọn đời / máy"}
                 </span>
-                <span className="text-xl font-black text-amber-600 font-mono">
-                  {p.priceText}
+                <span className="text-xl font-black text-emerald-600 font-mono">
+                  {isVip ? "0 đ (Miễn Phí VIP)" : p.priceText}
                 </span>
               </div>
 
-              <div>
-                {p.isFree ? (
-                  <button
-                    onClick={() => handleDownloadFile(p)}
-                    className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition shadow-xs"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>{p.platform === "sketchup" ? "Tải Plugin SketchUp" : "Tải Lisp miễn phí"}</span>
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleOpenBuyModal(p)}
-                    className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition shadow-sm shadow-amber-500/20"
-                  >
-                    <QrCode className="w-3.5 h-3.5" />
-                    <span>Đăng ký mua qua VietQR</span>
-                  </button>
-                )}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleDownloadFile(p)}
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition shadow-xs"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Tải Bộ Cài Đặt (745 KB)</span>
+                </button>
+                <Link
+                  href="/kich-hoat?tool=AUTOPLOT&vip=true"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-slate-900 bg-amber-400 hover:bg-amber-500 rounded-xl transition shadow-xs"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Kích Hoạt VIP (0đ)</span>
+                </Link>
               </div>
             </div>
 

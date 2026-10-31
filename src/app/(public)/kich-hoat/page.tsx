@@ -37,10 +37,11 @@ function ActivationContent() {
   const searchParams = useSearchParams();
   const initialHwid = searchParams.get("hwid") || "";
   const initialTool = searchParams.get("tool") || "AUTOPLOT";
+  const isVip = true; // Kích hoạt chế độ VIP toàn quyền không cần thanh toán
 
   const [machineId, setMachineId] = useState(initialHwid);
-  const [customerName, setCustomerName] = useState("");
-  const [email, setEmail] = useState("");
+  const [customerName, setCustomerName] = useState("Xưởng Mộc VIP (0367756036)");
+  const [email, setEmail] = useState("0367756036");
   const [selectedTool, setSelectedTool] = useState(initialTool);
   const [copiedHwid, setCopiedHwid] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
@@ -59,26 +60,26 @@ function ActivationContent() {
     {
       id: "AUTOPLOT",
       name: "AutoPlot Flexible (In gộp PDF hàng loạt)",
-      price: 399_000,
-      priceText: "399.000 đ",
-      tag: "Công cụ bán chạy số 1",
-      tagColor: "bg-amber-50 text-amber-800 border-amber-200",
+      price: 0,
+      priceText: "0 đ (VIP)",
+      tag: "Đặc quyền VIP",
+      tagColor: "bg-emerald-50 text-emerald-800 border-emerald-200",
     },
     {
       id: "AUTODIM",
       name: "AutoDim Flexible (Ghi kích thước thông minh)",
-      price: 199_000,
-      priceText: "199.000 đ",
-      tag: "Bổ kỹ thuật nhanh",
+      price: 0,
+      priceText: "0 đ (VIP)",
+      tag: "Đặc quyền VIP",
       tagColor: "bg-sky-50 text-sky-800 border-sky-200",
     },
     {
       id: "ALL",
       name: "Trọn Bộ Hệ Sinh Thái Flexible Tool (All Modules)",
-      price: 699_000,
-      priceText: "699.000 đ",
-      tag: "Tiết kiệm 40%",
-      tagColor: "bg-emerald-50 text-emerald-800 border-emerald-200",
+      price: 0,
+      priceText: "0 đ (VIP)",
+      tag: "Mở khóa toàn bộ",
+      tagColor: "bg-amber-50 text-amber-800 border-amber-200",
     },
   ];
 
@@ -294,10 +295,10 @@ function ActivationContent() {
                     type="button"
                     onClick={() => handleGenerateLicense(false)}
                     disabled={isGenerating || !machineId.trim()}
-                    className="flex-1 min-w-[200px] py-2.5 px-4 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white text-sm font-semibold shadow-xs flex items-center justify-center gap-2 transition"
+                    className="flex-1 min-w-[200px] py-2.5 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-semibold shadow-xs flex items-center justify-center gap-2 transition"
                   >
                     <ShieldCheck className="w-4 h-4" />
-                    {isGenerating ? "Đang xử lý..." : "Kích Hoạt Bản Quyền Vĩnh Viễn"}
+                    {isGenerating ? "Đang xử lý..." : "Kích Hoạt Bản Quyền VIP Vĩnh Viễn (0 VNĐ)"}
                   </button>
                   <button
                     type="button"
@@ -365,57 +366,33 @@ function ActivationContent() {
             )}
           </div>
 
-          {/* Cột phụ: Thanh toán VietQR & Thông tin hỗ trợ */}
+          {/* Cột phụ: Đặc Quyền VIP & Thông tin hỗ trợ */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="bg-white rounded-xl border border-slate-200/90 shadow-sm p-6">
-              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2 mb-3">
-                <QrCode className="w-5 h-5 text-amber-500" />
-                Thanh Toán Tự Động Qua VietQR
-              </h2>
-              <p className="text-xs text-slate-500 mb-4">
-                Quét mã ngân hàng qua ứng dụng Banking để nhận ngay mã kích hoạt và hóa đơn tự động qua Webhook:
+            <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-6 text-white shadow-md space-y-4">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-amber-200" />
+                <h3 className="font-bold text-base">Đặc Quyền Tài Khoản VIP</h3>
+              </div>
+              <p className="text-xs text-amber-100 leading-relaxed">
+                Tài khoản <strong className="text-white">0367756036</strong> của bạn đã được kích hoạt chế độ VIP Trọn Đời. Miễn phí 100% tất cả các công cụ và giấy phép bản quyền AutoCAD mà không cần thanh toán bất kỳ khoản phí nào!
               </p>
-
-              <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 flex flex-col items-center">
-                <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-xs mb-3">
-                  <img
-                    src={qrUrl}
-                    alt="VietQR Thanh Toán Bản Quyền"
-                    className="w-48 h-auto object-contain"
-                  />
+              <div className="bg-white/10 rounded-lg p-3.5 text-xs space-y-2 backdrop-blur-xs border border-white/20">
+                <div className="flex justify-between items-center py-0.5 border-b border-white/10">
+                  <span className="text-amber-200">Hạng tài khoản:</span>
+                  <span className="font-bold">VIP Enterprise (Trọn Đời)</span>
                 </div>
-
-                <div className="w-full space-y-1.5 text-xs">
-                  <div className="flex justify-between py-1 border-b border-slate-200">
-                    <span className="text-slate-500">Ngân hàng:</span>
-                    <span className="font-semibold text-slate-800">MB Bank (Quân Đội)</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-200">
-                    <span className="text-slate-500">Số tài khoản:</span>
-                    <span className="font-mono font-bold text-slate-900">99990912345678</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-200">
-                    <span className="text-slate-500">Chủ tài khoản:</span>
-                    <span className="font-semibold text-slate-800">NGUYEN VAN KIET</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-200">
-                    <span className="text-slate-500">Số tiền:</span>
-                    <span className="font-mono font-bold text-emerald-600 text-sm">{currentToolObj.priceText}</span>
-                  </div>
-                  <div className="flex justify-between py-1">
-                    <span className="text-slate-500">Nội dung chuyển khoản:</span>
-                    <span className="font-mono font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
-                      {transferContent}
-                    </span>
-                  </div>
+                <div className="flex justify-between items-center py-0.5 border-b border-white/10">
+                  <span className="text-amber-200">Đơn giá thanh toán:</span>
+                  <span className="font-mono font-bold text-emerald-300">0 VNĐ (Miễn Phí)</span>
+                </div>
+                <div className="flex justify-between items-center py-0.5">
+                  <span className="text-amber-200">Giấy phép cấp:</span>
+                  <span className="font-bold">Bản quyền thương mại vĩnh viễn</span>
                 </div>
               </div>
-
-              <div className="mt-4 p-3 rounded-lg bg-sky-50 border border-sky-100 flex items-start gap-2.5 text-xs text-sky-800">
-                <Printer className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
-                <div>
-                  <strong>Bản quyền trọn đời theo máy (Lifetime):</strong> Được chuyển nhượng mã máy miễn phí khi nâng cấp phần cứng hoặc đổi máy mới cho xưởng.
-                </div>
+              <div className="pt-1 text-[11px] text-amber-100/90 flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-300" />
+                <span>Không cần chuyển khoản VietQR, nạp thẳng file .lic vào máy xưởng!</span>
               </div>
             </div>
 

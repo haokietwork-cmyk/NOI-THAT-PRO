@@ -271,17 +271,17 @@ export const SEED_MATERIALS: MaterialItem[] = [
 // ============================================================================
 
 export const SEED_PROFILE: WorkshopProfile = {
-  name: "XƯỞNG NỘI THẤT HOÀNG GIA",
-  companyName: "Công ty TNHH Nội Thất Hoàng Gia",
-  phone: "0912 345 678",
+  name: "XƯỞNG NỘI THẤT VIP",
+  companyName: "Xưởng Mộc VIP Pro 0367756036",
+  phone: "0367756036",
   address: "Cụm Công Nghiệp Chàng Sơn, Thạch Thất, Hà Nội",
   logoUrl: "",
   quoteTerms:
     "Đơn giá đã bao gồm chi phí vận chuyển & lắp đặt hoàn thiện tại công trình trong phạm vi 30km. Bảo hành gỗ công nghiệp kháng ẩm và phụ kiện chính hãng 24 tháng.",
   bankName: "MB Bank",
   accountNumber: "99990912345678",
-  accountName: "XUONG NOI THAT HOANG GIA",
-  subscriptionTier: "pro",
+  accountName: "XUONG NOI THAT VIP",
+  subscriptionTier: "enterprise",
   costConfig: DEFAULT_WORKSHOP_COST_CONFIG,
   updatedAt: "2026-03-20T10:00:00Z",
 };
