@@ -50,7 +50,7 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - [x] **D3.** Webhook thanh toán (HMAC signature PayOS/SePay, idempotency table `payment_events`, khóa backdoor simulate trên prod, 71 tests pass).
 - [x] **D4.** Security headers trong `next.config.mjs` (X-Frame-Options SAMEORIGIN, CSP, HSTS, X-Content-Type-Options nosniff, Permissions-Policy, Referrer-Policy, xác nhận live 200 OK).
 - [x] **D5.** Trang Điều khoản & Chính sách quyền riêng tư (nháp: `/terms`, `/privacy`, phân định Data Controller cho xưởng và Data Processor cho nền tảng theo Nghị định 13/2023/NĐ-CP, cảnh báo kiểm tra pháp lý trước khi public).
-- [ ] **D6.** Xóa tài khoản & Xuất dữ liệu.
+- [x] **D6.** Xóa tài khoản & Xuất dữ liệu (Xuất JSON đầy đủ, API xóa tài khoản `/api/user/delete-account` xác nhận 2 bước gõ `XOA TAI KHOAN`, cascade tổ chức, giao diện `/settings/data`, 73 tests pass).
 - [ ] **D7.** Giám sát lỗi (lọc PII).
 - [ ] **D8.** ESLint thật, error boundary, xóa catch rỗng.
 - [ ] **D9.** `docs/OPERATIONS.md` (backup, restore, phân tách dev/prod).
@@ -88,3 +88,4 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - *31/10/2026:* Hoàn tất D3: Bảo mật Webhook thanh toán (Xác thực chữ ký HMAC-SHA256 PayOS, API Key SePay, migration bảng `payment_events` chống xử lý trùng, khóa triệt để backdoor simulate trên Production, 71 tests pass).
 - *31/10/2026:* Hoàn tất D4: Cấu hình bộ security headers toàn diện trong `next.config.mjs` (CSP, X-Frame-Options, X-Content-Type-Options, HSTS, Permissions-Policy, Referrer-Policy, kiểm thử trực tiếp trên server live trả về chính xác).
 - *31/10/2026:* Hoàn tất D5: Xây dựng trang `/terms` và `/privacy` (giao diện Web-Twin Slate 50 blueprint grid, phân định xưởng là Data Controller và nền tảng là Data Processor theo Nghị định 13/2023/NĐ-CP, chèn disclaimer kỹ thuật và ghi rõ cảnh báo: *Đây là bản dự thảo tham khảo kỹ thuật, người dùng cần tra cứu luật hiện hành hoặc tham vấn luật sư trước khi public*).
+- *31/10/2026:* Hoàn tất D6: Xây dựng tính năng xuất toàn bộ dữ liệu xưởng (Data Portability JSON), API xóa vĩnh viễn tài khoản `/api/user/delete-account` kèm xác thực 2 bước gõ `XOA TAI KHOAN`, giao diện quản lý tại `/settings/data` (73 tests pass).

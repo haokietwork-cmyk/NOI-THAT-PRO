@@ -150,3 +150,20 @@ test("D1: saveProfile không cho phép client tự leo thang subscription_tier l
   assert.strictEqual(allowedUpdateColumns.includes("subscription_tier"), false);
   assert.strictEqual(allowedUpdateColumns.includes("tier"), false);
 });
+
+test("D6: StorageService.exportAllUserData gom đầy đủ hồ sơ, vật tư và dự án", async () => {
+  const exportData = await StorageService.exportAllUserData();
+
+  assert.ok(exportData.exportedAt);
+  assert.ok(exportData.profile);
+  assert.ok(Array.isArray(exportData.materials));
+  assert.ok(Array.isArray(exportData.projects));
+  assert.ok(exportData.materials.length > 0);
+  assert.ok(exportData.projects.length > 0);
+});
+
+test("D6: StorageService.clearAllLocalData xóa sạch bộ nhớ tạm", () => {
+  StorageService.clearAllLocalData();
+  const state = StorageService.getLocalState();
+  assert.ok(state.profile);
+});

@@ -606,4 +606,43 @@ export class StorageService {
       return { success: false, error: err?.message || "Lỗi gửi lời mời thành viên" };
     }
   }
+
+  /**
+   * Xuất toàn bộ dữ liệu người dùng (Data Portability theo Nghị định 13)
+   */
+  public static async exportAllUserData(): Promise<{
+    exportedAt: string;
+    profile: WorkshopProfile;
+    materials: MaterialItem[];
+    projects: SavedProject[];
+  }> {
+    const profile = await this.getProfile();
+    const materials = await this.getMaterials();
+    const projects = await this.getProjects();
+
+    return {
+      exportedAt: new Date().toISOString(),
+      profile,
+      materials,
+      projects,
+    };
+  }
+
+  /**
+   * Xóa sạch toàn bộ dữ liệu trên LocalStorage của máy client
+   */
+  public static clearAllLocalData(): void {
+    if (this.isBrowser()) {
+      try {
+        localStorage.removeItem(STORAGE_KEYS.STATE);
+        localStorage.removeItem(STORAGE_KEYS.PROFILE);
+        localStorage.removeItem(STORAGE_KEYS.MATERIALS);
+        localStorage.removeItem(STORAGE_KEYS.PROJECTS);
+        localStorage.removeItem(STORAGE_KEYS.LEADS);
+      } catch (e) {
+        console.warn("Lỗi dọn dẹp LocalStorage:", e);
+      }
+    }
+    memoryState = null;
+  }
 }

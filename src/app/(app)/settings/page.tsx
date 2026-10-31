@@ -66,6 +66,12 @@ export default function SettingsPage() {
         >
           2. Gói cước & Thanh toán VietQR
         </Link>
+        <Link
+          href="/settings/data"
+          className="px-4 py-2 bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 rounded-xl transition"
+        >
+          3. Dữ liệu & Quyền riêng tư
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
