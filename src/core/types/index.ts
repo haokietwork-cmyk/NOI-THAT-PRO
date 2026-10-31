@@ -205,6 +205,21 @@ export interface ProjectCalculationResult {
 
 export type ProjectStatus = 'draft' | 'quoted' | 'ordered' | 'approved' | 'in_production' | 'finalized';
 
+export interface FrozenProjectTotals {
+  frozenAt: string;
+  totalCost: number;
+  totalQuote: number;
+  totalSheets: number;
+  totalEdgeLengthMd: number;
+  hardwareCost: number;
+  laborCost: number;
+  suppliesCost: number;
+  boardsSummary: BoardSummaryLine[];
+  edgesSummary: EdgeSummaryLine[];
+  itemsCount: number;
+  itemsHash?: string;
+}
+
 export interface SavedProject {
   id: string;
   projectName: string;
@@ -217,6 +232,8 @@ export interface SavedProject {
   versionNo?: number;                // Số thứ tự phiên bản (1, 2, 3...)
   parentProjectId?: string;          // ID dự án cha (nếu là bản sửa đổi revision)
   status: ProjectStatus;
+  isLocked?: boolean;                // Cờ khóa dự án khi chốt hợp đồng (P1 - H1)
+  frozenAt?: string;                 // Thời điểm đóng băng dự án
   items: CutlistPart[];
   materialsSnapshot: MaterialItem[]; // Snapshot pricing bảo toàn giá lịch sử
   materialSnapshots?: MaterialItem[]; // Alias tương thích ngược
@@ -226,7 +243,7 @@ export interface SavedProject {
   totalQuote: number;                // Tổng tiền báo khách hàng (VNĐ)
   calcVersion?: number;              // Phiên bản thuật toán tính toán (1: công thức hiện tại)
   costConfigSnapshot?: WorkshopCostConfig; // Snapshot cấu hình chi phí xưởng (bảo toàn giá khi đổi setting)
-  snapshotTotals?: any;              // Snapshot tổng tiền đóng băng
+  snapshotTotals?: FrozenProjectTotals; // Snapshot tổng tiền và BOM đóng băng
 }
 
 export interface FeatureLead {

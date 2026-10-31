@@ -2,6 +2,7 @@ import assert from "node:assert";
 import test from "node:test";
 import { StorageService } from "./storageService.ts";
 import { SEED_PROFILE, SEED_PROJECTS } from "./seedData.ts";
+import type { SavedProject } from "../types/index.ts";
 
 test("storageService: saveProfile cập nhật local state an toàn và trả về kết quả", async () => {
   const updatedProfile = {
@@ -166,4 +167,46 @@ test("D6: StorageService.clearAllLocalData xóa sạch bộ nhớ tạm", () => 
   StorageService.clearAllLocalData();
   const state = StorageService.getLocalState();
   assert.ok(state.profile);
+});
+
+test("H1: saveProject chặn sửa đè khi dự án đã đóng băng hợp đồng và createRevision tạo bản v2", async () => {
+  const lockedProject: SavedProject = {
+    id: "proj-locked-test",
+    projectName: "Công trình đã chốt",
+    clientName: "Bác Hùng",
+    status: "approved",
+    createdAt: "2026-10-31T00:00:00Z",
+    isLocked: true,
+    frozenAt: new Date().toISOString(),
+    roundingStep: 0.5,
+    profitMargin: 1.65,
+    totalCost: 20_000_000,
+    totalQuote: 33_000_000,
+    versionNo: 1,
+    items: [],
+    materialsSnapshot: [],
+  };
+
+  // Lưu dự án đã khóa vào local state
+  await StorageService.saveProject(lockedProject);
+
+  // Thử mở khóa sửa đè trái phép (gửi isLocked = false trên cùng ID)
+  const maliciousEdit: SavedProject = {
+    ...lockedProject,
+    isLocked: false,
+    totalCost: 10_000_000,
+  };
+
+  const editRes = await StorageService.saveProject(maliciousEdit);
+  assert.strictEqual(editRes.success, false);
+  assert.match(editRes.error || "", /đã được đóng băng hợp đồng.*tạo bản v2/);
+
+  // Tạo bản sửa đổi v2 hợp pháp
+  const revRes = await StorageService.createRevision("proj-locked-test");
+  assert.strictEqual(revRes.success, true);
+  assert.ok(revRes.project);
+  assert.strictEqual(revRes.project.parentProjectId, "proj-locked-test");
+  assert.strictEqual(revRes.project.versionNo, 2);
+  assert.strictEqual(revRes.project.isLocked, false);
+  assert.strictEqual(revRes.project.status, "draft");
 });

@@ -70,7 +70,16 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 ---
 
 ### GIAI ĐOẠN G: CHECKLIST GO-LIVE
-- [x] **G.** `docs/GO_LIVE.md` & `CHANGELOG.md` (Lập bảng kiểm định 14 mục Go-Live, ghi chép nhật ký phát hành, phân định trách nhiệm RACI và hướng dẫn chi tiết người dùng) 🛑 **CỔNG G5: DỪNG CHỜ DUYỆT CHECKLIST & CỔNG G6: CHỜ NGƯỜI THỰC HIỆN RA MẮT**.
+- [x] **G.** `docs/GO_LIVE.md` & `CHANGELOG.md` (Lập bảng kiểm định 14 mục Go-Live, ghi chép nhật ký phát hành, cập nhật quyết định Vercel & VietQR).
+
+---
+
+### GIAI ĐOẠN H: P1 SAU RA MẮT
+- [x] **H1.** Đóng băng dự án khi chốt hợp đồng (Migration `20261031130000_project_freeze_contract.sql` có rollback DOWN, trigger chặn sửa `project_items` khi `is_locked = true`, trigger tự động khóa khi `status IN ('approved', 'ordered', 'in_production', 'finalized')`, module `freeze-project.ts` lưu `snapshotTotals` & băm SHA-256 cutlist integrity, `StorageService.createRevision()` sinh bản v2 giữ nguyên bản gốc bất biến, UI hiển thị badge ĐÃ KHÓA HĐ và nút Tạo Bản Sửa Đổi v2, 87 tests pass).
+- [ ] **H2.** Nhật ký thay đổi (audit log `project_audit_log`: đổi giá, khóa BOM, chuyển trạng thái hợp đồng, mở khóa bản nháp).
+- [ ] **H3.** Tính số bản lề/ray từ danh sách tấm (nối `hingeThresholds` vào engine, nhãn ước tính).
+- [ ] **H4.** Nâng cấp dự án nháp dùng công thức cũ (xem trước mức chênh).
+- [ ] **H5.** Onboarding và điều hướng.
 
 ---
 
@@ -95,4 +104,5 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - *31/10/2026:* Hoàn tất D10: Nâng cấp `src/middleware.ts` tự động chuyển hướng private app routes sang `/login` với dynamic origin, hoàn thiện tài liệu hướng dẫn làm cứng bảo mật xác thực `docs/AUTH_SETUP.md` (xác nhận email, redirect whitelist, rate limits, Turnstile CAPTCHA, cảnh báo rủi ro chi phí SMS OTP). Hoàn tất toàn bộ Giai đoạn D (P0 Launch Blockers).
 - *31/10/2026:* Hoàn tất Giai đoạn E: Stepper 3 bước `/quoting`, chế độ nâng cao `advancedMode`, badge tùy chỉnh cấu hình, test bất biến bộ lọc hiển thị 6 tiêu chí, loại bỏ hoàn toàn `includes("(v")`, bảo vệ bí mật kinh doanh in A4, gỡ bỏ 13 thư viện thừa (rút gọn còn 21 dependencies), 78 tests pass.
 - *31/10/2026:* Hoàn tất Giai đoạn F: Tính năng chia sẻ báo giá bằng secure link (Bảng `quote_shares`, hàm băm SHA-256 token, RPC `get_shared_quote` SECURITY DEFINER, bộ test RLS `test_rls_quote_shares.sql`, module `quote-share.ts`, API routes tạo/thu hồi/truy vấn, trang in chuẩn A4 `/share/[token]` với `X-Robots-Tag: noindex, nofollow`, 82 tests pass, bản dựng Next.js hoàn tất 26/26 routes).
-- *31/10/2026:* Hoàn tất Giai đoạn G: Soạn thảo bảng kiểm định ra mắt `docs/GO_LIVE.md` (14 mục kiểm định trạng thái, hướng dẫn chi tiết người dùng, lệnh kiểm tra độc lập VERIFY) và lập nhật ký phiên bản `CHANGELOG.md` cho bản phát hành v1.0.0-rc.1. DỪNG TẠI CỔNG G5 & G6.
+- *31/10/2026:* Hoàn tất Giai đoạn G: Soạn thảo bảng kiểm định ra mắt `docs/GO_LIVE.md` (14 mục kiểm định trạng thái, hướng dẫn chi tiết người dùng, lệnh kiểm tra độc lập VERIFY) và lập nhật ký phiên bản `CHANGELOG.md` cho bản phát hành v1.0.0-rc.1. Đã chốt triển khai lên Vercel và thu tiền qua mã VietQR.
+- *31/10/2026:* Hoàn tất H1: Đóng băng dự án khi chốt hợp đồng (Migration `20261031130000_project_freeze_contract.sql`, trigger bảo vệ `project_items`, trigger tự động khóa khi `status` duyệt, lõi `freeze-project.ts` băm SHA-256 cutlist integrity, `createRevision()` sinh bản v2 không đổi bản gốc, UI Dashboard & Project Details hiển thị badge ĐÃ KHÓA HĐ và nút Tạo Bản Sửa Đổi v2, 87 unit tests pass).

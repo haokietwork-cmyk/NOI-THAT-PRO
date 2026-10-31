@@ -121,6 +121,20 @@ export function useAppStore() {
     await StorageService.deleteProject(id);
   };
 
+  const createRevision = async (
+    parentProjectId: string
+  ): Promise<{ success: boolean; project?: SavedProject; error?: string }> => {
+    const res = await StorageService.createRevision(parentProjectId);
+    if (res.success && res.project) {
+      currentState = {
+        ...currentState,
+        projects: [res.project, ...currentState.projects],
+      };
+      notify();
+    }
+    return res;
+  };
+
   const getProject = (id: string): SavedProject | undefined => {
     return currentState.projects.find((p) => p.id === id);
   };
@@ -146,6 +160,7 @@ export function useAppStore() {
     deleteMaterial,
     saveProject,
     deleteProject,
+    createRevision,
     getProject,
     resetToDefaults,
   };

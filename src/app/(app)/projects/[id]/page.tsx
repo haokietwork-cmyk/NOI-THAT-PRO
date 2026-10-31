@@ -12,12 +12,21 @@ import {
   Calendar,
   User,
   Sliders,
-  Boxes
+  Boxes,
+  Lock,
+  ShieldCheck,
+  GitBranch,
 } from "lucide-react";
 import { useAppStore } from "@/core/store/useAppStore";
-import { calculateQuoteEngine, LEGAL_DISCLAIMER, resolveProjectProfitMargin } from "@/core/calculations/quote-engine";
+import {
+  calculateQuoteEngine,
+  calculateProject,
+  LEGAL_DISCLAIMER,
+  resolveProjectProfitMargin,
+} from "@/core/calculations/quote-engine";
 import { exportWorkshopBOMExcel } from "@/core/exporters/excel-exporter";
 import { WORKSHOP_TERMS } from "@/core/constants/terms";
+import { isProjectContractLocked, freezeProjectContract } from "@/core/calculations/freeze-project";
 import HelpTooltip from "@/core/components/HelpTooltip";
 
 export default function ProjectWorkspacePage() {
@@ -25,10 +34,11 @@ export default function ProjectWorkspacePage() {
   const params = useParams();
   const projectId = params?.id as string;
 
-  const { projects, profile, materials } = useAppStore();
+  const { projects, profile, materials, createRevision, saveProject } = useAppStore();
   const project = projects.find((p) => p.id === projectId);
 
   const [activeTab, setActiveTab] = useState<"bom" | "quote" | "items">("bom");
+  const [isCreatingRevision, setIsCreatingRevision] = useState(false);
 
   if (!project) {
     return (
@@ -62,6 +72,43 @@ export default function ProjectWorkspacePage() {
   );
   const formatVND = (val: number) => (val || 0).toLocaleString("vi-VN") + " đ";
 
+  const isLocked = isProjectContractLocked(project.status, project.isLocked);
+
+  const handleCreateRevision = async () => {
+    setIsCreatingRevision(true);
+    try {
+      const res = await createRevision(project.id);
+      if (res.success && res.project) {
+        router.push(`/quoting?id=${res.project.id}`);
+      } else {
+        alert(res.error || "Không thể tạo bản sửa đổi lúc này");
+      }
+    } finally {
+      setIsCreatingRevision(false);
+    }
+  };
+
+  const handleFreezeContract = async () => {
+    if (
+      !confirm(
+        "Xác nhận CHỐT HỢP ĐỒNG và ĐÓNG BĂNG dự án?\n\nSau khi khóa, toàn bộ chi tiết tấm và giá vốn sẽ được lưu giữ bất biến 100%. Mọi thay đổi tiếp theo sẽ được tạo thành bản sửa đổi v2."
+      )
+    ) {
+      return;
+    }
+    const fullCalcResult = calculateProject(
+      project.items,
+      projectMaterials as any,
+      {
+        profitMargin: effectiveProfitMargin,
+        roundingStep: project.roundingStep ?? 0.5,
+        costConfig: project.costConfigSnapshot,
+      }
+    );
+    const frozen = freezeProjectContract(project, fullCalcResult, "approved");
+    await saveProject(frozen);
+  };
+
   return (
     <div className="space-y-6 font-sans pb-16">
       {/* Top action header */}
@@ -76,23 +123,53 @@ export default function ProjectWorkspacePage() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold text-slate-900">{project.projectName}</h1>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                Đã bóc tách
-              </span>
+              {isLocked ? (
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-900 text-amber-300 border border-slate-700 flex items-center gap-1 shadow-xs">
+                  <Lock className="w-3 h-3 text-amber-400" />
+                  ĐÃ KHÓA HỢP ĐỒNG {project.versionNo ? `(v${project.versionNo})` : ""}
+                </span>
+              ) : (
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  Đã bóc tách
+                </span>
+              )}
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
               Khách hàng: <strong className="text-slate-700">{project.clientName}</strong> • {new Date(project.createdAt).toLocaleDateString("vi-VN")}
+              {project.frozenAt && (
+                <span className="ml-2 text-slate-400">• Đóng băng: {new Date(project.frozenAt).toLocaleDateString("vi-VN")}</span>
+              )}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <Link
-            href={`/quoting?id=${project.id}`}
-            className="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
-          >
-            Sửa {WORKSHOP_TERMS.cutlist.labelWithOriginal}
-          </Link>
+          {isLocked ? (
+            <button
+              onClick={handleCreateRevision}
+              disabled={isCreatingRevision}
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-800 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-xl transition shadow-xs"
+            >
+              <GitBranch className="w-3.5 h-3.5 text-amber-600" />
+              <span>{isCreatingRevision ? "Đang tạo..." : `Tạo Bản Sửa Đổi v${(project.versionNo || 1) + 1}`}</span>
+            </button>
+          ) : (
+            <>
+              <Link
+                href={`/quoting?id=${project.id}`}
+                className="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
+              >
+                Sửa {WORKSHOP_TERMS.cutlist.labelWithOriginal}
+              </Link>
+              <button
+                onClick={handleFreezeContract}
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition"
+              >
+                <Lock className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Chốt Hợp Đồng</span>
+              </button>
+            </>
+          )}
 
           <button
             onClick={() => window.print()}

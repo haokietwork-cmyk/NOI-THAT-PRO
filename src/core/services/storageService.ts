@@ -9,6 +9,11 @@ import { SEED_MATERIALS, SEED_PROFILE, SEED_PROJECTS } from "./seedData.ts";
 import { createClient, isSupabaseConfigured } from "../supabase/client.ts";
 import { resolveProjectProfitMargin } from "../calculations/profit-calculator.ts";
 import { validateAndSanitizeCostConfig } from "../calculations/cost-config-validator.ts";
+import {
+  isProjectContractLocked,
+  createProjectRevision,
+  freezeProjectContract,
+} from "../calculations/freeze-project.ts";
 
 const STORAGE_KEYS = {
   STATE: "noithat_pro_state_v1",
@@ -330,6 +335,11 @@ export class StorageService {
               totalCost: Number(p.total_cost || 0),
               totalQuote: Number(p.total_quote || 0),
               calcVersion: p.calc_version ?? 1,
+              versionNo: p.version_no ?? 1,
+              parentProjectId: p.parent_project_id,
+              isLocked: Boolean(p.is_locked || isProjectContractLocked(p.status)),
+              frozenAt: p.frozen_at,
+              snapshotTotals: p.snapshot_totals,
               materialsSnapshot: SEED_MATERIALS,
               items: (p.project_items || []).map((item: any) => ({
                 id: item.id,
@@ -362,10 +372,24 @@ export class StorageService {
   public static async saveProject(project: SavedProject): Promise<{ success: boolean; error?: string }> {
     const current = this.getLocalState();
     const existing = current.projects.find((p) => p.id === project.id);
+
+    // Chặn sửa đè trực tiếp khi dự án đã đóng băng hợp đồng
+    if (existing?.isLocked && !project.isLocked) {
+      return {
+        success: false,
+        error: "Dự án đã được đóng băng hợp đồng. Không thể tự ý mở khóa sửa đè. Vui lòng tạo bản v2.",
+      };
+    }
+
     const resolvedCalcVersion = 1;
     const sanitizedCostConfigSnapshot = validateAndSanitizeCostConfig(project.costConfigSnapshot);
+    const isLocked = Boolean(project.isLocked || isProjectContractLocked(project.status));
+    const frozenAt = project.frozenAt || (isLocked ? new Date().toISOString() : undefined);
+
     const projectWithVersion: SavedProject = {
       ...project,
+      isLocked,
+      frozenAt,
       calcVersion: resolvedCalcVersion,
       costConfigSnapshot: sanitizedCostConfigSnapshot,
     };
@@ -420,6 +444,11 @@ export class StorageService {
             client_phone: project.clientPhone,
             client_address: project.clientAddress,
             status: project.status,
+            is_locked: isLocked,
+            frozen_at: frozenAt || null,
+            snapshot_totals: project.snapshotTotals || null,
+            version_no: project.versionNo ?? 1,
+            parent_project_id: project.parentProjectId || null,
             profit_margin: project.profitMargin,
             total_cost: project.totalCost,
             total_quote: project.totalQuote,
@@ -485,6 +514,25 @@ export class StorageService {
     }
 
     return { success: true };
+  }
+
+  /**
+   * Tạo bản sửa đổi mới v2, v3... từ một dự án đã chốt hợp đồng
+   */
+  public static async createRevision(parentProjectId: string): Promise<{ success: boolean; project?: SavedProject; error?: string }> {
+    const projects = await this.getProjects();
+    const parent = projects.find((p) => p.id === parentProjectId);
+    if (!parent) {
+      return { success: false, error: "Không tìm thấy dự án cha" };
+    }
+
+    const revision = createProjectRevision(parent);
+    const saveRes = await this.saveProject(revision);
+    if (!saveRes.success) {
+      return { success: false, error: saveRes.error };
+    }
+
+    return { success: true, project: revision };
   }
 
   public static async deleteProject(id: string): Promise<void> {

@@ -19,7 +19,8 @@ import {
   Search,
   X,
   RotateCcw,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Lock,
 } from "lucide-react";
 import { useAppStore } from "@/core/store/useAppStore";
 import { formatPercentVi } from "@/core/calculations/profit-calculator";
@@ -399,6 +400,17 @@ export default function DashboardPage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="font-bold text-slate-900 text-sm">{prj.projectName}</h3>
+                    {prj.versionNo && prj.versionNo > 1 && (
+                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-md bg-slate-100 text-slate-700 border border-slate-300">
+                        v{prj.versionNo}
+                      </span>
+                    )}
+                    {prj.isLocked && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-900 text-amber-300 border border-slate-700 flex items-center gap-1 shadow-2xs">
+                        <Lock className="w-2.5 h-2.5 text-amber-400" />
+                        Đã Khóa HĐ
+                      </span>
+                    )}
                     <span
                       className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
                         prj.status === "in_production"
