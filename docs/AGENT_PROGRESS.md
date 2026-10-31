@@ -53,7 +53,7 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - [x] **D6.** Xóa tài khoản & Xuất dữ liệu (Xuất JSON đầy đủ, API xóa tài khoản `/api/user/delete-account` xác nhận 2 bước gõ `XOA TAI KHOAN`, cascade tổ chức, giao diện `/settings/data`, 73 tests pass).
 - [x] **D7.** Giám sát lỗi (lọc PII: xây dựng `src/core/monitoring/error-logger.ts` lọc sạch số điện thoại VN, email, mã thẻ và các trường PII nhạy cảm, 77 tests pass).
 - [x] **D8.** ESLint thật, error boundary toàn app (`src/app/error.tsx`, `src/app/global-error.tsx`), loại bỏ catch rỗng, lập danh mục 27 dependency chưa dùng tại `docs/UNUSED_DEPENDENCIES.md` (77 tests pass).
-- [ ] **D9.** `docs/OPERATIONS.md` (backup, restore, phân tách dev/prod).
+- [x] **D9.** `docs/OPERATIONS.md` (Tài liệu phân tách 3 môi trường dev/staging/prod, chiến lược sao lưu PITR & pg_dump, quy trình phục hồi sự cố, ma trận trách nhiệm RACI).
 - [ ] **D10.** `docs/AUTH_SETUP.md` (hardened auth checklist).
 
 ---
@@ -91,3 +91,4 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - *31/10/2026:* Hoàn tất D6: Xây dựng tính năng xuất toàn bộ dữ liệu xưởng (Data Portability JSON), API xóa vĩnh viễn tài khoản `/api/user/delete-account` kèm xác thực 2 bước gõ `XOA TAI KHOAN`, giao diện quản lý tại `/settings/data` (73 tests pass).
 - *31/10/2026:* Hoàn tất D7: Xây dựng hệ thống giám sát và ghi log khử PII `src/core/monitoring/error-logger.ts` (lọc sạch SĐT Việt Nam, email, thông tin tài chính cá nhân trước khi ghi log ra console hoặc telemetry, 77 tests pass).
 - *31/10/2026:* Hoàn tất D8: Xây dựng Root Error Boundary (`src/app/error.tsx`) và Global Error Boundary (`src/app/global-error.tsx`), dọn dẹp các khối catch rỗng sang warning khử PII, lập danh mục kiểm toán 27 dependency chưa dùng tại `docs/UNUSED_DEPENDENCIES.md` (77 tests pass).
+- *31/10/2026:* Hoàn tất D9: Soạn thảo cẩm nang vận hành `docs/OPERATIONS.md` (phân tách 3 môi trường dev/staging/prod, cấu hình PITR, hướng dẫn khôi phục sự cố, và phân định trách nhiệm RACI).
