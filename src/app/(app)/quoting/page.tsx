@@ -19,6 +19,7 @@ import {
   RefreshCw,
   Building2,
   ArrowRight,
+  ArrowLeft,
   ChevronRight,
   Info,
   Layers,
@@ -33,7 +34,9 @@ import {
   Filter,
   Search,
   X,
-  RotateCcw
+  RotateCcw,
+  Eye,
+  Table
 } from "lucide-react";
 import { useAppStore, SEED_PARTS } from "@/core/store/useAppStore";
 import { useAuth } from "@/core/store/useAuth";
@@ -70,6 +73,31 @@ function QuotingWorkspace() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalTitle, setAuthModalTitle] = useState("");
   const [authModalDesc, setAuthModalDesc] = useState("");
+
+  // ==========================================================================
+  // TIẾN TRÌNH 3 BƯỚC & CHẾ ĐỘ NÂNG CAO (STEPPER & ADVANCED MODE)
+  // ==========================================================================
+  type QuotingStep = 1 | 2 | 3;
+  const [currentStep, setCurrentStep] = useState<QuotingStep>(1);
+  const [advancedMode, setAdvancedMode] = useState<boolean>(false);
+  const [projectVersionNo, setProjectVersionNo] = useState<number>(1);
+  const [parentProjectId, setParentProjectId] = useState<string | undefined>(undefined);
+
+  // Đọc cấu hình Chế độ nâng cao từ localStorage trong useEffect (tránh lỗi hydration)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("autocutlist_advanced_mode");
+      if (saved === "true") setAdvancedMode(true);
+    }
+  }, []);
+
+  const toggleAdvancedMode = () => {
+    const next = !advancedMode;
+    setAdvancedMode(next);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("autocutlist_advanced_mode", String(next));
+    }
+  };
 
   const [projectName, setProjectName] = useState("Dự án căn hộ 2PN Vinhomes");
   const [clientName, setClientName] = useState("Anh Tuấn");
@@ -319,9 +347,110 @@ function QuotingWorkspace() {
         setParts(found.items);
         setProfitMargin(resolveProjectProfitMargin(found.profitMargin));
         if (found.roundingStep) setRoundingStep(found.roundingStep);
+        setProjectVersionNo(found.versionNo ?? found.version ?? 1);
+        setParentProjectId(found.parentProjectId);
+        setProjectStatus(found.status || "draft");
+        if (found.items && found.items.length > 0) {
+          setCurrentStep(2);
+        }
       }
     }
   }, [editId, projects]);
+
+  // Kiểm tra dự án có phải là bản revision v2+ hay không (dựa trên versionNo hoặc parentProjectId, KHÔNG kiểm tra tên chuỗi)
+  const isRevision = useMemo(() => {
+    return (projectVersionNo > 1) || Boolean(parentProjectId);
+  }, [projectVersionNo, parentProjectId]);
+
+  // Kiểm tra dự án có bị khóa theo trạng thái hợp đồng hay không
+  const isLockedContract = useMemo(() => {
+    return projectStatus === "approved" || projectStatus === "in_production" || projectStatus === "finalized" || projectStatus === "ordered";
+  }, [projectStatus]);
+
+  // Hiển thị tính năng nâng cao nếu BẬT chế độ nâng cao HOẶC dự án là bản v2+/đã khóa hợp đồng
+  const showAdvancedFeatures = advancedMode || isRevision || isLockedContract;
+
+  // Điều hướng các bước trong luồng làm việc và cập nhật URL query param
+  const goToStep = (step: QuotingStep) => {
+    setCurrentStep(step);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("step", String(step));
+      window.history.pushState(null, "", url.toString());
+    }
+  };
+
+  // Đồng bộ với URL khi tải trang hoặc khi người dùng bấm Back/Forward của trình duyệt
+  useEffect(() => {
+    const s = searchParams?.get("step");
+    if (s === "1" || s === "2" || s === "3") {
+      setCurrentStep(Number(s) as QuotingStep);
+    }
+    const handlePopState = () => {
+      const sp = new URLSearchParams(window.location.search);
+      const stepVal = sp.get("step");
+      if (stepVal === "1" || stepVal === "2" || stepVal === "3") {
+        setCurrentStep(Number(stepVal) as QuotingStep);
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [searchParams]);
+
+  // Xuất file Excel BOM Xưởng
+  const handleExportWorkshopBOM = () => {
+    exportWorkshopBOMExcel(
+      projectName,
+      calcResult.boards,
+      calcResult.edges,
+      calcResult.laborCost,
+      calcResult.totalBaseCost,
+      profile.costConfig
+    );
+    showToast("Đã xuất file Excel BOM xưởng thành công!");
+  };
+
+  // Xuất file Cutlist Tấm Ván CNC
+  const handleExportProjectCutlist = () => {
+    const cutlistItems = parts.map((p) => ({
+      moduleName: p.moduleName,
+      partName: p.partName,
+      lengthMm: p.lengthMm,
+      widthMm: p.widthMm,
+      thicknessMm: p.thicknessMm,
+      qty: p.qty,
+      materialCode: p.materialCode,
+      edgeL1: p.edgeL1,
+      edgeL2: p.edgeL2,
+      edgeW1: p.edgeW1,
+      edgeW2: p.edgeW2,
+    }));
+    exportStandardCutlistExcel(projectName, cutlistItems);
+    showToast("Đã xuất file Cutlist chuẩn máy CNC thành công!");
+  };
+
+  // Mở hộp thoại in báo giá A4
+  const handlePrintA4 = () => {
+    setActiveOutputTab("quote");
+    goToStep(2);
+    setTimeout(() => {
+      window.print();
+    }, 250);
+  };
+
+  // Kiểm tra xưởng có đang dùng cấu hình chi phí tùy chỉnh khác mặc định hay không
+  const isCustomCostConfig = useMemo(() => {
+    const currentCfg = profile.costConfig;
+    if (!currentCfg) return false;
+    return (
+      currentCfg.suppliesRatePerSheet !== DEFAULT_WORKSHOP_COST_CONFIG.suppliesRatePerSheet ||
+      currentCfg.laborRatePerSheet !== DEFAULT_WORKSHOP_COST_CONFIG.laborRatePerSheet ||
+      currentCfg.hingesPerSheet !== DEFAULT_WORKSHOP_COST_CONFIG.hingesPerSheet ||
+      currentCfg.slidesPerSheet !== DEFAULT_WORKSHOP_COST_CONFIG.slidesPerSheet ||
+      (currentCfg.glueRatePerMd ?? 0) !== (DEFAULT_WORKSHOP_COST_CONFIG.glueRatePerMd ?? 0) ||
+      (currentCfg.glueUnitPrice ?? 0) !== (DEFAULT_WORKSHOP_COST_CONFIG.glueUnitPrice ?? 0)
+    );
+  }, [profile.costConfig]);
 
   // Ưu tiên snapshot giá tại ngày tạo để bảo toàn lịch sử dự án cũ
   const activeMaterials = useMemo(() => {
@@ -573,13 +702,13 @@ function QuotingWorkspace() {
       setShowAuthModal(true);
       return;
     }
-    const nextVer = projectName.includes("(v") 
-      ? projectName.replace(/\(v\d+\)/, `(v${Date.now().toString().slice(-2)})`)
-      : `${projectName} (v2)`;
-    setProjectName(nextVer);
+    const nextVer = (projectVersionNo || 1) + 1;
+    setProjectVersionNo(nextVer);
+    setParentProjectId(editId || undefined);
+    setProjectName(`${projectName.replace(/\s*\(v\d+\)$/, "")} (v${nextVer})`);
     setProjectStatus("draft");
-    router.replace("/quoting"); // Tách id khỏi URL để khi lưu sẽ tạo dự án độc lập, kế thừa 100% profitMargin từ v1
-    showToast(`Đã tạo phiên bản báo giá mới: "${nextVer}". Bạn có thể tinh chỉnh giá hoặc danh sách tấm mà không ảnh hưởng bản cũ!`, "info");
+    router.replace("/quoting?step=1"); // Tách id khỏi URL để khi lưu sẽ tạo dự án độc lập, kế thừa 100% profitMargin từ v1
+    showToast(`Đã tạo phiên bản báo giá mới v${nextVer}. Bạn có thể tinh chỉnh giá hoặc danh sách tấm mà không ảnh hưởng bản cũ!`, "info");
   };
 
   // Lưu dự án vào Store
@@ -606,6 +735,8 @@ function QuotingWorkspace() {
       totalCost: calcResult.totalBaseCost,
       totalQuote: calcResult.totalQuotePrice,
       calcVersion: 1,
+      versionNo: projectVersionNo,
+      parentProjectId: parentProjectId,
       costConfigSnapshot: profile.costConfig || DEFAULT_WORKSHOP_COST_CONFIG,
     };
 
@@ -783,30 +914,29 @@ function QuotingWorkspace() {
               </span>
             )}
 
-            <button
-              type="button"
-              onClick={handleCreateRevision}
-              title="Nhân bản để tạo bản báo giá v2 sau đàm phán"
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition"
-            >
-              <Copy className="w-3.5 h-3.5 text-slate-500" />
-              <span>Tạo bản v2</span>
-            </button>
+            {showAdvancedFeatures && (
+              <button
+                type="button"
+                onClick={handleCreateRevision}
+                title="Nhân bản để tạo bản báo giá v2 sau đàm phán"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition cursor-pointer"
+              >
+                <Copy className="w-3.5 h-3.5 text-slate-500" />
+                <span>Tạo bản v2</span>
+              </button>
+            )}
 
             <button
               onClick={handleSaveProject}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition cursor-pointer"
             >
               <Save className="w-3.5 h-3.5" />
               <span>Lưu dự án</span>
             </button>
 
             <button
-              onClick={() => {
-                setActiveOutputTab("quote");
-                setTimeout(() => window.print(), 200);
-              }}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition shadow-sm shadow-amber-500/20"
+              onClick={handlePrintA4}
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition shadow-sm shadow-amber-500/20 cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>In Báo Giá A4</span>
@@ -863,9 +993,127 @@ function QuotingWorkspace() {
       </div>
 
       {/* ================================================================== */}
-      {/* BƯỚC 1: KHUNG KÉO THẢ EXCEL CUTLIST (no-print)                     */}
+      {/* THANH ĐIỀU HƯỚNG 3 BƯỚC (STEPPER) & CHẾ ĐỘ NÂNG CAO (no-print)      */}
       {/* ================================================================== */}
-      <div className="no-print bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-4">
+      <div className="no-print space-y-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
+          <div className="flex flex-wrap items-center gap-2">
+            {isCustomCostConfig && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs">
+                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                <span>Đang dùng cấu hình tùy chỉnh của xưởng</span>
+              </span>
+            )}
+
+            {!advancedMode && activeCutlistFilterCount > 0 && (
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-sky-50 text-sky-800 border border-sky-200">
+                <Filter className="w-3.5 h-3.5 text-sky-600" />
+                <span>Đang lọc {activeCutlistFilterCount} tiêu chí</span>
+                <button
+                  type="button"
+                  onClick={handleResetCutlistFilter}
+                  className="text-sky-700 hover:text-sky-950 underline font-bold text-[11px]"
+                >
+                  Xóa lọc
+                </button>
+              </span>
+            )}
+
+            {isRevision && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-800 border border-indigo-200">
+                <Copy className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Phiên bản v{projectVersionNo}</span>
+              </span>
+            )}
+          </div>
+
+          {/* Nút bật/tắt Chế độ nâng cao (mặc định tắt, ghi nhớ trong localStorage) */}
+          <button
+            type="button"
+            onClick={toggleAdvancedMode}
+            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition border cursor-pointer ${
+              advancedMode
+                ? "bg-slate-900 text-amber-400 border-slate-800 shadow-xs"
+                : "bg-white text-slate-600 hover:bg-slate-50 border-slate-200"
+            }`}
+          >
+            <Sliders className="w-3.5 h-3.5" />
+            <span>Chế độ nâng cao: {advancedMode ? "BẬT" : "TẮT"}</span>
+          </button>
+        </div>
+
+        {/* 3-Step Navigation Bar */}
+        <nav aria-label="Tiến trình làm việc" className="bg-white rounded-2xl border border-slate-200/80 p-2 shadow-xs">
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={() => goToStep(1)}
+              className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl transition text-xs font-bold cursor-pointer ${
+                currentStep === 1
+                  ? "bg-amber-500 text-white shadow-xs"
+                  : "bg-slate-50 text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-black shrink-0 ${
+                currentStep === 1 ? "bg-white text-amber-600" : "bg-slate-200 text-slate-700"
+              }`}>
+                1
+              </span>
+              <span className="hidden sm:inline">1. Nhập Cutlist</span>
+              <span className="sm:hidden">1. Nhập</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (parts.length > 0) goToStep(2);
+              }}
+              disabled={parts.length === 0}
+              className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl transition text-xs font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                currentStep === 2
+                  ? "bg-amber-500 text-white shadow-xs"
+                  : "bg-slate-50 text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-black shrink-0 ${
+                currentStep === 2 ? "bg-white text-amber-600" : "bg-slate-200 text-slate-700"
+              }`}>
+                2
+              </span>
+              <span className="hidden sm:inline">2. Xem Báo Giá &amp; BOM</span>
+              <span className="sm:hidden">2. Báo Giá</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (parts.length > 0) goToStep(3);
+              }}
+              disabled={parts.length === 0}
+              className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl transition text-xs font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                currentStep === 3
+                  ? "bg-amber-500 text-white shadow-xs"
+                  : "bg-slate-50 text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-black shrink-0 ${
+                currentStep === 3 ? "bg-white text-amber-600" : "bg-slate-200 text-slate-700"
+              }`}>
+                3
+              </span>
+              <span className="hidden sm:inline">3. Xuất File &amp; In Ấn</span>
+              <span className="sm:hidden">3. Xuất</span>
+            </button>
+          </div>
+        </nav>
+      </div>
+
+      {/* ================================================================== */}
+      {/* BƯỚC 1: KHUNG KÉO THẢ EXCEL CUTLIST & DANH SÁCH TẤM (no-print)      */}
+      {/* ================================================================== */}
+      {currentStep === 1 && (
+        <div className="space-y-6">
+          <div className="no-print bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
             <span className="w-6 h-6 rounded-full bg-amber-500 text-white font-black text-xs flex items-center justify-center">
@@ -1028,26 +1276,28 @@ function QuotingWorkspace() {
               )}
             </div>
 
-            {/* Nút bật tắt Phễu Lọc */}
-            <button
-              type="button"
-              onClick={() => setShowCutlistFilter(!showCutlistFilter)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition shadow-xs cursor-pointer ${
-                activeCutlistFilterCount > 0
-                  ? "bg-amber-500 text-white shadow-amber-500/20"
-                  : showCutlistFilter
-                  ? "bg-slate-900 text-white"
-                  : "bg-white hover:bg-slate-100 text-slate-700 border border-slate-200"
-              }`}
-            >
-              <Filter className="w-3.5 h-3.5" />
-              <span>Phễu Lọc</span>
-              {activeCutlistFilterCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-white text-amber-700 font-mono text-[10px] flex items-center justify-center font-black">
-                  {activeCutlistFilterCount}
-                </span>
-              )}
-            </button>
+            {/* Nút bật tắt Phễu Lọc (Hiển thị khi Chế độ nâng cao BẬT hoặc khi đang lọc) */}
+            {(advancedMode || activeCutlistFilterCount > 0) && (
+              <button
+                type="button"
+                onClick={() => setShowCutlistFilter(!showCutlistFilter)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition shadow-xs cursor-pointer ${
+                  activeCutlistFilterCount > 0
+                    ? "bg-amber-500 text-white shadow-amber-500/20"
+                    : showCutlistFilter
+                    ? "bg-slate-900 text-white"
+                    : "bg-white hover:bg-slate-100 text-slate-700 border border-slate-200"
+                }`}
+              >
+                <Filter className="w-3.5 h-3.5" />
+                <span>Phễu Lọc</span>
+                {activeCutlistFilterCount > 0 && (
+                  <span className="w-4 h-4 rounded-full bg-white text-amber-700 font-mono text-[10px] flex items-center justify-center font-black">
+                    {activeCutlistFilterCount}
+                  </span>
+                )}
+              </button>
+            )}
 
             <button
               onClick={() => setShowPresetModal(true)}
@@ -1442,12 +1692,32 @@ function QuotingWorkspace() {
             </tbody>
           </table>
         </div>
+
+        {/* Step 1 Footer Action Bar */}
+        <div className="no-print flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+          <span className="text-xs text-slate-500">
+            Dự án hiện có <strong>{parts.length}</strong> chi tiết phôi ván trong danh sách.
+          </span>
+          <button
+            type="button"
+            onClick={() => goToStep(2)}
+            disabled={parts.length === 0}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl transition shadow-xs disabled:opacity-40 cursor-pointer"
+          >
+            <span>Tiếp tục: Xem Báo Giá &amp; BOM ({parts.length} tấm)</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
+    </div>
+  )}
 
       {/* ================================================================== */}
-      {/* KHU VỰC KẾT QUẢ: 2 TAB CHÍNH (XƯỞNG VS KHÁCH HÀNG)                */}
+      {/* BƯỚC 2: KHU VỰC KẾT QUẢ: 2 TAB CHÍNH (XƯỞNG VS KHÁCH HÀNG)         */}
       {/* ================================================================== */}
-      <div className="space-y-4">
+      {currentStep === 2 && (
+        <div className="space-y-6">
+          <div className="space-y-4">
         
         {/* Tab switcher giữa 2 đầu ra (no-print) */}
         <div className="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
@@ -1852,8 +2122,9 @@ function QuotingWorkspace() {
             {/* Nút in ở cuối trang (no-print) */}
             <div className="no-print flex justify-center pt-2">
               <button
-                onClick={() => window.print()}
-                className="inline-flex items-center gap-2 px-6 py-3 text-sm font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition shadow-md shadow-amber-500/25"
+                type="button"
+                onClick={handlePrintA4}
+                className="inline-flex items-center gap-2 px-6 py-3 text-sm font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition shadow-md shadow-amber-500/25 cursor-pointer"
               >
                 <Printer className="w-4 h-4" />
                 <span>In / Xuất PDF Báo Giá A4 Ngay</span>
@@ -1863,6 +2134,338 @@ function QuotingWorkspace() {
           </div>
         )}
       </div>
+
+      {/* Step 2 Footer Navigation Bar */}
+      <div className="no-print flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+        <button
+          type="button"
+          onClick={() => goToStep(1)}
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Quay lại sửa phôi ván (Bước 1)</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => goToStep(3)}
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer"
+        >
+          <span>Tiếp tục: Xuất File &amp; In Ấn (Bước 3)</span>
+          <ArrowRight className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  )}
+
+  {/* ================================================================== */}
+  {/* BƯỚC 3: TRUNG TÂM XUẤT FILE & IN ẤN (ACTION HUB & A4 LIVE PREVIEW)  */}
+  {/* ================================================================== */}
+  {currentStep === 3 && (
+    <div className="space-y-6">
+      {/* Action Hub: 4 Thẻ Hành Động Chính (Web-Twin Pure White Cards) */}
+      <div className="no-print bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+          <div>
+            <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-emerald-600 text-white font-black text-xs flex items-center justify-center">
+                3
+              </span>
+              Trung Tâm Xuất File &amp; In Báo Giá A4
+            </h2>
+            <p className="text-xs text-slate-500 mt-1">
+              Lựa chọn định dạng xuất phù hợp cho đại lý vật tư xưởng, máy cắt CNC hoặc gửi trực tiếp cho khách hàng.
+            </p>
+          </div>
+
+          {/* Tóm tắt nhanh số liệu */}
+          <div className="flex items-center gap-3 text-xs font-mono bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
+            <div>
+              <span className="text-[10px] text-slate-400 block uppercase">Tổng Ván:</span>
+              <strong className="text-slate-900 font-bold">{calcResult.totalSheets} tấm</strong>
+            </div>
+            <div className="h-6 w-px bg-slate-200" />
+            <div>
+              <span className="text-[10px] text-slate-400 block uppercase">Báo Giá Khách:</span>
+              <strong className="text-amber-600 font-bold">{formatVND(calcResult.totalQuotePrice)}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: Xuất Excel BOM Xưởng */}
+          <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-emerald-300 transition flex flex-col justify-between space-y-3 shadow-2xs">
+            <div className="space-y-2">
+              <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                <FileSpreadsheet className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold text-slate-900">BOM Vật Tư Xưởng (.xlsx)</h3>
+                <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                  Bóc tách chi tiết từng tấm ván cần mua, mét dài chỉ PVC, phụ kiện liên kết và nhân công để gửi đại lý vật liệu.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleExportWorkshopBOM}
+              className="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer"
+            >
+              <Download className="w-4 h-4" />
+              <span>Tải Excel BOM Xưởng</span>
+            </button>
+          </div>
+
+          {/* Card 2: Xuất Excel Cutlist Tấm Ván Cho Máy CNC */}
+          <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-sky-300 transition flex flex-col justify-between space-y-3 shadow-2xs">
+            <div className="space-y-2">
+              <div className="w-9 h-9 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center">
+                <Table className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold text-slate-900">Cutlist Tấm Ván (.xlsx)</h3>
+                <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                  Bảng kê 8 cột chuẩn gồm {parts.length} chi tiết phôi để nạp trực tiếp vào phần mềm xếp ván (Cutlist Plus, ABF, Aspire).
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleExportProjectCutlist}
+              className="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer"
+            >
+              <Download className="w-4 h-4" />
+              <span>Tải Excel Cutlist CNC</span>
+            </button>
+          </div>
+
+          {/* Card 3: In / Xuất PDF Báo Giá A4 */}
+          <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/40 hover:bg-amber-50 hover:border-amber-300 transition flex flex-col justify-between space-y-3 shadow-2xs">
+            <div className="space-y-2">
+              <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                <Printer className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold text-amber-950">In Báo Giá Chuẩn A4 (.pdf)</h3>
+                <p className="text-[11px] text-amber-800 mt-1 leading-relaxed">
+                  Bản báo giá trang trọng gửi khách hàng, gom nhóm thành phẩm, ẩn chi phí nội bộ và có sẵn điều khoản bảo hành.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handlePrintA4}
+              className="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer"
+            >
+              <Printer className="w-4 h-4" />
+              <span>In / Lưu PDF A4 Ngay</span>
+            </button>
+          </div>
+
+          {/* Card 4: Lưu Dự Án Đám Mây */}
+          <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-400 transition flex flex-col justify-between space-y-3 shadow-2xs">
+            <div className="space-y-2">
+              <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+                <Save className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold text-slate-900">Lưu Dự Án Lịch Sử</h3>
+                <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                  Lưu trữ đám mây xưởng, chụp bảo toàn đơn giá ngày tạo (Snapshot Pricing) và hỗ trợ quản lý vòng đời dự án.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleSaveProject}
+              className="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer"
+            >
+              <Save className="w-4 h-4" />
+              <span>Lưu Vào Kho Dự Án</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Embedded Live Preview of A4 Sheet (no-print preview wrapper, print-area when printing) */}
+      <div className="space-y-3">
+        <div className="no-print flex items-center justify-between px-1">
+          <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+            <Eye className="w-4 h-4 text-slate-500" />
+            Xem trước Báo giá chuẩn A4 gửi khách
+          </span>
+          <button
+            type="button"
+            onClick={handlePrintA4}
+            className="inline-flex items-center gap-1.5 text-xs text-amber-600 hover:text-amber-700 font-bold cursor-pointer"
+          >
+            <Printer className="w-3.5 h-3.5" />
+            <span>Mở hộp thoại in / xuất PDF</span>
+          </button>
+        </div>
+
+        {/* Khung tờ giấy Báo Giá A4 thực tế (.print-area) */}
+        <div className="print-area bg-white rounded-2xl border border-slate-200/90 p-8 sm:p-12 shadow-md space-y-6 text-xs max-w-4xl mx-auto">
+          {/* Header Tờ Báo Giá A4 */}
+          <div className="flex justify-between items-start pb-6 border-b-2 border-slate-800">
+            <div className="space-y-1.5 max-w-md">
+              <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">
+                {profile.name || "XƯỞNG SẢN XUẤT NỘI THẤT HOÀNG GIA"}
+              </h2>
+              <p className="text-slate-600 text-xs">
+                Hotline / Zalo: <strong className="text-slate-900">{profile.phone || "0912 345 678"}</strong>
+              </p>
+              <p className="text-slate-500 text-[11px] leading-relaxed">
+                Địa chỉ: {profile.address || "Cụm Công Nghiệp Chàng Sơn, Thạch Thất, Hà Nội"}
+              </p>
+              {profile.bankName && (
+                <p className="text-slate-500 text-[11px]">
+                  Tài khoản: <strong className="text-slate-800">{profile.accountNumber}</strong> ({profile.bankName} - {profile.accountName})
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="hidden sm:flex w-16 h-16 rounded-full border-2 border-emerald-600 border-dashed flex-col items-center justify-center text-center p-1 text-[7px] font-black text-emerald-800 rotate-[-8deg] shadow-xs bg-emerald-50/50">
+                <span className="uppercase tracking-tight leading-tight">ĐÃ KIỂM DUYỆT</span>
+                <span className="text-emerald-700 font-mono text-[8px] font-extrabold">ISO GỖ CNC</span>
+                <span className="text-[6px] text-emerald-500">2026-PASS</span>
+              </div>
+
+              <div className="text-right space-y-1">
+                <span className="inline-block text-xs font-black px-3.5 py-1 rounded-md bg-slate-900 text-white tracking-widest uppercase">
+                  BÁO GIÁ THI CÔNG
+                </span>
+                <p className="text-[11px] text-slate-500 font-mono">
+                  Số HĐ: <strong className="text-slate-800">HĐNT-2026-VN{editId ? editId.slice(0, 4).toUpperCase() : "889"}</strong>
+                </p>
+                <p className="text-[10px] text-slate-400 font-mono" suppressHydrationWarning>
+                  Ngày lập: {new Date().toLocaleDateString("vi-VN")}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Thông tin dự án & Khách hàng */}
+          <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+            <div>
+              <span className="text-slate-400 block text-[10px] font-bold">CÔNG TRÌNH / DỰ ÁN:</span>
+              <strong className="text-slate-900 text-sm font-bold">{projectName}</strong>
+            </div>
+            <div>
+              <span className="text-slate-400 block text-[10px] font-bold">KHÁCH HÀNG:</span>
+              <strong className="text-slate-900 text-sm font-bold">
+                {clientName} {clientPhone ? `(${clientPhone})` : ""}
+              </strong>
+            </div>
+          </div>
+
+          {/* Bảng hạng mục báo giá gom theo Module */}
+          <div className="space-y-2">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead className="bg-slate-100 text-slate-700 font-bold border-y border-slate-300">
+                <tr>
+                  <th className="p-3 w-12 text-center">STT</th>
+                  <th className="p-3">Hạng Mục Thành Phẩm</th>
+                  <th className="p-3">Quy Cách & Chi Tiết Cấu Thành</th>
+                  <th className="p-3 text-right">Số Tấm</th>
+                  <th className="p-3 text-right">Thành Tiền (VNĐ)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 text-slate-800">
+                {calcResult.moduleQuotes.map((m, idx) => (
+                  <tr key={m.moduleName}>
+                    <td className="p-3 text-center text-slate-400 font-mono">{idx + 1}</td>
+                    <td className="p-3 font-bold text-slate-900">{m.moduleName}</td>
+                    <td className="p-3 text-slate-600 text-[11px]">
+                      {m.description || "Gỗ MDF chống ẩm phủ Melamine, dán cạnh chỉ PVC đồng màu, phụ kiện bản lề giảm chấn"}
+                    </td>
+                    <td className="p-3 text-right font-mono text-slate-500">{m.partCount}</td>
+                    <td className="p-3 text-right font-mono font-black text-slate-900 text-sm">
+                      {formatVND(m.quotePrice)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Tổng cộng thanh toán */}
+          <div className="pt-4 border-t-2 border-slate-800 flex justify-between items-center text-xs">
+            <div>
+              <span className="font-black text-slate-900 text-sm block">TỔNG CỘNG THANH TOÁN:</span>
+              <span className="text-slate-500 text-[11px]">Đã bao gồm chi phí gia công, vận chuyển và lắp đặt hoàn thiện.</span>
+            </div>
+            <span className="text-2xl font-black text-amber-600 font-mono">
+              {formatVND(calcResult.totalQuotePrice)}
+            </span>
+          </div>
+
+          {/* Điều khoản & Cam kết của xưởng chuẩn thương mại */}
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <strong className="text-slate-900 font-bold uppercase text-[10px] flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                ĐIỀU KHOẢN & TIÊU CHUẨN KỸ THUẬT BẢO HÀNH:
+              </strong>
+              <span className="font-mono text-[10px] text-slate-400">TIÊU CHUẨN XƯỞNG CNC</span>
+            </div>
+            <ul className="space-y-1 list-disc list-inside text-slate-600 text-[10px] leading-relaxed">
+              <li><strong>Quy cách vật tư:</strong> 100% cốt ván MDF chống ẩm lõi xanh HMR V313 đạt tiêu chuẩn phát thải E1/E2. Dán cạnh chỉ PVC đồng màu bằng keo hạt PUR chống nước cạnh.</li>
+              <li><strong>Thời gian thi công:</strong> Hoàn thiện gia công và lắp đặt trong 07 – 10 ngày làm việc kể từ ngày thống nhất mẫu ván.</li>
+              <li><strong>Chính sách bảo hành:</strong> Bảo hành 24 tháng đối với kết cấu gỗ công nghiệp, 12 tháng đối với phụ kiện kim khí (ray trượt, bản lề).</li>
+              <li><strong>Tiến độ thanh toán:</strong> Đợt 1 tạm ứng 50% khi duyệt mẫu ván & ký hợp đồng; Đợt 2 thanh toán 50% sau khi nghiệm thu bàn giao hoàn thiện.</li>
+            </ul>
+          </div>
+
+          {/* Ghi chú miễn trừ pháp lý theo Hiến Pháp GEMINI.md 5.4 */}
+          <div className="pt-3 border-t border-slate-200 text-center text-[10px] text-slate-400 italic">
+            {LEGAL_DISCLAIMER}
+          </div>
+
+          {/* Chữ ký 2 bên */}
+          <div className="pt-8 grid grid-cols-2 text-center text-xs">
+            <div>
+              <strong className="block text-slate-900 font-bold uppercase">ĐẠI DIỆN KHÁCH HÀNG</strong>
+              <span className="text-slate-400 text-[10px]">(Ký & ghi rõ họ tên)</span>
+            </div>
+            <div>
+              <strong className="block text-slate-900 font-bold uppercase">ĐẠI DIỆN XƯỞNG SẢN XUẤT</strong>
+              <span className="text-slate-400 text-[10px]">(Ký & đóng dấu)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Step 3 Footer Navigation Bar */}
+      <div className="no-print flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+        <button
+          type="button"
+          onClick={() => goToStep(2)}
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Quay lại Xem Báo Giá &amp; BOM (Bước 2)</span>
+        </button>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <button
+            type="button"
+            onClick={() => goToStep(1)}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 text-xs font-semibold rounded-xl transition cursor-pointer"
+          >
+            <span>Về Bước 1 (Sửa phôi)</span>
+          </button>
+          <button
+            type="button"
+            onClick={handlePrintA4}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer"
+          >
+            <Printer className="w-4 h-4" />
+            <span>In Báo Giá A4 Ngay</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
 
       {/* ================================================================== */}
       {/* MODAL ÁNH XẠ CỘT THÔNG MINH (SMART COLUMN MAPPING MODAL)           */}

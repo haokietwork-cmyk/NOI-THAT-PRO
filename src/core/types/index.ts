@@ -214,6 +214,8 @@ export interface SavedProject {
   createdAt: string;
   updatedAt?: string;
   version?: number;                  // Phiên bản báo giá (v1, v2...)
+  versionNo?: number;                // Số thứ tự phiên bản (1, 2, 3...)
+  parentProjectId?: string;          // ID dự án cha (nếu là bản sửa đổi revision)
   status: ProjectStatus;
   items: CutlistPart[];
   materialsSnapshot: MaterialItem[]; // Snapshot pricing bảo toàn giá lịch sử

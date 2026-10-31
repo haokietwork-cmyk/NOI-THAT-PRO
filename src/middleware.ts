@@ -59,8 +59,10 @@ export async function middleware(request: NextRequest) {
   const origin = request.nextUrl.origin;
 
   // 1. Kiểm tra Route bảo vệ (Protected Route)
+  // Ngoại lệ duy nhất: Cho phép dùng thử bóc tách với dữ liệu mẫu 48 tấm (?demo=true) mà không cần đăng nhập
+  const isDemoQuoting = pathname === "/quoting" && request.nextUrl.searchParams.get("demo") === "true";
   const isProtected = PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
-  if (isProtected && !user) {
+  if (isProtected && !user && !isDemoQuoting) {
     const redirectUrl = new URL("/login", origin);
     redirectUrl.searchParams.set("redirectTo", pathname);
     return NextResponse.redirect(redirectUrl);

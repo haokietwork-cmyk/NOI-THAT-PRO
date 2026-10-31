@@ -59,8 +59,8 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 ---
 
 ### GIAI ĐOẠN E: BƯỚC 4 — LUỒNG 3 BƯỚC & CHẾ ĐỘ NÂNG CAO
-- [ ] **E1-E8.** Stepper 3 bước `/quoting`, Chế độ nâng cao, badge cấu hình, bộ lọc hiển thị.
-- [ ] **E9.** Dọn dẹp dependency chưa dùng.
+- [x] **E1-E8.** Stepper 3 bước `/quoting` (1. Nhập Cutlist -> 2. Xem Báo Giá & BOM -> 3. Xuất File & In Ấn), Chế độ nâng cao (`advancedMode` ghi nhớ qua `localStorage`, đọc trong `useEffect`), badge cấu hình tùy chỉnh (`isCustomCostConfig`), bộ lọc 6 tiêu chí độc lập hiển thị (có unit test `filter-invariance.test.ts` chứng minh giá vốn & báo giá bất biến 100%), nhận diện bản v2 bằng `versionNo > 1 || Boolean(parentProjectId)` (loại bỏ hoàn toàn `includes("(v")`), bảo vệ bí mật kinh doanh khi in A4 (`no-print` che giấu lãi/giá vốn), đồng bộ query param `?step=1|2|3` và responsive 375px mobile.
+- [ ] **E9.** Dọn dẹp dependency chưa dùng (thực hiện theo cổng G4 sau khi duyệt).
 
 ---
 
