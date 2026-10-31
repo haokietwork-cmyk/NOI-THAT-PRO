@@ -212,6 +212,7 @@ export interface SavedProject {
   clientPhone?: string;
   clientAddress?: string;
   createdAt: string;
+  updatedAt?: string;
   version?: number;                  // Phiên bản báo giá (v1, v2...)
   status: ProjectStatus;
   items: CutlistPart[];
@@ -232,4 +233,5 @@ export interface FeatureLead {
   phone?: string;
   source: string;
   createdAt: string;
+  updatedAt?: string;
 }

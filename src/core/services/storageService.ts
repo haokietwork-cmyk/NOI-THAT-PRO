@@ -371,6 +371,34 @@ export class StorageService {
         } = await supabase.auth.getUser();
 
         if (user) {
+          // Phân giải org_id của người dùng hiện tại
+          let orgId = (project as any).orgId;
+          if (!orgId) {
+            const { data: profData } = await supabase
+              .from("profiles")
+              .select("active_org_id")
+              .eq("id", user.id)
+              .single();
+            orgId = profData?.active_org_id;
+          }
+
+          // Kiểm tra xung đột sửa đổi đồng thời trên 2 thiết bị (Optimistic Concurrency Control)
+          if (project.id && !project.id.startsWith("proj-")) {
+            const { data: serverProj } = await supabase
+              .from("projects")
+              .select("updated_at")
+              .eq("id", project.id)
+              .single();
+
+            if (serverProj && project.updatedAt) {
+              const serverTime = new Date(serverProj.updated_at).getTime();
+              const clientTime = new Date(project.updatedAt).getTime();
+              if (serverTime > clientTime) {
+                console.warn("Phát hiện xung đột phiên bản dự án giữa các thiết bị");
+              }
+            }
+          }
+
           // Lưu dự án: chỉ map các trường khớp với schema database thực tế
           const projectPayload: Record<string, any> = {
             id: project.id.startsWith("proj-") ? undefined : project.id,
@@ -378,6 +406,7 @@ export class StorageService {
             project_name: project.projectName,
             client_name: project.clientName,
             client_phone: project.clientPhone,
+            client_address: project.clientAddress,
             status: project.status,
             profit_margin: project.profitMargin,
             total_cost: project.totalCost,
@@ -385,8 +414,14 @@ export class StorageService {
             rounding_step: project.roundingStep ?? 0.5,
             materials_snapshot: project.materialsSnapshot || project.materialSnapshots,
             cost_config_snapshot: sanitizedCostConfigSnapshot,
+            sections_snapshot: (project as any).sectionsSnapshot || (project as any).sections,
             calc_version: resolvedCalcVersion,
+            updated_at: new Date().toISOString(),
           };
+
+          if (orgId) {
+            projectPayload.org_id = orgId;
+          }
 
           const { data: savedProj, error: projErr } = await supabase
             .from("projects")
@@ -475,6 +510,88 @@ export class StorageService {
       } catch (e) {
         console.warn("Lỗi lưu lead LocalStorage:", e);
       }
+    }
+  }
+
+  // ==========================================================================
+  // SYNC & ORGANIZATION MULTI-TENANCY HELPERS (PHASE C3)
+  // ==========================================================================
+
+  /**
+   * Đồng bộ toàn bộ dự án demo offline từ LocalStorage lên Cloud khi khách đăng nhập/đăng ký
+   */
+  public static async syncLocalDemoToCloud(): Promise<{ syncedCount: number; errors: string[] }> {
+    if (!this.isBrowser() || !isSupabaseConfigured()) {
+      return { syncedCount: 0, errors: ["Chưa có kết nối Cloud"] };
+    }
+
+    const local = this.getLocalState();
+    const demoProjects = local.projects.filter((p) => p.id.startsWith("proj-"));
+    const errors: string[] = [];
+    let syncedCount = 0;
+
+    for (const proj of demoProjects) {
+      const res = await this.saveProject(proj);
+      if (res.success) {
+        syncedCount++;
+      } else if (res.error) {
+        errors.push(`Dự án '${proj.projectName}': ${res.error}`);
+      }
+    }
+
+    return { syncedCount, errors };
+  }
+
+  /**
+   * Lấy danh sách thành viên trong xưởng
+   */
+  public static async getOrgMembers(orgId: string): Promise<Array<{ id: string; userId: string; role: string; email?: string }>> {
+    if (!this.isBrowser() || !isSupabaseConfigured()) {
+      return [];
+    }
+
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("org_members")
+        .select("id, user_id, role")
+        .eq("org_id", orgId);
+
+      if (error || !data) return [];
+      return data.map((d: any) => ({
+        id: d.id,
+        userId: d.user_id,
+        role: d.role,
+      }));
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Mời thành viên mới vào xưởng với vai trò được chọn
+   */
+  public static async inviteOrgMember(
+    orgId: string,
+    userId: string,
+    role: "owner" | "sales" | "viewer"
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.isBrowser() || !isSupabaseConfigured()) {
+      return { success: false, error: "Chưa kết nối Supabase Cloud" };
+    }
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.from("org_members").insert({
+        org_id: orgId,
+        user_id: userId,
+        role,
+      });
+
+      if (error) return { success: false, error: error.message };
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err?.message || "Lỗi gửi lời mời thành viên" };
     }
   }
 }

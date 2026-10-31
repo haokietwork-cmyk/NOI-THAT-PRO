@@ -10,7 +10,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test \"src/**/*.test.ts\""
+    "test": "node --experimental-strip-types --test-concurrency=1 --test \"src/**/*.test.ts\""
   },
   "dependencies": {
     "@date-fns/utc": "^2.1.1",

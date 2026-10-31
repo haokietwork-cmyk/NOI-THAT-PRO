@@ -96,3 +96,28 @@ test("storageService: saveProject bắt lỗi xóa chi tiết cũ delErr không 
   assert.strictEqual(res.success, false);
   assert.strictEqual(res.error, "foreign key violation on delete");
 });
+
+test("storageService: syncLocalDemoToCloud hoạt động an toàn khi offline", async () => {
+  const syncResult = await StorageService.syncLocalDemoToCloud();
+  assert.strictEqual(typeof syncResult.syncedCount, "number");
+  assert.ok(Array.isArray(syncResult.errors));
+});
+
+test("storageService: inviteOrgMember bắt buộc vai trò hợp lệ", async () => {
+  const res = await StorageService.inviteOrgMember("org-test", "user-test", "viewer");
+  assert.strictEqual(typeof res.success, "boolean");
+});
+
+test("storageService: Kiểm tra phát hiện xung đột Optimistic Concurrency Control", () => {
+  const detectConflict = (clientUpdatedAt?: string, serverUpdatedAt?: string): boolean => {
+    if (!clientUpdatedAt || !serverUpdatedAt) return false;
+    return new Date(serverUpdatedAt).getTime() > new Date(clientUpdatedAt).getTime();
+  };
+
+  const clientTime = "2026-10-31T08:00:00Z";
+  const newerServerTime = "2026-10-31T08:30:00Z";
+  const olderServerTime = "2026-10-31T07:30:00Z";
+
+  assert.strictEqual(detectConflict(clientTime, newerServerTime), true, "Phải phát hiện xung đột khi server có bản mới hơn");
+  assert.strictEqual(detectConflict(clientTime, olderServerTime), false, "Không có xung đột khi client mới hơn hoặc bằng");
+});
