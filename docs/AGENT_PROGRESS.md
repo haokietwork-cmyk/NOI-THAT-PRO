@@ -70,7 +70,7 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 ---
 
 ### GIAI ĐOẠN G: CHECKLIST GO-LIVE
-- [ ] **G.** `docs/GO_LIVE.md` (chuẩn bị go-live) 🛑 **CỔNG G5 & G6**.
+- [x] **G.** `docs/GO_LIVE.md` & `CHANGELOG.md` (Lập bảng kiểm định 14 mục Go-Live, ghi chép nhật ký phát hành, phân định trách nhiệm RACI và hướng dẫn chi tiết người dùng) 🛑 **CỔNG G5: DỪNG CHỜ DUYỆT CHECKLIST & CỔNG G6: CHỜ NGƯỜI THỰC HIỆN RA MẮT**.
 
 ---
 
@@ -94,4 +94,5 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - *31/10/2026:* Hoàn tất D9: Soạn thảo cẩm nang vận hành `docs/OPERATIONS.md` (phân tách 3 môi trường dev/staging/prod, cấu hình PITR, hướng dẫn khôi phục sự cố, và phân định trách nhiệm RACI).
 - *31/10/2026:* Hoàn tất D10: Nâng cấp `src/middleware.ts` tự động chuyển hướng private app routes sang `/login` với dynamic origin, hoàn thiện tài liệu hướng dẫn làm cứng bảo mật xác thực `docs/AUTH_SETUP.md` (xác nhận email, redirect whitelist, rate limits, Turnstile CAPTCHA, cảnh báo rủi ro chi phí SMS OTP). Hoàn tất toàn bộ Giai đoạn D (P0 Launch Blockers).
 - *31/10/2026:* Hoàn tất Giai đoạn E: Stepper 3 bước `/quoting`, chế độ nâng cao `advancedMode`, badge tùy chỉnh cấu hình, test bất biến bộ lọc hiển thị 6 tiêu chí, loại bỏ hoàn toàn `includes("(v")`, bảo vệ bí mật kinh doanh in A4, gỡ bỏ 13 thư viện thừa (rút gọn còn 21 dependencies), 78 tests pass.
-- *31/10/2026:* Hoàn tất Giai đoạn F: Tính năng chia sẻ báo giá bằng secure link (Bảng `quote_shares`, hàm băm SHA-256 token, RPC `get_shared_quote` SECURITY DEFINER, bộ test RLS `test_rls_quote_shares.sql`, module `quote-share.ts`, API routes tạo/thu hồi/truy vấn, trang in chuẩn A4 `/share/[token]` với `X-Robots-Tag: noindex, nofollow`, 82 tests pass, bản dựng Next.js hoàn tất 26/26 routes). Sẵn sàng cho Giai đoạn G (Checklist Go-Live `docs/GO_LIVE.md`).
+- *31/10/2026:* Hoàn tất Giai đoạn F: Tính năng chia sẻ báo giá bằng secure link (Bảng `quote_shares`, hàm băm SHA-256 token, RPC `get_shared_quote` SECURITY DEFINER, bộ test RLS `test_rls_quote_shares.sql`, module `quote-share.ts`, API routes tạo/thu hồi/truy vấn, trang in chuẩn A4 `/share/[token]` với `X-Robots-Tag: noindex, nofollow`, 82 tests pass, bản dựng Next.js hoàn tất 26/26 routes).
+- *31/10/2026:* Hoàn tất Giai đoạn G: Soạn thảo bảng kiểm định ra mắt `docs/GO_LIVE.md` (14 mục kiểm định trạng thái, hướng dẫn chi tiết người dùng, lệnh kiểm tra độc lập VERIFY) và lập nhật ký phiên bản `CHANGELOG.md` cho bản phát hành v1.0.0-rc.1. DỪNG TẠI CỔNG G5 & G6.
