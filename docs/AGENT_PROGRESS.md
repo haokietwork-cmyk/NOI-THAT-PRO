@@ -49,7 +49,7 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - [x] **D2.** Bảo mật 3 API route (Zod schema, size limit, rate limit, no PII log: tạo `api-guard.ts` và áp dụng cho `/api/projects/direct-ingest`, `/api/license/verify`, 68 tests pass).
 - [x] **D3.** Webhook thanh toán (HMAC signature PayOS/SePay, idempotency table `payment_events`, khóa backdoor simulate trên prod, 71 tests pass).
 - [x] **D4.** Security headers trong `next.config.mjs` (X-Frame-Options SAMEORIGIN, CSP, HSTS, X-Content-Type-Options nosniff, Permissions-Policy, Referrer-Policy, xác nhận live 200 OK).
-- [ ] **D5.** Trang Điều khoản & Chính sách quyền riêng tư (nháp).
+- [x] **D5.** Trang Điều khoản & Chính sách quyền riêng tư (nháp: `/terms`, `/privacy`, phân định Data Controller cho xưởng và Data Processor cho nền tảng theo Nghị định 13/2023/NĐ-CP, cảnh báo kiểm tra pháp lý trước khi public).
 - [ ] **D6.** Xóa tài khoản & Xuất dữ liệu.
 - [ ] **D7.** Giám sát lỗi (lọc PII).
 - [ ] **D8.** ESLint thật, error boundary, xóa catch rỗng.
@@ -87,3 +87,4 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - *31/10/2026:* Hoàn tất D2: Xây dựng bộ chắn bảo mật `api-guard.ts` (Rate limit sliding window, body size limit, lọc sạch PII logging, Zod schemas kiểm duyệt đầu vào) và áp dụng cho direct-ingest và license verify (68 tests pass).
 - *31/10/2026:* Hoàn tất D3: Bảo mật Webhook thanh toán (Xác thực chữ ký HMAC-SHA256 PayOS, API Key SePay, migration bảng `payment_events` chống xử lý trùng, khóa triệt để backdoor simulate trên Production, 71 tests pass).
 - *31/10/2026:* Hoàn tất D4: Cấu hình bộ security headers toàn diện trong `next.config.mjs` (CSP, X-Frame-Options, X-Content-Type-Options, HSTS, Permissions-Policy, Referrer-Policy, kiểm thử trực tiếp trên server live trả về chính xác).
+- *31/10/2026:* Hoàn tất D5: Xây dựng trang `/terms` và `/privacy` (giao diện Web-Twin Slate 50 blueprint grid, phân định xưởng là Data Controller và nền tảng là Data Processor theo Nghị định 13/2023/NĐ-CP, chèn disclaimer kỹ thuật và ghi rõ cảnh báo: *Đây là bản dự thảo tham khảo kỹ thuật, người dùng cần tra cứu luật hiện hành hoặc tham vấn luật sư trước khi public*).
