@@ -76,7 +76,7 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 
 ### GIAI ĐOẠN H: P1 SAU RA MẮT
 - [x] **H1.** Đóng băng dự án khi chốt hợp đồng (Migration `20261031130000_project_freeze_contract.sql` có rollback DOWN, trigger chặn sửa `project_items` khi `is_locked = true`, trigger tự động khóa khi `status IN ('approved', 'ordered', 'in_production', 'finalized')`, module `freeze-project.ts` lưu `snapshotTotals` & băm SHA-256 cutlist integrity, `StorageService.createRevision()` sinh bản v2 giữ nguyên bản gốc bất biến, UI hiển thị badge ĐÃ KHÓA HĐ và nút Tạo Bản Sửa Đổi v2, 87 tests pass).
-- [ ] **H2.** Nhật ký thay đổi (audit log `project_audit_log`: đổi giá, khóa BOM, chuyển trạng thái hợp đồng, mở khóa bản nháp).
+- [x] **H2.** Nhật ký thay đổi (audit log: Migration `20261031133000_project_audit_log.sql`, REVOKE ALL từ client, chỉ GRANT SELECT, trigger tự động ghi khi đổi giá/chốt BOM/đổi trạng thái, bộ test RLS `test_audit_log.sql`, module `audit-log.ts` khử PII, Tab 3 Nhật ký thay đổi trên UI chi tiết dự án, 90 tests pass).
 - [ ] **H3.** Tính số bản lề/ray từ danh sách tấm (nối `hingeThresholds` vào engine, nhãn ước tính).
 - [ ] **H4.** Nâng cấp dự án nháp dùng công thức cũ (xem trước mức chênh).
 - [ ] **H5.** Onboarding và điều hướng.
@@ -106,3 +106,4 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - *31/10/2026:* Hoàn tất Giai đoạn F: Tính năng chia sẻ báo giá bằng secure link (Bảng `quote_shares`, hàm băm SHA-256 token, RPC `get_shared_quote` SECURITY DEFINER, bộ test RLS `test_rls_quote_shares.sql`, module `quote-share.ts`, API routes tạo/thu hồi/truy vấn, trang in chuẩn A4 `/share/[token]` với `X-Robots-Tag: noindex, nofollow`, 82 tests pass, bản dựng Next.js hoàn tất 26/26 routes).
 - *31/10/2026:* Hoàn tất Giai đoạn G: Soạn thảo bảng kiểm định ra mắt `docs/GO_LIVE.md` (14 mục kiểm định trạng thái, hướng dẫn chi tiết người dùng, lệnh kiểm tra độc lập VERIFY) và lập nhật ký phiên bản `CHANGELOG.md` cho bản phát hành v1.0.0-rc.1. Đã chốt triển khai lên Vercel và thu tiền qua mã VietQR.
 - *31/10/2026:* Hoàn tất H1: Đóng băng dự án khi chốt hợp đồng (Migration `20261031130000_project_freeze_contract.sql`, trigger bảo vệ `project_items`, trigger tự động khóa khi `status` duyệt, lõi `freeze-project.ts` băm SHA-256 cutlist integrity, `createRevision()` sinh bản v2 không đổi bản gốc, UI Dashboard & Project Details hiển thị badge ĐÃ KHÓA HĐ và nút Tạo Bản Sửa Đổi v2, 87 unit tests pass).
+- *31/10/2026:* Hoàn tất H2: Nhật ký thay đổi dự án Audit Log (Bảng `project_audit_log`, migration bảo mật chỉ cho phép trigger server ghi và RLS phân quyền theo tổ chức, test RLS `test_audit_log.sql`, module `audit-log.ts` khử sạch PII, tích hợp Tab 3 Dòng thời gian lịch sử dự án, 90 unit tests pass).

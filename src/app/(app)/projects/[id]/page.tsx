@@ -16,6 +16,7 @@ import {
   Lock,
   ShieldCheck,
   GitBranch,
+  History,
 } from "lucide-react";
 import { useAppStore } from "@/core/store/useAppStore";
 import {
@@ -27,6 +28,11 @@ import {
 import { exportWorkshopBOMExcel } from "@/core/exporters/excel-exporter";
 import { WORKSHOP_TERMS } from "@/core/constants/terms";
 import { isProjectContractLocked, freezeProjectContract } from "@/core/calculations/freeze-project";
+import {
+  getProjectAuditHistory,
+  formatAuditActionVi,
+  type ProjectAuditLogEntry,
+} from "@/core/monitoring/audit-log";
 import HelpTooltip from "@/core/components/HelpTooltip";
 
 export default function ProjectWorkspacePage() {
@@ -37,8 +43,20 @@ export default function ProjectWorkspacePage() {
   const { projects, profile, materials, createRevision, saveProject } = useAppStore();
   const project = projects.find((p) => p.id === projectId);
 
-  const [activeTab, setActiveTab] = useState<"bom" | "quote" | "items">("bom");
+  const [activeTab, setActiveTab] = useState<"bom" | "quote" | "items" | "history">("bom");
   const [isCreatingRevision, setIsCreatingRevision] = useState(false);
+  const [auditLogs, setAuditLogs] = useState<ProjectAuditLogEntry[]>([]);
+  const [loadingLogs, setLoadingLogs] = useState(false);
+
+  useEffect(() => {
+    if (activeTab === "history" && project?.id) {
+      setLoadingLogs(true);
+      getProjectAuditHistory(project.id).then((logs) => {
+        setAuditLogs(logs);
+        setLoadingLogs(false);
+      });
+    }
+  }, [activeTab, project?.id]);
 
   if (!project) {
     return (
@@ -204,6 +222,18 @@ export default function ProjectWorkspacePage() {
         >
           2. Báo Giá Khách Hàng (Chuẩn In A4)
         </button>
+
+        <button
+          onClick={() => setActiveTab("history")}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+            activeTab === "history"
+              ? "bg-slate-900 text-white shadow-sm"
+              : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+          }`}
+        >
+          <History className="w-3.5 h-3.5" />
+          <span>3. Nhật Ký Thay Đổi</span>
+        </button>
       </div>
 
       {/* TAB 1: BOM */}
@@ -355,6 +385,82 @@ export default function ProjectWorkspacePage() {
               {LEGAL_DISCLAIMER}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* TAB 3: AUDIT HISTORY */}
+      {activeTab === "history" && (
+        <div className="no-print bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-4">
+          <div className="pb-4 border-b border-slate-100 flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <History className="w-4 h-4 text-slate-600" />
+                <span>Nhật Ký Thay Đổi Dự Án (Audit Log)</span>
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Ghi nhận tự động các mốc chốt hợp đồng, đóng băng số liệu, thay đổi đơn giá và phiên bản bổ sung.
+              </p>
+            </div>
+            <span className="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">
+              {auditLogs.length} sự kiện
+            </span>
+          </div>
+
+          {loadingLogs ? (
+            <div className="py-8 text-center text-xs text-slate-400">Đang tải nhật ký thay đổi...</div>
+          ) : auditLogs.length === 0 ? (
+            <div className="py-8 text-center text-xs text-slate-500">
+              Chưa có sự kiện thay đổi nào được ghi nhận cho dự án này.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {auditLogs.map((log) => {
+                const actionMeta = formatAuditActionVi(log.action);
+                return (
+                  <div
+                    key={log.id}
+                    className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`text-[11px] font-bold px-2 py-0.5 rounded-full border shadow-2xs ${actionMeta.badgeClass}`}
+                        >
+                          {actionMeta.label}
+                        </span>
+                        <span className="text-[11px] text-slate-400 font-mono">
+                          {new Date(log.createdAt).toLocaleString("vi-VN")}
+                        </span>
+                      </div>
+
+                      {/* Chi tiết kỹ thuật */}
+                      <div className="text-[11px] text-slate-600 space-x-3">
+                        {log.details.old_status && log.details.new_status && (
+                          <span>
+                            Trạng thái: <strong>{log.details.old_status}</strong> ➔{" "}
+                            <strong className="text-emerald-700">{log.details.new_status}</strong>
+                          </span>
+                        )}
+                        {log.details.new_total_quote && (
+                          <span>
+                            Báo giá:{" "}
+                            <strong className="font-mono text-slate-900">
+                              {Number(log.details.new_total_quote).toLocaleString("vi-VN")} đ
+                            </strong>
+                          </span>
+                        )}
+                        {log.details.version_no && (
+                          <span>
+                            Phiên bản: <strong>v{log.details.version_no}</strong>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
     </div>
