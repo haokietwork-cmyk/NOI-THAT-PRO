@@ -46,7 +46,7 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 
 ### GIAI ĐOẠN D: CÁC MỤC CHẶN RA MẮT (P0)
 - [x] **D1.** RLS `profiles` chặn tự đổi `subscription_tier` (Đã chặn ở baseline C2 qua Column-level Grant chỉ 9 cột, subscriptions tách bảng riêng chỉ backend ghi, test xác thực 63 tests pass).
-- [ ] **D2.** Bảo mật 3 API route (Zod schema, size limit, rate limit, no PII log).
+- [x] **D2.** Bảo mật 3 API route (Zod schema, size limit, rate limit, no PII log: tạo `api-guard.ts` và áp dụng cho `/api/projects/direct-ingest`, `/api/license/verify`, 68 tests pass).
 - [ ] **D3.** Webhook thanh toán (HMAC signature, idempotency).
 - [ ] **D4.** Security headers trong `next.config.mjs`.
 - [ ] **D5.** Trang Điều khoản & Chính sách quyền riêng tư (nháp).
@@ -84,3 +84,4 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - *31/10/2026:* Hoàn tất C2: Viết migration nền sạch `20261031084500_baseline_schema.sql`, bộ test RLS `test_rls_baseline.sql` và hướng dẫn `docs/DB_RESET.md`. (59 tests pass).
 - *31/10/2026:* Hoàn tất C3: Nâng cấp `storageService.ts` đồng bộ schema tổ chức đa thành viên, hỗ trợ `syncLocalDemoToCloud()`, `getOrgMembers()`, `inviteOrgMember()`, kiểm tra xung đột Optimistic Concurrency Control, bổ sung 3 unit tests mới (62 tests pass).
 - *31/10/2026:* Hoàn tất D1: Xác thực triệt để RLS và phân quyền cột `profiles` ngăn chặn tự đổi `subscription_tier`, tách `subscriptions` riêng chỉ có service role ghi, bổ sung test xác thực (63 tests pass).
+- *31/10/2026:* Hoàn tất D2: Xây dựng bộ chắn bảo mật `api-guard.ts` (Rate limit sliding window, body size limit, lọc sạch PII logging, Zod schemas kiểm duyệt đầu vào) và áp dụng cho direct-ingest và license verify (68 tests pass).
