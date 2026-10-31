@@ -105,9 +105,16 @@ function ActivationContent() {
     const cleanHwid = machineId.trim().toUpperCase();
     const tools = selectedTool === "ALL" ? ["AUTOPLOT", "AUTODIM", "WOOD_NESTING", "EXPORT_2D"] : [selectedTool];
 
-    // Tạo chữ ký số mô phỏng (tương thích cấu trúc LicensePayload)
-    const signatureRaw = `${cleanHwid}:${customerName || "Khách Hàng Xưởng"}:${tools.join(",")}:${now.toISOString()}`;
-    const signatureBase64 = typeof window !== "undefined" ? btoa(signatureRaw) : "SIG_FLEXIBLE_DEMO";
+    // Tạo chữ ký số mô phỏng an toàn với chuỗi Unicode tiếng Việt
+    const signatureRaw = `${cleanHwid}:${customerName || "Khach Hang Xuong"}:${tools.join(",")}:${now.toISOString()}`;
+    let signatureBase64 = "SIG_FLEXIBLE_DEMO";
+    try {
+      if (typeof window !== "undefined") {
+        signatureBase64 = btoa(encodeURIComponent(signatureRaw).replace(/%([0-9A-F]{2})/g, (_, p1) => String.fromCharCode(parseInt(p1, 16))));
+      }
+    } catch {
+      signatureBase64 = "SIG_FLEXIBLE_FALLBACK";
+    }
 
     const payload: LicenseData = {
       MachineId: cleanHwid,
