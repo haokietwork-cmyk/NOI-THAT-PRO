@@ -54,7 +54,7 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - [x] **D7.** Giám sát lỗi (lọc PII: xây dựng `src/core/monitoring/error-logger.ts` lọc sạch số điện thoại VN, email, mã thẻ và các trường PII nhạy cảm, 77 tests pass).
 - [x] **D8.** ESLint thật, error boundary toàn app (`src/app/error.tsx`, `src/app/global-error.tsx`), loại bỏ catch rỗng, lập danh mục 27 dependency chưa dùng tại `docs/UNUSED_DEPENDENCIES.md` (77 tests pass).
 - [x] **D9.** `docs/OPERATIONS.md` (Tài liệu phân tách 3 môi trường dev/staging/prod, chiến lược sao lưu PITR & pg_dump, quy trình phục hồi sự cố, ma trận trách nhiệm RACI).
-- [ ] **D10.** `docs/AUTH_SETUP.md` (hardened auth checklist).
+- [x] **D10.** `docs/AUTH_SETUP.md` (Hướng dẫn hardened auth checklist: xác nhận email, URL whitelist, rate limits, chống bot Turnstile, cảnh báo rủi ro chi phí SMS OTP; hoàn thiện `src/middleware.ts` bảo vệ private route với dynamic origin redirect).
 
 ---
 
@@ -92,3 +92,4 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - *31/10/2026:* Hoàn tất D7: Xây dựng hệ thống giám sát và ghi log khử PII `src/core/monitoring/error-logger.ts` (lọc sạch SĐT Việt Nam, email, thông tin tài chính cá nhân trước khi ghi log ra console hoặc telemetry, 77 tests pass).
 - *31/10/2026:* Hoàn tất D8: Xây dựng Root Error Boundary (`src/app/error.tsx`) và Global Error Boundary (`src/app/global-error.tsx`), dọn dẹp các khối catch rỗng sang warning khử PII, lập danh mục kiểm toán 27 dependency chưa dùng tại `docs/UNUSED_DEPENDENCIES.md` (77 tests pass).
 - *31/10/2026:* Hoàn tất D9: Soạn thảo cẩm nang vận hành `docs/OPERATIONS.md` (phân tách 3 môi trường dev/staging/prod, cấu hình PITR, hướng dẫn khôi phục sự cố, và phân định trách nhiệm RACI).
+- *31/10/2026:* Hoàn tất D10: Nâng cấp `src/middleware.ts` tự động chuyển hướng private app routes sang `/login` với dynamic origin, hoàn thiện tài liệu hướng dẫn làm cứng bảo mật xác thực `docs/AUTH_SETUP.md` (xác nhận email, redirect whitelist, rate limits, Turnstile CAPTCHA, cảnh báo rủi ro chi phí SMS OTP). Hoàn tất toàn bộ Giai đoạn D (P0 Launch Blockers).

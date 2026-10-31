@@ -1,6 +1,19 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+// Danh sách các route yêu cầu xác thực bắt buộc trên Cloud
+const PROTECTED_PREFIXES = [
+  "/dashboard",
+  "/projects",
+  "/quoting",
+  "/materials",
+  "/settings",
+  "/my-assets",
+];
+
+// Danh sách các route dành cho khách vãng lai (nếu đã đăng nhập thì tự vào dashboard)
+const AUTH_ROUTES = ["/login", "/register", "/forgot-password"];
+
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
     request: {
@@ -13,7 +26,7 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
-  // Nếu chưa cấu hình Supabase (Demo Mode), bỏ qua kiểm tra session
+  // Nếu chưa cấu hình Supabase (Chế độ Demo / Offline), cho phép truy cập cục bộ
   if (
     !supabaseUrl ||
     !supabaseAnonKey ||
@@ -40,7 +53,24 @@ export async function middleware(request: NextRequest) {
   });
 
   // Tự động làm mới session
-  await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const { pathname } = request.nextUrl;
+  const origin = request.nextUrl.origin;
+
+  // 1. Kiểm tra Route bảo vệ (Protected Route)
+  const isProtected = PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  if (isProtected && !user) {
+    const redirectUrl = new URL("/login", origin);
+    redirectUrl.searchParams.set("redirectTo", pathname);
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  // 2. Nếu đã đăng nhập mà truy cập trang đăng nhập/đăng ký -> chuyển sang Dashboard
+  const isAuthRoute = AUTH_ROUTES.some((route) => pathname === route);
+  if (isAuthRoute && user) {
+    return NextResponse.redirect(new URL("/dashboard", origin));
+  }
 
   return response;
 }
