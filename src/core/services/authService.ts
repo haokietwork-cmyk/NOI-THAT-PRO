@@ -61,8 +61,15 @@ export class AuthService {
     if (!this.isBrowser()) return;
     if (user) {
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
+      try {
+        const cookieVal = encodeURIComponent(JSON.stringify(user));
+        document.cookie = `noithat_pro_session=${cookieVal}; path=/; max-age=2592000; SameSite=Lax`;
+      } catch {}
     } else {
       localStorage.removeItem(AUTH_STORAGE_KEY);
+      try {
+        document.cookie = "noithat_pro_session=; path=/; max-age=0; SameSite=Lax";
+      } catch {}
     }
     authListeners.forEach((listener) => listener(user));
   }

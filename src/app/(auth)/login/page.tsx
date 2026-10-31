@@ -9,7 +9,7 @@ import { useAuth } from "@/core/store/useAuth";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get("redirect") || "/dashboard";
+  const redirectUrl = searchParams.get("redirect") || searchParams.get("redirectTo") || "/dashboard";
 
   const { loginWithEmail, loginWithPhone, register, isAuthenticated } = useAuth();
 
@@ -48,8 +48,8 @@ function LoginForm() {
     if (res.success) {
       setSuccessMsg("Đăng nhập thành công!");
       setTimeout(() => {
-        router.push(redirectUrl);
-      }, 400);
+        window.location.href = redirectUrl;
+      }, 300);
     } else {
       setErrorMsg(res.error || "Đăng nhập thất bại");
     }
@@ -67,8 +67,8 @@ function LoginForm() {
     if (res.success) {
       setSuccessMsg("Đăng nhập thành công!");
       setTimeout(() => {
-        router.push(redirectUrl);
-      }, 400);
+        window.location.href = redirectUrl;
+      }, 300);
     } else {
       setErrorMsg(res.error || "Đăng nhập thất bại");
     }
@@ -92,8 +92,8 @@ function LoginForm() {
     if (res.success) {
       setSuccessMsg("Đăng ký tài khoản xưởng thành công!");
       setTimeout(() => {
-        router.push(redirectUrl);
-      }, 500);
+        window.location.href = redirectUrl;
+      }, 300);
     } else {
       setErrorMsg(res.error || "Đăng ký thất bại");
     }

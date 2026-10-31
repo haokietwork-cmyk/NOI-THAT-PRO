@@ -55,6 +55,19 @@ export async function middleware(request: NextRequest) {
   // Tự động làm mới session
   const { data: { user } } = await supabase.auth.getUser();
 
+  // Đọc cookie phiên cục bộ (hỗ trợ đăng nhập SĐT xưởng mộc)
+  const localSessionCookie = request.cookies.get("noithat_pro_session")?.value;
+  let localUser = null;
+  if (localSessionCookie) {
+    try {
+      localUser = JSON.parse(decodeURIComponent(localSessionCookie));
+    } catch {
+      localUser = null;
+    }
+  }
+
+  const effectiveUser = user || localUser;
+
   const { pathname } = request.nextUrl;
   const origin = request.nextUrl.origin;
 
@@ -62,7 +75,7 @@ export async function middleware(request: NextRequest) {
   // Ngoại lệ duy nhất: Cho phép dùng thử bóc tách với dữ liệu mẫu 48 tấm (?demo=true) mà không cần đăng nhập
   const isDemoQuoting = pathname === "/quoting" && request.nextUrl.searchParams.get("demo") === "true";
   const isProtected = PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
-  if (isProtected && !user && !isDemoQuoting) {
+  if (isProtected && !effectiveUser && !isDemoQuoting) {
     const redirectUrl = new URL("/login", origin);
     redirectUrl.searchParams.set("redirectTo", pathname);
     return NextResponse.redirect(redirectUrl);
@@ -70,7 +83,7 @@ export async function middleware(request: NextRequest) {
 
   // 2. Nếu đã đăng nhập mà truy cập trang đăng nhập/đăng ký -> chuyển sang Dashboard
   const isAuthRoute = AUTH_ROUTES.some((route) => pathname === route);
-  if (isAuthRoute && user) {
+  if (isAuthRoute && effectiveUser) {
     return NextResponse.redirect(new URL("/dashboard", origin));
   }
 
