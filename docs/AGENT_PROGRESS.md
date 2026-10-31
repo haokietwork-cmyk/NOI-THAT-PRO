@@ -65,7 +65,7 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 ---
 
 ### GIAI ĐOẠN F: BƯỚC 5 — CHIA SẺ BÁO GIÁ BẰNG LINK BẢO MẬT
-- [ ] **F.** Bảng `quote_shares`, che dữ liệu server-side, link bảo mật, PDF print.
+- [x] **F.** Bảng `quote_shares`, che dữ liệu server-side, link bảo mật, PDF print. (Migration `20261031120000_quote_shares.sql` băm token SHA-256 + RPC `get_shared_quote` SECURITY DEFINER, bộ test RLS `test_rls_quote_shares.sql`, module `quote-share.ts`, API routes `create`, `revoke`, `[token]`, trang in `/share/[token]` chuẩn A4 có `X-Robots-Tag: noindex, nofollow`, Modal chia sẻ tích hợp trực tiếp Step 3 tại `/quoting`, 82 tests pass).
 
 ---
 
@@ -93,3 +93,5 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - *31/10/2026:* Hoàn tất D8: Xây dựng Root Error Boundary (`src/app/error.tsx`) và Global Error Boundary (`src/app/global-error.tsx`), dọn dẹp các khối catch rỗng sang warning khử PII, lập danh mục kiểm toán 27 dependency chưa dùng tại `docs/UNUSED_DEPENDENCIES.md` (77 tests pass).
 - *31/10/2026:* Hoàn tất D9: Soạn thảo cẩm nang vận hành `docs/OPERATIONS.md` (phân tách 3 môi trường dev/staging/prod, cấu hình PITR, hướng dẫn khôi phục sự cố, và phân định trách nhiệm RACI).
 - *31/10/2026:* Hoàn tất D10: Nâng cấp `src/middleware.ts` tự động chuyển hướng private app routes sang `/login` với dynamic origin, hoàn thiện tài liệu hướng dẫn làm cứng bảo mật xác thực `docs/AUTH_SETUP.md` (xác nhận email, redirect whitelist, rate limits, Turnstile CAPTCHA, cảnh báo rủi ro chi phí SMS OTP). Hoàn tất toàn bộ Giai đoạn D (P0 Launch Blockers).
+- *31/10/2026:* Hoàn tất Giai đoạn E: Stepper 3 bước `/quoting`, chế độ nâng cao `advancedMode`, badge tùy chỉnh cấu hình, test bất biến bộ lọc hiển thị 6 tiêu chí, loại bỏ hoàn toàn `includes("(v")`, bảo vệ bí mật kinh doanh in A4, gỡ bỏ 13 thư viện thừa (rút gọn còn 21 dependencies), 78 tests pass.
+- *31/10/2026:* Hoàn tất Giai đoạn F: Tính năng chia sẻ báo giá bằng secure link (Bảng `quote_shares`, hàm băm SHA-256 token, RPC `get_shared_quote` SECURITY DEFINER, bộ test RLS `test_rls_quote_shares.sql`, module `quote-share.ts`, API routes tạo/thu hồi/truy vấn, trang in chuẩn A4 `/share/[token]` với `X-Robots-Tag: noindex, nofollow`, 82 tests pass, bản dựng Next.js hoàn tất 26/26 routes). Sẵn sàng cho Giai đoạn G (Checklist Go-Live `docs/GO_LIVE.md`).

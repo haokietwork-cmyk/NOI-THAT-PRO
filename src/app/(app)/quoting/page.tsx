@@ -36,13 +36,15 @@ import {
   X,
   RotateCcw,
   Eye,
-  Table
+  Table,
+  Share2
 } from "lucide-react";
 import { useAppStore, SEED_PARTS } from "@/core/store/useAppStore";
 import { useAuth } from "@/core/store/useAuth";
 import AuthModal from "@/core/components/AuthModal";
 import TechnicalHandbookModal from "@/core/components/TechnicalHandbookModal";
 import PresetLibraryModal from "@/core/components/PresetLibraryModal";
+import ShareQuoteModal from "@/core/components/ShareQuoteModal";
 import { CutlistPart, MaterialItem, SavedProject, ProjectStatus, DEFAULT_WORKSHOP_COST_CONFIG } from "@/core/types";
 import { calculateProject, LEGAL_DISCLAIMER } from "@/core/calculations/engine";
 import {
@@ -111,6 +113,7 @@ function QuotingWorkspace() {
   const [isDragging, setIsDragging] = useState(false);
   const [showPresetModal, setShowPresetModal] = useState(false);
   const [showHandbookModal, setShowHandbookModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // ==========================================================================
   // PHỄU LỌC CHI TIẾT TẤM (CUTLIST FILTER FUNNEL)
@@ -932,6 +935,15 @@ function QuotingWorkspace() {
             >
               <Save className="w-3.5 h-3.5" />
               <span>Lưu dự án</span>
+            </button>
+
+            <button
+              onClick={() => setShowShareModal(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-sky-800 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-xl transition cursor-pointer"
+              title="Chia sẻ link báo giá an toàn cho khách hàng"
+            >
+              <Share2 className="w-3.5 h-3.5 text-sky-600" />
+              <span className="hidden sm:inline">Chia sẻ link</span>
             </button>
 
             <button
@@ -2191,7 +2203,7 @@ function QuotingWorkspace() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
           {/* Card 1: Xuất Excel BOM Xưởng */}
           <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-emerald-300 transition flex flex-col justify-between space-y-3 shadow-2xs">
             <div className="space-y-2">
@@ -2261,7 +2273,30 @@ function QuotingWorkspace() {
             </button>
           </div>
 
-          {/* Card 4: Lưu Dự Án Đám Mây */}
+          {/* Card 4: Chia Sẻ Báo Giá An Toàn (Secure Link) */}
+          <div className="p-4 rounded-xl border border-indigo-200 bg-indigo-50/40 hover:bg-indigo-50 hover:border-indigo-300 transition flex flex-col justify-between space-y-3 shadow-2xs">
+            <div className="space-y-2">
+              <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center">
+                <Share2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold text-indigo-950">Chia Sẻ Link Báo Giá</h3>
+                <p className="text-[11px] text-indigo-800 mt-1 leading-relaxed">
+                  Tạo link bảo mật gửi trực tiếp qua Zalo/Email cho khách xem trên điện thoại, che 100% giá vốn nội bộ.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowShareModal(true)}
+              className="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer"
+            >
+              <Share2 className="w-4 h-4" />
+              <span>Tạo Link Chia Sẻ</span>
+            </button>
+          </div>
+
+          {/* Card 5: Lưu Dự Án Đám Mây */}
           <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-400 transition flex flex-col justify-between space-y-3 shadow-2xs">
             <div className="space-y-2">
               <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
@@ -2456,6 +2491,14 @@ function QuotingWorkspace() {
           </button>
           <button
             type="button"
+            onClick={() => setShowShareModal(true)}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-xs font-bold rounded-xl transition cursor-pointer"
+          >
+            <Share2 className="w-4 h-4 text-indigo-600" />
+            <span>Chia sẻ link</span>
+          </button>
+          <button
+            type="button"
             onClick={handlePrintA4}
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer"
           >
@@ -2647,6 +2690,20 @@ function QuotingWorkspace() {
       <TechnicalHandbookModal
         isOpen={showHandbookModal}
         onClose={() => setShowHandbookModal(false)}
+      />
+
+      {/* Modal Chia Sẻ Báo Giá An Toàn (Secure Link) */}
+      <ShareQuoteModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        projectId={editId || undefined}
+        isAuthenticated={isAuthenticated}
+        onPromptLogin={() => {
+          setAuthModalTitle("Đăng nhập để chia sẻ báo giá");
+          setAuthModalDesc("Vui lòng đăng nhập tài khoản xưởng để tạo liên kết bảo mật cho khách hàng.");
+          setShowAuthModal(true);
+        }}
+        onSaveProjectFirst={handleSaveProject}
       />
 
     </div>
