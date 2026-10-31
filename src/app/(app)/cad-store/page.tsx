@@ -65,6 +65,27 @@ export default function CadStorePage() {
 
   const plugins: PluginItem[] = [
     {
+      id: "autoplot-flexible",
+      code: "AutoPlotFlexible.bundle",
+      cmd: "AUTOPLOT",
+      platform: "autocad",
+      title: "AutoPlot Flexible v2.0 (.NET In Gộp PDF Hàng Loạt)",
+      desc: "Công cụ in & gộp PDF hàng loạt đỉnh cao cho AutoCAD (.NET C# / AutoCAD 2018-2026). Tự động nhận diện khung Block động, Polyline, sắp xếp Natural Sort (A-2 < A-10), in qua Named View chống lệch lề và gộp PDF tự động tạo Bookmark mục lục.",
+      priceNumber: 399_000,
+      priceText: "399.000 đ",
+      tag: "Flagship v2.0 - 63/63 Pass Oracle",
+      tagColor: "bg-amber-50 text-amber-800 border-amber-200",
+      supportedCad: "AutoCAD 2018 - 2026",
+      features: [
+        "Nhận diện khung Block động lồng nhau, Polyline kín và Layer",
+        "Khử trùng lặp khung thông minh bằng lưới băm Spatial Hash Grid",
+        "Sắp xếp trang tự nhiên (Natural Sort) và theo ma trận tọa độ",
+        "In qua Named View triệt tiêu 100% tình trạng lệch lề, mất nét",
+        "Tự động gộp file PDF thành 1 tập duy nhất kèm Bookmark mục lục",
+        "Quản lý bản quyền Machine ID (RSA), dùng thử 15 ngày & cập nhật ngầm",
+      ],
+    },
+    {
       id: "autocutlist-pro",
       code: "AutoCutlist_Pro.lsp",
       cmd: "QC",
@@ -289,6 +310,14 @@ export default function CadStorePage() {
 
   // Tải file Lisp hoặc SketchUp Extension (sinh file đính kèm với License)
   const handleDownloadFile = (plugin: PluginItem, license?: string) => {
+    // Tải trực tiếp bộ cài đặt AutoPlot Flexible .NET
+    if (plugin.id === "autoplot-flexible") {
+      const link = document.createElement("a");
+      link.href = "/downloads/AutoPlot_Flexible_v2.0_Setup.zip";
+      link.download = "AutoPlot_Flexible_v2.0_Setup.zip";
+      link.click();
+      return;
+    }
     // Tải trực tiếp file lsp thật chuẩn từ gói công cụ tương ứng
     if (plugin.id === "autocutlist-pro") {
       const link = document.createElement("a");
