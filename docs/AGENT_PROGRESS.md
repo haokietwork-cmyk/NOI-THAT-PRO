@@ -48,7 +48,7 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - [x] **D1.** RLS `profiles` chặn tự đổi `subscription_tier` (Đã chặn ở baseline C2 qua Column-level Grant chỉ 9 cột, subscriptions tách bảng riêng chỉ backend ghi, test xác thực 63 tests pass).
 - [x] **D2.** Bảo mật 3 API route (Zod schema, size limit, rate limit, no PII log: tạo `api-guard.ts` và áp dụng cho `/api/projects/direct-ingest`, `/api/license/verify`, 68 tests pass).
 - [x] **D3.** Webhook thanh toán (HMAC signature PayOS/SePay, idempotency table `payment_events`, khóa backdoor simulate trên prod, 71 tests pass).
-- [ ] **D4.** Security headers trong `next.config.mjs`.
+- [x] **D4.** Security headers trong `next.config.mjs` (X-Frame-Options SAMEORIGIN, CSP, HSTS, X-Content-Type-Options nosniff, Permissions-Policy, Referrer-Policy, xác nhận live 200 OK).
 - [ ] **D5.** Trang Điều khoản & Chính sách quyền riêng tư (nháp).
 - [ ] **D6.** Xóa tài khoản & Xuất dữ liệu.
 - [ ] **D7.** Giám sát lỗi (lọc PII).
@@ -86,3 +86,4 @@ Quy tắc: Cập nhật sau MỖI commit. Dừng tại các cổng quy định.
 - *31/10/2026:* Hoàn tất D1: Xác thực triệt để RLS và phân quyền cột `profiles` ngăn chặn tự đổi `subscription_tier`, tách `subscriptions` riêng chỉ có service role ghi, bổ sung test xác thực (63 tests pass).
 - *31/10/2026:* Hoàn tất D2: Xây dựng bộ chắn bảo mật `api-guard.ts` (Rate limit sliding window, body size limit, lọc sạch PII logging, Zod schemas kiểm duyệt đầu vào) và áp dụng cho direct-ingest và license verify (68 tests pass).
 - *31/10/2026:* Hoàn tất D3: Bảo mật Webhook thanh toán (Xác thực chữ ký HMAC-SHA256 PayOS, API Key SePay, migration bảng `payment_events` chống xử lý trùng, khóa triệt để backdoor simulate trên Production, 71 tests pass).
+- *31/10/2026:* Hoàn tất D4: Cấu hình bộ security headers toàn diện trong `next.config.mjs` (CSP, X-Frame-Options, X-Content-Type-Options, HSTS, Permissions-Policy, Referrer-Policy, kiểm thử trực tiếp trên server live trả về chính xác).
