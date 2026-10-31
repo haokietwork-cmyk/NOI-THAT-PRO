@@ -33,6 +33,12 @@ import {
   formatAuditActionVi,
   type ProjectAuditLogEntry,
 } from "@/core/monitoring/audit-log";
+import {
+  isLegacyCalculationProject,
+  calculateUpgradePreview,
+  applyProjectFormulaUpgrade,
+  type UpgradePreviewResult,
+} from "@/core/calculations/legacy-upgrade";
 import HelpTooltip from "@/core/components/HelpTooltip";
 
 export default function ProjectWorkspacePage() {
@@ -47,6 +53,29 @@ export default function ProjectWorkspacePage() {
   const [isCreatingRevision, setIsCreatingRevision] = useState(false);
   const [auditLogs, setAuditLogs] = useState<ProjectAuditLogEntry[]>([]);
   const [loadingLogs, setLoadingLogs] = useState(false);
+
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const [upgradePreview, setUpgradePreview] = useState<UpgradePreviewResult | null>(null);
+  const [isUpgrading, setIsUpgrading] = useState(false);
+
+  const handleOpenUpgradeModal = () => {
+    if (!project) return;
+    const preview = calculateUpgradePreview(project, profile.costConfig);
+    setUpgradePreview(preview);
+    setUpgradeModalOpen(true);
+  };
+
+  const handleConfirmUpgrade = async () => {
+    if (!project) return;
+    setIsUpgrading(true);
+    try {
+      const upgraded = applyProjectFormulaUpgrade(project, profile.costConfig);
+      await saveProject(upgraded);
+      setUpgradeModalOpen(false);
+    } finally {
+      setIsUpgrading(false);
+    }
+  };
 
   useEffect(() => {
     if (activeTab === "history" && project?.id) {
@@ -129,6 +158,27 @@ export default function ProjectWorkspacePage() {
 
   return (
     <div className="space-y-6 font-sans pb-16">
+      {/* Banner cảnh báo công thức cũ */}
+      {isLegacyCalculationProject(project) && (
+        <div className="no-print p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs">
+          <div className="flex items-center gap-2">
+            <span className="text-base">⚠️</span>
+            <div>
+              <strong className="font-bold">Dự án dùng công thức cũ (thiếu định mức vật tư phụ)</strong>
+              <p className="text-[11px] text-amber-700 mt-0.5">
+                Bản nháp này chưa tính chi phí vật tư phụ (ốc cam, ke góc, vít, màng PE). Bạn có thể xem trước mức chênh và nâng cấp mà không đổi số âm thầm.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handleOpenUpgradeModal}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition shadow-xs shrink-0 cursor-pointer"
+          >
+            <span>Xem Mức Chênh & Nâng Cấp</span>
+          </button>
+        </div>
+      )}
+
       {/* Top action header */}
       <div className="no-print bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -507,6 +557,90 @@ export default function ProjectWorkspacePage() {
               })}
             </div>
           )}
+        </div>
+      )}
+
+      {/* MODAL XEM TRƯỚC MỨC CHÊNH NÂNG CẤP CÔNG THỨC */}
+      {upgradeModalOpen && upgradePreview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs no-print">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-5 text-xs">
+            <div className="pb-3 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Xem Trước Nâng Cấp Công Thức</h3>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Bảo toàn Snapshot: Đối chiếu rõ ràng mức chênh trước khi ghi đè số liệu.
+                </p>
+              </div>
+              <button
+                onClick={() => setUpgradeModalOpen(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-600">Giá vốn cũ (chưa có VT phụ):</span>
+                  <span className="font-mono font-bold text-slate-700">
+                    {formatVND(upgradePreview.currentCost)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-600">Giá vốn mới (đã thêm VT phụ):</span>
+                  <span className="font-mono font-bold text-slate-900">
+                    {formatVND(upgradePreview.upgradedCost)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-amber-700 font-bold border-t border-slate-200/60 pt-1.5">
+                  <span>Mức chênh giá vốn:</span>
+                  <span className="font-mono">+{formatVND(upgradePreview.diffCost)}</span>
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200/80 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-emerald-800">Báo giá cũ (gửi khách):</span>
+                  <span className="font-mono font-bold text-emerald-900">
+                    {formatVND(upgradePreview.currentQuote)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-emerald-800 font-bold">Báo giá mới (sau markup):</span>
+                  <span className="font-mono font-black text-emerald-950 text-sm">
+                    {formatVND(upgradePreview.upgradedQuote)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-emerald-700 font-bold border-t border-emerald-200/60 pt-1.5">
+                  <span>Mức chênh báo giá:</span>
+                  <span className="font-mono">+{formatVND(upgradePreview.diffQuote)}</span>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-slate-500 italic">
+                * Sau khi nâng cấp, dự án sẽ được chuyển sang calc_version: 1 và lưu snapshot vật tư phụ đầy đủ.
+              </p>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setUpgradeModalOpen(false)}
+                className="px-4 py-2 font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                disabled={isUpgrading}
+                onClick={handleConfirmUpgrade}
+                className="px-4 py-2 font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition shadow-xs"
+              >
+                {isUpgrading ? "Đang nâng cấp..." : "Xác Nhận Nâng Cấp"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
