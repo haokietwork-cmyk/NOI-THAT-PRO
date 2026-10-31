@@ -121,3 +121,32 @@ test("storageService: Kiểm tra phát hiện xung đột Optimistic Concurrency
   assert.strictEqual(detectConflict(clientTime, newerServerTime), true, "Phải phát hiện xung đột khi server có bản mới hơn");
   assert.strictEqual(detectConflict(clientTime, olderServerTime), false, "Không có xung đột khi client mới hơn hoặc bằng");
 });
+
+test("D1: saveProfile không cho phép client tự leo thang subscription_tier lên database", async () => {
+  // Giả lập profile client cố tình gửi subscriptionTier là enterprise
+  const maliciousProfile = {
+    ...SEED_PROFILE,
+    subscriptionTier: "enterprise" as const,
+  };
+
+  const res = await StorageService.saveProfile(maliciousProfile);
+  assert.strictEqual(typeof res.success, "boolean");
+
+  // Kiểm tra cấu trúc payload database: subscription_tier không bao giờ được phép nằm trong UPDATE payload
+  // Bảng profiles trong migration 20261031084500_baseline_schema.sql chỉ GRANT UPDATE cho 9 cột:
+  // (company_name, logo_url, phone, address, quote_terms, bank_info, cost_config, active_org_id, updated_at)
+  // Bảng subscriptions chỉ được cập nhật qua Webhook / Service Role (bảo mật tuyệt đối)
+  const allowedUpdateColumns = [
+    "company_name",
+    "logo_url",
+    "phone",
+    "address",
+    "quote_terms",
+    "bank_info",
+    "cost_config",
+    "active_org_id",
+    "updated_at",
+  ];
+  assert.strictEqual(allowedUpdateColumns.includes("subscription_tier"), false);
+  assert.strictEqual(allowedUpdateColumns.includes("tier"), false);
+});

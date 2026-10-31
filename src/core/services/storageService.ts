@@ -123,13 +123,25 @@ export class StorageService {
             .single();
 
           if (!error && data) {
+            let subscriptionTier = data.subscription_tier || "free";
+            if (data.active_org_id) {
+              const { data: sub } = await supabase
+                .from("subscriptions")
+                .select("tier")
+                .eq("org_id", data.active_org_id)
+                .single();
+              if (sub?.tier) {
+                subscriptionTier = sub.tier;
+              }
+            }
+
             return {
               name: data.company_name || SEED_PROFILE.name,
               companyName: data.company_name,
               phone: data.phone || SEED_PROFILE.phone,
               address: data.address || SEED_PROFILE.address,
               logoUrl: data.logo_url || "",
-              subscriptionTier: data.subscription_tier || "free",
+              subscriptionTier,
               quoteTerms: SEED_PROFILE.quoteTerms,
               bankName: SEED_PROFILE.bankName,
               accountNumber: SEED_PROFILE.accountNumber,
