@@ -62,6 +62,7 @@ import {
   exportStandardCutlistExcel,
   exportMaterialsTemplateExcel,
 } from "@/core/exporters/excel-exporter";
+import { trackFunnelEvent } from "@/core/monitoring/telemetry";
 
 function QuotingWorkspace() {
   const router = useRouter();
@@ -381,6 +382,14 @@ function QuotingWorkspace() {
   // Điều hướng các bước trong luồng làm việc và cập nhật URL query param
   const goToStep = (step: QuotingStep) => {
     setCurrentStep(step);
+    if (step === 2) {
+      trackFunnelEvent("quote_calculated", {
+        partCount: parts.length,
+        sheetCount: calcResult.totalSheets,
+        isCustomConfig: isCustomCostConfig,
+        step: 2,
+      });
+    }
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
       url.searchParams.set("step", String(step));
@@ -407,6 +416,7 @@ function QuotingWorkspace() {
 
   // Xuất file Excel BOM Xưởng
   const handleExportWorkshopBOM = () => {
+    trackFunnelEvent("bom_exported_excel", { format: "xlsx", sheetCount: calcResult.totalSheets, step: 3 });
     exportWorkshopBOMExcel(
       projectName,
       calcResult.boards,
@@ -420,6 +430,7 @@ function QuotingWorkspace() {
 
   // Xuất file Cutlist Tấm Ván CNC
   const handleExportProjectCutlist = () => {
+    trackFunnelEvent("cutlist_imported", { partCount: parts.length, format: "xlsx" });
     const cutlistItems = parts.map((p) => ({
       moduleName: p.moduleName,
       partName: p.partName,
@@ -439,6 +450,7 @@ function QuotingWorkspace() {
 
   // Mở hộp thoại in báo giá A4
   const handlePrintA4 = () => {
+    trackFunnelEvent("quote_exported_a4", { format: "pdf", step: 3 });
     setActiveOutputTab("quote");
     goToStep(2);
     setTimeout(() => {
@@ -604,6 +616,7 @@ function QuotingWorkspace() {
     });
 
     setParts(parsedParts);
+    trackFunnelEvent("cutlist_imported", { partCount: parsedParts.length, step: 1 });
     setShowMappingModal(false);
     showToast(`⚡ Tự động nhận diện và bóc tách thành công ${parsedParts.length} chi tiết từ file Excel!`, "success");
   };
@@ -650,6 +663,7 @@ function QuotingWorkspace() {
     setProjectName("Căn hộ 2PN Vinhomes Smart City");
     setClientName("Anh Tuấn");
     setClientPhone("0988 123 456");
+    trackFunnelEvent("demo_started", { partCount: SEED_PARTS.length, step: 1 });
     showToast("⚡ Đã nạp thành công bộ dữ liệu mẫu 48 tấm (Căn hộ 2PN)!");
   };
 
@@ -749,6 +763,7 @@ function QuotingWorkspace() {
     };
 
     const res = await saveProject(projectToSave);
+    trackFunnelEvent("project_saved", { isCustomConfig: isCustomCostConfig, versionNo: projectVersionNo });
     if (res?.error) {
       showToast(`⚠️ Đã lưu tạm trên máy, chưa lên Cloud: ${res.error}`, "info");
     } else {

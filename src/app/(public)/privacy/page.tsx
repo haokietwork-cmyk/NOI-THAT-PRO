@@ -88,6 +88,11 @@ export default function PrivacyPage() {
                     <td className="p-3">Kích thước ván (Dài, Rộng, Dày), Mã vật tư, Đơn giá</td>
                     <td className="p-3 font-sans">Thuật toán tính số tấm ván, mét chỉ dán cạnh và giá vốn BOM</td>
                   </tr>
+                  <tr>
+                    <td className="p-3 font-semibold">Phân Tích Ẩn Danh (Funnel)</td>
+                    <td className="p-3">Mã phiên ngẫu nhiên (Session ID), Mốc hành vi (Demo, Bóc tách, Xuất PDF, Chia sẻ link)</td>
+                    <td className="p-3 font-sans">Đo lường phễu trải nghiệm sản phẩm. Tuyệt đối KHÔNG chứa tên khách, SĐT, địa chỉ, tên dự án hay giá vốn.</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -108,6 +113,9 @@ export default function PrivacyPage() {
               </li>
               <li>
                 <strong>Không ghi log dữ liệu cá nhân (No PII Logging):</strong> Toàn bộ hệ thống máy chủ, nhật ký lỗi (Sentry/Console) và API guards đều tự động lọc bỏ các trường nhạy cảm (SĐT, tên khách, địa chỉ) trước khi ghi log.
+              </li>
+              <li>
+                <strong>Phân tích sử dụng ẩn danh (Zero-PII Telemetry):</strong> Dữ liệu đo lường hành vi sản phẩm (phễu bóc tách, xuất file) được định danh bằng Session ID ngẫu nhiên, tự động làm sạch và không thể liên kết ngược về người dùng hay xưởng cụ thể.
               </li>
               <li>
                 <strong>Mã hóa đường truyền (HTTPS/TLS):</strong> Toàn bộ kết nối giữa trình duyệt, plugin CAD và máy chủ đều được mã hóa bằng TLS 1.3 với chuẩn bảo mật HSTS.

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Share2, Copy, Check, ShieldAlert, ShieldCheck, Clock, CreditCard, X, AlertCircle } from "lucide-react";
+import { trackFunnelEvent } from "@/core/monitoring/telemetry";
 
 interface ShareQuoteModalProps {
   isOpen: boolean;
@@ -62,6 +63,7 @@ export default function ShareQuoteModal({
       }
 
       setShareUrl(data.shareUrl);
+      trackFunnelEvent("share_link_created", { expiresDays });
     } catch (err: any) {
       setErrorMsg(err.message || "Đã xảy ra lỗi khi tạo liên kết");
     } finally {
