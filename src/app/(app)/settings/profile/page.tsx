@@ -18,6 +18,7 @@ import {
   Sliders
 } from "lucide-react";
 import { useAppStore } from "@/core/store/useAppStore";
+import { DEFAULT_HINGE_THRESHOLDS, type HingeHeightThreshold } from "@/core/types";
 
 export default function WorkshopProfileSettingsPage() {
   const { profile, updateProfile } = useAppStore();
@@ -35,6 +36,9 @@ export default function WorkshopProfileSettingsPage() {
   const [laborRate, setLaborRate] = useState(profile.costConfig?.laborRatePerSheet ?? 120000);
   const [hingesPerSheet, setHingesPerSheet] = useState(profile.costConfig?.hingesPerSheet ?? 2.0);
   const [slidesPerSheet, setSlidesPerSheet] = useState(profile.costConfig?.slidesPerSheet ?? 0.35);
+  const [hingeThresholds, setHingeThresholds] = useState<HingeHeightThreshold[]>(
+    profile.costConfig?.hingeThresholds || DEFAULT_HINGE_THRESHOLDS
+  );
 
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -56,6 +60,7 @@ export default function WorkshopProfileSettingsPage() {
         laborRatePerSheet: Number(laborRate) || 120000,
         hingesPerSheet: Number(hingesPerSheet) || 2.0,
         slidesPerSheet: Number(slidesPerSheet) || 0.35,
+        hingeThresholds,
       },
     });
     if (res?.error) {
@@ -291,6 +296,43 @@ export default function WorkshopProfileSettingsPage() {
                     Mặc định: 0.35 bộ ray trượt cho mỗi tấm ván tủ.
                   </span>
                 </div>
+              </div>
+
+              {/* Ngưỡng bản lề theo chiều cao cánh tủ (Tiers) */}
+              <div className="pt-3 border-t border-slate-200/80 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-bold text-slate-800">
+                    Ngưỡng số lượng bản lề theo chiều cao cánh tủ (mm):
+                  </label>
+                  <span className="text-[10px] text-slate-400 italic">Quy tắc bậc thang (Tiers)</span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {hingeThresholds.map((tier, idx) => (
+                    <div key={idx} className="p-2.5 rounded-xl bg-white border border-slate-200 space-y-1">
+                      <span className="text-[10px] text-slate-500 block">Cao ≤ {tier.maxHeightMm} mm</span>
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="number"
+                          min="1"
+                          max="10"
+                          value={tier.hingeCount}
+                          onChange={(e) => {
+                            const val = Number(e.target.value) || 2;
+                            const next = [...hingeThresholds];
+                            next[idx] = { ...tier, hingeCount: val };
+                            setHingeThresholds(next);
+                          }}
+                          className="w-12 p-1 font-mono font-bold text-center bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900"
+                        />
+                        <span className="text-[11px] text-slate-600 font-semibold">bản lề</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <span className="text-[10px] text-slate-500 block">
+                  * Hệ thống tự động tính số bản lề khi bóc tách chi tiết có nhãn cánh cửa hoặc dựa theo tỷ lệ ván nếu không đánh nhãn.
+                </span>
               </div>
             </div>
 

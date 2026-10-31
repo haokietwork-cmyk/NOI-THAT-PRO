@@ -300,6 +300,52 @@ export default function ProjectWorkspacePage() {
               {formatVND(calcResult.totalCost)}
             </span>
           </div>
+
+          {/* Phụ kiện kim khí & Chỉ dán cạnh */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            {/* Chỉ dán cạnh */}
+            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2 text-xs">
+              <span className="font-bold text-slate-800 block">2. Chỉ dán cạnh PVC (Máy dán tự động)</span>
+              <div className="flex justify-between text-slate-600">
+                <span>Tổng mét dài (+8% hao hụt):</span>
+                <span className="font-mono font-bold text-slate-900">
+                  {calcResult.edges.totalMeters} mét dài
+                </span>
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>Thành tiền chỉ dán:</span>
+                <span className="font-mono font-bold text-emerald-700">
+                  {formatVND(calcResult.edges.totalCost)}
+                </span>
+              </div>
+            </div>
+
+            {/* Phụ kiện kim khí */}
+            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-slate-800 block">3. Phụ kiện kim khí xưởng (Hệ 32mm)</span>
+                <HelpTooltip
+                  content={`Ước tính theo cấu hình xưởng (${project.costConfigSnapshot?.hingesPerSheet ?? profile.costConfig?.hingesPerSheet ?? 2.0} bản lề/tấm, ${project.costConfigSnapshot?.slidesPerSheet ?? profile.costConfig?.slidesPerSheet ?? 0.35} bộ ray/tấm). Bạn có thể cấu hình lại tỷ lệ này trong Cài Đặt Hồ Sơ Xưởng.`}
+                  label="Giải thích định mức phụ kiện"
+                />
+              </div>
+              <div className="text-[11px] text-amber-800 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200 font-medium">
+                Ước tính theo cấu hình xưởng ({project.costConfigSnapshot?.hingesPerSheet ?? profile.costConfig?.hingesPerSheet ?? 2.0} bản lề/tấm, {project.costConfigSnapshot?.slidesPerSheet ?? profile.costConfig?.slidesPerSheet ?? 0.35} bộ ray/tấm)
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>Bản lề Inox 304 giảm chấn:</span>
+                <span className="font-mono font-bold text-slate-900">
+                  ~{Math.max(4, Math.round(calcResult.totalSheets * (project.costConfigSnapshot?.hingesPerSheet ?? profile.costConfig?.hingesPerSheet ?? 2.0)))} cái
+                </span>
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>Ray trượt âm giảm chấn 450mm:</span>
+                <span className="font-mono font-bold text-slate-900">
+                  ~{Math.max(1, Math.round(calcResult.totalSheets * (project.costConfigSnapshot?.slidesPerSheet ?? profile.costConfig?.slidesPerSheet ?? 0.35)))} bộ
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
