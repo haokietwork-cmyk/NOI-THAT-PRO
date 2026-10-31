@@ -688,7 +688,7 @@ export default function MaterialsPage() {
 
         {/* Data Table */}
         <div className="overflow-x-auto rounded-xl border border-slate-200">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left text-xs border-collapse min-w-[700px]">
             <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
               <tr>
                 <th className="p-3 w-10 text-center">STT</th>

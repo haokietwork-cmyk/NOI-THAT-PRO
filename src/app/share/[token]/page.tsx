@@ -56,9 +56,9 @@ export default async function ShareQuotePage({ params }: SharePageProps) {
       {/* ================================================================ */}
       {/* THANH THAO TÁC TRÊN CÙNG DÀNH CHO KHÁCH & XƯỞNG (no-print)        */}
       {/* ================================================================ */}
-      <header className="no-print max-w-4xl mx-auto mb-6 bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+      <header className="no-print max-w-4xl mx-auto mb-6 bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black shadow-xs">
+          <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black shadow-xs shrink-0">
             A4
           </div>
           <div>
@@ -77,9 +77,9 @@ export default async function ShareQuotePage({ params }: SharePageProps) {
       {/* ================================================================ */}
       {/* KHUNG TỜ GIẤY BÁO GIÁ A4 CHUẨN IN (.print-area)                   */}
       {/* ================================================================ */}
-      <main className="print-area bg-white rounded-2xl border border-slate-200/90 p-8 sm:p-12 shadow-md space-y-6 text-xs max-w-4xl mx-auto">
+      <main className="print-area bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-8 md:p-12 shadow-md space-y-6 text-xs max-w-4xl mx-auto">
         {/* Header Tờ Báo Giá A4 */}
-        <div className="flex justify-between items-start pb-6 border-b-2 border-slate-800">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-6 border-b-2 border-slate-800">
           <div className="space-y-1.5 max-w-md">
             <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">
               {quote.workshop.name}
@@ -126,7 +126,7 @@ export default async function ShareQuotePage({ params }: SharePageProps) {
         </div>
 
         {/* Thông tin dự án & Khách hàng */}
-        <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs">
           <div>
             <span className="text-slate-400 block text-[10px] font-bold">CÔNG TRÌNH / DỰ ÁN:</span>
             <strong className="text-slate-900 text-sm font-bold">{quote.projectName}</strong>
@@ -140,8 +140,8 @@ export default async function ShareQuotePage({ params }: SharePageProps) {
         </div>
 
         {/* Bảng hạng mục báo giá gom theo Module */}
-        <div className="space-y-2">
-          <table className="w-full text-left border-collapse text-xs">
+        <div className="space-y-2 overflow-x-auto">
+          <table className="w-full text-left border-collapse text-xs min-w-[500px]">
             <thead className="bg-slate-100 text-slate-700 font-bold border-y border-slate-300">
               <tr>
                 <th className="p-3 w-12 text-center">STT</th>
@@ -168,7 +168,7 @@ export default async function ShareQuotePage({ params }: SharePageProps) {
         </div>
 
         {/* Tổng cộng thanh toán */}
-        <div className="pt-4 border-t-2 border-slate-800 flex justify-between items-center text-xs">
+        <div className="pt-4 border-t-2 border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs">
           <div>
             <span className="font-black text-slate-900 text-sm block">TỔNG CỘNG THANH TOÁN:</span>
             <span className="text-slate-500 text-[11px]">Đã bao gồm chi phí gia công, vận chuyển và lắp đặt hoàn thiện.</span>

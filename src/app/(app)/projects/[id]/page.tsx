@@ -211,7 +211,7 @@ export default function ProjectWorkspacePage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
           {isLocked ? (
             <button
               onClick={handleCreateRevision}
@@ -250,7 +250,7 @@ export default function ProjectWorkspacePage() {
       </div>
 
       {/* Tabs */}
-      <div className="no-print flex items-center gap-2 border-b border-slate-200 pb-2">
+      <div className="no-print flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
         <button
           onClick={() => setActiveTab("bom")}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
@@ -315,8 +315,8 @@ export default function ProjectWorkspacePage() {
             </button>
           </div>
 
-          <div className="rounded-xl border border-slate-200 overflow-hidden text-xs">
-            <table className="w-full text-left">
+          <div className="rounded-xl border border-slate-200 overflow-x-auto text-xs">
+            <table className="w-full text-left min-w-[600px]">
               <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
                 <tr>
                   <th className="p-3">Mã vật liệu & Quy cách</th>
@@ -402,9 +402,9 @@ export default function ProjectWorkspacePage() {
       {/* TAB 2: A4 QUOTE */}
       {activeTab === "quote" && (
         <div className="space-y-4">
-          <div className="print-area bg-white rounded-2xl border border-slate-200/90 p-8 sm:p-12 shadow-md space-y-6 text-xs max-w-4xl mx-auto">
+          <div className="print-area bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-8 md:p-12 shadow-md space-y-6 text-xs max-w-4xl mx-auto">
             {/* Header A4 */}
-            <div className="flex justify-between items-start pb-6 border-b-2 border-slate-800">
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-6 border-b-2 border-slate-800">
               <div className="space-y-1">
                 <h2 className="text-xl font-black text-slate-900 uppercase">
                   {profile.name || "XƯỞNG NỘI THẤT HOÀNG GIA"}
@@ -426,7 +426,7 @@ export default function ProjectWorkspacePage() {
             </div>
 
             {/* Info */}
-            <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs">
               <div>
                 <span className="text-slate-400 block text-[10px]">CÔNG TRÌNH:</span>
                 <strong className="text-slate-900 text-sm font-bold">{project.projectName}</strong>
@@ -438,35 +438,37 @@ export default function ProjectWorkspacePage() {
             </div>
 
             {/* Items */}
-            <table className="w-full text-left border-collapse text-xs">
-              <thead className="bg-slate-100 text-slate-700 font-bold border-y border-slate-300">
-                <tr>
-                  <th className="p-3 w-12 text-center">STT</th>
-                  <th className="p-3">{WORKSHOP_TERMS.module.labelWithOriginal}</th>
-                  <th className="p-3">Quy Cách Vật Liệu</th>
-                  <th className="p-3 text-right">Số Tấm</th>
-                  <th className="p-3 text-right">Thành Tiền (VNĐ)</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200">
-                {calcResult.moduleSummaries.map((m, idx) => (
-                  <tr key={m.moduleName}>
-                    <td className="p-3 text-center text-slate-400 font-mono">{idx + 1}</td>
-                    <td className="p-3 font-bold text-slate-900">{m.moduleName}</td>
-                    <td className="p-3 text-slate-600 text-[11px]">
-                      MDF Chống ẩm phủ Melamine, dán chỉ PVC, ray & bản lề giảm chấn
-                    </td>
-                    <td className="p-3 text-right font-mono text-slate-500">{m.itemCount}</td>
-                    <td className="p-3 text-right font-mono font-bold text-slate-900 text-sm">
-                      {formatVND(m.estimatedQuote)}
-                    </td>
+            <div className="space-y-2 overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs min-w-[500px]">
+                <thead className="bg-slate-100 text-slate-700 font-bold border-y border-slate-300">
+                  <tr>
+                    <th className="p-3 w-12 text-center">STT</th>
+                    <th className="p-3">{WORKSHOP_TERMS.module.labelWithOriginal}</th>
+                    <th className="p-3">Quy Cách Vật Liệu</th>
+                    <th className="p-3 text-right">Số Tấm</th>
+                    <th className="p-3 text-right">Thành Tiền (VNĐ)</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {calcResult.moduleSummaries.map((m, idx) => (
+                    <tr key={m.moduleName}>
+                      <td className="p-3 text-center text-slate-400 font-mono">{idx + 1}</td>
+                      <td className="p-3 font-bold text-slate-900">{m.moduleName}</td>
+                      <td className="p-3 text-slate-600 text-[11px]">
+                        MDF Chống ẩm phủ Melamine, dán chỉ PVC, ray & bản lề giảm chấn
+                      </td>
+                      <td className="p-3 text-right font-mono text-slate-500">{m.itemCount}</td>
+                      <td className="p-3 text-right font-mono font-bold text-slate-900 text-sm">
+                        {formatVND(m.estimatedQuote)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
             {/* Total */}
-            <div className="pt-4 border-t-2 border-slate-800 flex justify-between items-center">
+            <div className="pt-4 border-t-2 border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
               <div>
                 <span className="font-extrabold text-slate-900 text-sm block">TỔNG CỘNG THANH TOÁN:</span>
                 <span className="text-slate-500 text-[11px]">Đã bao gồm lắp đặt hoàn thiện tại công trình.</span>

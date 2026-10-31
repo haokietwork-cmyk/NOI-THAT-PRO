@@ -17,11 +17,16 @@ import {
   User,
   ShieldCheck,
   Sparkles,
+  X,
 } from "lucide-react";
 import { useAuth } from "@/core/store/useAuth";
 import { WORKSHOP_TERMS } from "@/core/constants/terms";
 
-export default function Sidebar() {
+interface SidebarProps {
+  onCloseMobile?: () => void;
+}
+
+export default function Sidebar({ onCloseMobile }: SidebarProps = {}) {
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
 
@@ -106,8 +111,12 @@ export default function Sidebar() {
   return (
     <aside className="no-print w-72 bg-white text-slate-800 flex flex-col shrink-0 border-r border-slate-200/80 min-h-screen select-none transition-all">
       {/* Brand Header */}
-      <div className="h-16 flex items-center px-6 border-b border-slate-200/80 gap-3">
-        <Link href="/" className="flex items-center gap-3 group">
+      <div className="h-16 flex items-center justify-between px-6 border-b border-slate-200/80">
+        <Link
+          href="/"
+          onClick={() => onCloseMobile?.()}
+          className="flex items-center gap-3 group"
+        >
           <div className="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center text-white shadow-sm shadow-amber-500/20 group-hover:bg-amber-600 transition">
             <Layers className="w-5 h-5" />
           </div>
@@ -125,6 +134,16 @@ export default function Sidebar() {
             </p>
           </div>
         </Link>
+        {onCloseMobile && (
+          <button
+            type="button"
+            onClick={onCloseMobile}
+            className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+            aria-label="Đóng menu điều hướng"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* Widget Giám sát Định mức Xưởng */}
@@ -192,6 +211,7 @@ export default function Sidebar() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={() => onCloseMobile?.()}
                   className={`flex items-center justify-between px-3.5 py-2 rounded-xl transition-all ${
                     isActive
                       ? "bg-amber-50 text-amber-900 font-semibold border border-amber-200/80 shadow-xs"
@@ -279,6 +299,7 @@ export default function Sidebar() {
             </p>
             <Link
               href="/login"
+              onClick={() => onCloseMobile?.()}
               className="w-full py-2 px-3 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white transition shadow-xs flex items-center justify-center gap-1.5 text-center"
             >
               <span>🔑 Đăng nhập / Đăng ký</span>
