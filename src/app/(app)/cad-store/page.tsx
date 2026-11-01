@@ -72,12 +72,12 @@ export default function CadStorePage() {
       code: "AutoPlotFlexible.bundle",
       cmd: "AUTOPLOT",
       platform: "autocad",
-      title: "AutoPlot Flexible v2.0 (.NET In Gộp PDF Hàng Loạt)",
+      title: "AutoPlot Flexible v2.1 (.NET In Gộp PDF Hàng Loạt)",
       desc: "Công cụ in & gộp PDF hàng loạt đỉnh cao cho AutoCAD (.NET C# / AutoCAD 2018-2026). Tự động nhận diện khung Block động, Polyline, sắp xếp Natural Sort (A-2 < A-10), in qua Named View chống lệch lề và gộp PDF tự động tạo Bookmark mục lục.",
       priceNumber: 399_000,
       priceText: "399.000 đ",
-      tag: "Công cụ chính thức v2.0 - 63/63 Pass Oracle",
-      tagColor: "bg-amber-50 text-amber-800 border-amber-200",
+      tag: "Bản cập nhật v2.1 - 63/63 Pass Oracle",
+      tagColor: "bg-emerald-50 text-emerald-800 border-emerald-200",
       supportedCad: "AutoCAD 2018 - 2026",
       features: [
         "Nhận diện khung Block động lồng nhau, Polyline kín và Layer",
@@ -86,6 +86,43 @@ export default function CadStorePage() {
         "In qua Named View triệt tiêu 100% tình trạng lệch lề, mất nét",
         "Tự động gộp file PDF thành 1 tập duy nhất kèm Bookmark mục lục",
         "Quản lý bản quyền Machine ID (RSA), dùng thử 15 ngày & cập nhật ngầm",
+      ],
+    },
+    {
+      id: "autoviewbase-flexible",
+      code: "AutoViewBaseFlexible.bundle",
+      cmd: "AUTOVIEWBASE",
+      platform: "autocad",
+      title: "AutoViewBase Flexible v2.1 (Trích Xuất Hình Chiếu 2D Tự Động)",
+      desc: "Tự động trích xuất các hình chiếu 2D (Top, Front, Side, Isometric) từ mô hình 3D Solid / Inventor DWG sang không gian vẽ Layout và Model, gán tỉ lệ chuẩn và tự động tạo khung bản vẽ kỹ thuật.",
+      priceNumber: 299_000,
+      priceText: "299.000 đ",
+      tag: "Module Mới v2.1 - Kèm File Sample",
+      tagColor: "bg-indigo-50 text-indigo-800 border-indigo-200",
+      supportedCad: "AutoCAD 2018 - 2026",
+      features: [
+        "Tự động trích xuất 4 hình chiếu chuẩn từ chi tiết 3D Solid",
+        "Tự động sắp xếp bố cục khung tên và tỉ lệ bản vẽ chuẩn xưởng",
+        "Tích hợp sẵn file mẫu sample chuẩn ngành mộc",
+        "Liên kết liền mạch với AutoPlot để in ấn ngay sau khi trích xuất",
+      ],
+    },
+    {
+      id: "flexible-suite-all",
+      code: "FlexibleToolSuite.bundle",
+      cmd: "ALL",
+      platform: "autocad",
+      title: "Trọn Bộ Hệ Sinh Thái Flexible Tool (All Modules VIP)",
+      desc: "Gói mở khóa toàn bộ các module trong hệ sinh thái Flexible Tool: AutoPlot (In gộp PDF), AutoViewBase (Trích xuất 2D), AutoDim (Ghi kích thước) và Wood Nesting bản quyền trọn đời.",
+      priceNumber: 699_000,
+      priceText: "699.000 đ",
+      tag: "Trọn Gói Tiết Kiệm 50% - VIP Trọn Đời",
+      tagColor: "bg-amber-50 text-amber-800 border-amber-200",
+      supportedCad: "AutoCAD 2018 - 2026",
+      features: [
+        "Mở khóa 100% tất cả module hiện tại và tương lai của Flexible Tool",
+        "Cấp phép bản quyền vĩnh viễn không giới hạn số lần cập nhật",
+        "Hỗ trợ kỹ thuật ưu tiên và đồng bộ cấu hình xưởng trên Web",
       ],
     },
   ];
@@ -197,8 +234,8 @@ export default function CadStorePage() {
 
   // Tải file Lisp hoặc SketchUp Extension (sinh file đính kèm với License)
   const handleDownloadFile = (plugin: PluginItem, license?: string) => {
-    // Tải trực tiếp bộ cài đặt AutoPlot Flexible .NET
-    if (plugin.id === "autoplot-flexible") {
+    // Tải trực tiếp bộ cài đặt Flexible Tool (.NET bundle)
+    if (plugin.id === "autoplot-flexible" || plugin.id === "autoviewbase-flexible" || plugin.id === "flexible-suite-all") {
       const link = document.createElement("a");
       link.href = "/downloads/AutoPlot_Flexible_v2.0_Setup.zip";
       link.download = "AutoPlot_Flexible_v2.0_Setup.zip";
@@ -606,7 +643,7 @@ end
                   <span>Tải Bộ Cài Đặt (745 KB)</span>
                 </button>
                 <Link
-                  href="/kich-hoat?tool=AUTOPLOT&vip=true"
+                  href={`/kich-hoat?tool=${p.cmd}&vip=true`}
                   className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-slate-900 bg-amber-400 hover:bg-amber-500 rounded-xl transition shadow-xs"
                 >
                   <ShieldCheck className="w-3.5 h-3.5" />

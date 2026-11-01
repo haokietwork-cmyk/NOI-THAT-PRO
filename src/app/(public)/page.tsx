@@ -1149,10 +1149,10 @@ export default function LandingPage() {
               <span>CÔNG CỤ DÀNH CHO THỢ THIẾT KẾ & BỔ KỸ THUẬT</span>
             </div>
             <h3 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-              Kho Plugin AutoCAD (Lisp) Chuẩn Hóa
+              Kho Công Cụ AutoCAD &amp; Flexible Tool (.NET) Chuẩn Hóa
             </h3>
             <p className="text-sm text-slate-600">
-              Bộ công cụ tự động hóa viết riêng cho ngành nội thất gỗ công nghiệp. Khóa bản quyền theo mã Volume Serial ổ cứng, dùng ổn định vĩnh viễn trên AutoCAD 2018 - 2026.
+              Bộ công cụ tự động hóa viết riêng cho ngành nội thất gỗ công nghiệp. Quản lý bản quyền Machine ID, dùng ổn định vĩnh viễn trên AutoCAD 2018 - 2026.
             </p>
           </div>
 
@@ -1244,39 +1244,39 @@ export default function LandingPage() {
             <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-5">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
-                    XUẤT HỒ SƠ
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    CÔNG NGHỆ .NET MỚI
                   </span>
-                  <span className="text-xs font-mono font-semibold text-slate-400">LỆNH: INN</span>
+                  <span className="text-xs font-mono font-semibold text-slate-400">LỆNH: AUTOPLOT</span>
                 </div>
                 <h4 className="text-base font-bold text-slate-900">
-                  Lisp In Hàng Loạt Bản Vẽ Thi Công
+                  AutoPlot Flexible v2.1 (In & Gộp PDF Hàng Loạt)
                 </h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Tự động nhận diện khung bản vẽ (Block hoặc Polyline) trên không gian Model / Layout. Xuất 100 bản vẽ thi công A3/A4 ra PDF trong 30 giây không lệch tỷ lệ.
+                  Tự động quét khung Block động lồng nhau, Polyline kín trên Model/Layout. Sắp xếp Natural Sort thông minh (A-2 trước A-10), in qua Named View và gộp 1 file PDF kèm Bookmark.
                 </p>
                 <ul className="text-xs text-slate-500 space-y-1.5 pt-2">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                    <span>Tự động sắp thứ tự trang bản vẽ</span>
+                    <span>In chuẩn tỉ lệ 100%, chống lệch lề</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                    <span>Gộp chung 1 file PDF duy nhất</span>
+                    <span>Tự động gộp PDF & sinh mục lục</span>
                   </li>
                 </ul>
               </div>
 
               <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
                 <div>
-                  <span className="text-[11px] text-slate-400 block line-through">250.000 đ</span>
-                  <span className="text-base font-bold text-slate-900 font-mono">149.000 đ</span>
+                  <span className="text-[11px] text-slate-400 block line-through">500.000 đ</span>
+                  <span className="text-base font-bold text-slate-900 font-mono">399.000 đ</span>
                 </div>
                 <Link
                   href="/cad-store"
                   className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition shadow-sm"
                 >
-                  <span>Xem chi tiết</span>
+                  <span>Tải & Kích hoạt</span>
                 </Link>
               </div>
             </div>

@@ -17,6 +17,26 @@ interface PluginAsset {
 
 const DEFAULT_PLUGINS: PluginAsset[] = [
   {
+    id: "autoplot-flexible",
+    name: "AutoPlot Flexible v2.1 (.NET In Gộp PDF Hàng Loạt)",
+    fileName: "AutoPlot_Flexible_v2.0_Setup.zip",
+    commandName: "AUTOPLOT",
+    purchasedDate: "31/10/2026",
+    licenseCount: "Bản quyền Pro Vĩnh Viễn",
+    licenseKey: "Kích hoạt tự động qua Cổng Bản Quyền",
+    volumeId: "Hardware ID máy tính",
+  },
+  {
+    id: "autoviewbase-flexible",
+    name: "AutoViewBase Flexible v2.1 (Trích Xuất Hình Chiếu 2D)",
+    fileName: "AutoPlot_Flexible_v2.0_Setup.zip",
+    commandName: "AUTOVIEWBASE",
+    purchasedDate: "01/11/2026",
+    licenseCount: "Bản quyền Pro Vĩnh Viễn",
+    licenseKey: "Kích hoạt tự động qua Cổng Bản Quyền",
+    volumeId: "Hardware ID máy tính",
+  },
+  {
     id: "autocutlist-pro",
     name: "AutoCutlist Pro (Bóc tách Cutlist sang Web)",
     fileName: "AutoCutlist_Pro.lsp",
@@ -34,16 +54,6 @@ const DEFAULT_PLUGINS: PluginAsset[] = [
     purchasedDate: "18/10/2026",
     licenseCount: "Bản quyền 1 máy",
     licenseKey: "NTPRO-4A2B-SD-18932",
-    volumeId: "4A2B-8C1D",
-  },
-  {
-    id: "smartcabinet-sketchup",
-    name: "SmartCabinet Parametric 3D (Tự Sinh Thùng Tủ & Cam Chốt)",
-    fileName: "SmartCabinet_Parametric.rbz",
-    commandName: "SC3D",
-    purchasedDate: "18/10/2026",
-    licenseCount: "Bản quyền 2 máy (1 xưởng + 1 laptop)",
-    licenseKey: "NTPRO-4A2B-SC3D-99824",
     volumeId: "4A2B-8C1D",
   },
 ];
@@ -90,8 +100,18 @@ export default function MyAssetsPage() {
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
-  // Tải file mã nguồn LISP mẫu chuẩn công nghiệp
+  // Tải file mã nguồn hoặc bộ cài đặt
   const handleDownloadFile = (plugin: PluginAsset) => {
+    if (plugin.fileName.endsWith(".zip") || plugin.id.includes("flexible")) {
+      const a = document.createElement("a");
+      a.href = "/downloads/AutoPlot_Flexible_v2.0_Setup.zip";
+      a.download = "AutoPlot_Flexible_v2.0_Setup.zip";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      return;
+    }
+
     const lspContent = `;;; ==========================================================================
 ;;; NỀN TẢNG NỘI THẤT PRO - AUTOLISP SUITE
 ;;; Công cụ: ${plugin.name}

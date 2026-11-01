@@ -66,6 +66,14 @@ function ActivationContent() {
       tagColor: "bg-emerald-50 text-emerald-800 border-emerald-200",
     },
     {
+      id: "AUTOVIEWBASE",
+      name: "AutoViewBase Flexible (Trích xuất hình chiếu 2D)",
+      price: 0,
+      priceText: "0 đ (VIP)",
+      tag: "Mới v2.1",
+      tagColor: "bg-indigo-50 text-indigo-800 border-indigo-200",
+    },
+    {
       id: "AUTODIM",
       name: "AutoDim Flexible (Ghi kích thước thông minh)",
       price: 0,
@@ -103,7 +111,7 @@ function ActivationContent() {
     }
 
     const cleanHwid = machineId.trim().toUpperCase();
-    const tools = selectedTool === "ALL" ? ["AUTOPLOT", "AUTODIM", "WOOD_NESTING", "EXPORT_2D"] : [selectedTool];
+    const tools = selectedTool === "ALL" ? ["AUTOPLOT", "AUTOVIEWBASE", "AUTODIM", "WOOD_NESTING", "EXPORT_2D"] : [selectedTool];
 
     // Tạo chữ ký số mô phỏng an toàn với chuỗi Unicode tiếng Việt
     const signatureRaw = `${cleanHwid}:${customerName || "Khach Hang Xuong"}:${tools.join(",")}:${now.toISOString()}`;
