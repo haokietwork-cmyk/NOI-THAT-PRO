@@ -241,8 +241,8 @@ export default function CadStorePage() {
     // Tải trực tiếp bộ cài đặt Flexible Tool (.NET bundle)
     if (plugin.id === "autoplot-flexible" || plugin.id === "autoviewbase-flexible" || plugin.id === "flexible-suite-all") {
       const link = document.createElement("a");
-      link.href = "/downloads/AutoPlot_Flexible_v2.0_Setup.zip";
-      link.download = "AutoPlot_Flexible_v2.0_Setup.zip";
+      link.href = "/downloads/AutoPlot_Flexible_v2.2_Setup.zip";
+      link.download = "AutoPlot_Flexible_v2.2_Setup.zip";
       link.click();
       return;
     }

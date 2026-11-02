@@ -196,12 +196,12 @@ function ActivationContent() {
             </div>
             <div className="flex items-center gap-2">
               <a
-                href="/downloads/AutoPlot_Flexible_v2.0_Setup.zip"
+                href="/downloads/AutoPlot_Flexible_v2.2_Setup.zip"
                 download
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold shadow-sm transition"
               >
                 <Download className="w-4 h-4" />
-                Tải Bộ Cài Đặt (745 KB)
+                Tải Bộ Cài Đặt (v2.2)
               </a>
             </div>
           </div>

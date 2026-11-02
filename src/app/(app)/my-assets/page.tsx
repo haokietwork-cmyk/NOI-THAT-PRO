@@ -104,8 +104,8 @@ export default function MyAssetsPage() {
   const handleDownloadFile = (plugin: PluginAsset) => {
     if (plugin.fileName.endsWith(".zip") || plugin.id.includes("flexible")) {
       const a = document.createElement("a");
-      a.href = "/downloads/AutoPlot_Flexible_v2.0_Setup.zip";
-      a.download = "AutoPlot_Flexible_v2.0_Setup.zip";
+      a.href = "/downloads/AutoPlot_Flexible_v2.2_Setup.zip";
+      a.download = "AutoPlot_Flexible_v2.2_Setup.zip";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
