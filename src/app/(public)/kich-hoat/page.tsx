@@ -185,7 +185,7 @@ function ActivationContent() {
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-mono font-medium mb-3">
                 <Sparkles className="w-3.5 h-3.5" />
-                HỆ SINH THÁI FLEXIBLE TOOL & AUTOPLOT v2.0
+                HỆ SINH THÁI FLEXIBLE TOOL & AUTOPLOT v2.2 (UNIVERSAL 2014-2026+)
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-3">
                 Cổng Kích Hoạt Bản Quyền AutoCAD

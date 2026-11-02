@@ -18,7 +18,7 @@ interface PluginAsset {
 const DEFAULT_PLUGINS: PluginAsset[] = [
   {
     id: "autoplot-flexible",
-    name: "AutoPlot Flexible v2.1 (.NET In Gộp PDF Hàng Loạt)",
+    name: "AutoPlot Flexible v2.2 (Universal 2014-2026+)",
     fileName: "AutoPlot_Flexible_v2.0_Setup.zip",
     commandName: "AUTOPLOT",
     purchasedDate: "31/10/2026",
