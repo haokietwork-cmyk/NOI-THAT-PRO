@@ -9,7 +9,7 @@ export async function GET() {
   const versionInfo = {
     latest_version: "2.2.0",
     release_date: "2026-11-02",
-    download_url: "/downloads/AutoPlot_Flexible_v2.0_Setup.zip",
+    download_url: "/downloads/AutoPlot_Flexible_v2.2_Setup.zip",
     web_store_url: "/cad-store",
     changelog: "Phát hành bản v2.2.0: Tương thích toàn diện AutoCAD 2014-2026+ (Universal Build), chuẩn hóa tỉ lệ phóng to X:1 theo quy chuẩn kỹ thuật (11:1, 8:1, 6:1...), tự động trích xuất tên và số hiệu bản vẽ từ khung tên CAD, tối ưu động cơ gộp PDF và hỗ trợ bộ nạp AutoPlot.lsp đa năng.",
     critical: false,
