@@ -185,7 +185,7 @@ function ActivationContent() {
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-mono font-medium mb-3">
                 <Sparkles className="w-3.5 h-3.5" />
-                HỆ SINH THÁI FLEXIBLE TOOL & AUTOPLOT v2.2 (UNIVERSAL 2014-2026+)
+                HỆ SINH THÁI FLEXIBLE TOOL & AUTOPLOT v2.3 (UNIVERSAL 2014-2027)
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-3">
                 Cổng Kích Hoạt Bản Quyền AutoCAD
@@ -196,12 +196,12 @@ function ActivationContent() {
             </div>
             <div className="flex items-center gap-2">
               <a
-                href="/downloads/AutoPlot_Flexible_v2.2_Setup.zip"
+                href="/downloads/AutoPlot_Flexible_v2.3_Setup.zip"
                 download
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold shadow-sm transition"
               >
                 <Download className="w-4 h-4" />
-                Tải Bộ Cài Đặt (v2.2)
+                Tải Bộ Cài Đặt (v2.3)
               </a>
             </div>
           </div>

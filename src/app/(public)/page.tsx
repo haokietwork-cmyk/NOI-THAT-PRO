@@ -1250,7 +1250,7 @@ export default function LandingPage() {
                   <span className="text-xs font-mono font-semibold text-slate-400">LỆNH: AUTOPLOT</span>
                 </div>
                 <h4 className="text-base font-bold text-slate-900">
-                  AutoPlot Flexible v2.2 (Universal 2014-2026+)
+                  AutoPlot Flexible v2.3 (Universal 2014-2027)
                 </h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
                   Tự động quét khung Block động lồng nhau, Polyline kín trên Model/Layout. Sắp xếp Natural Sort thông minh (A-2 trước A-10), in qua Named View và gộp 1 file PDF kèm Bookmark.

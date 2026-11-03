@@ -18,8 +18,8 @@ interface PluginAsset {
 const DEFAULT_PLUGINS: PluginAsset[] = [
   {
     id: "autoplot-flexible",
-    name: "AutoPlot Flexible v2.2 (Universal 2014-2026+)",
-    fileName: "AutoPlot_Flexible_v2.2_Setup.zip",
+    name: "AutoPlot Flexible v2.3 (Universal 2014-2027)",
+    fileName: "AutoPlot_Flexible_v2.3_Setup.zip",
     commandName: "AUTOPLOT",
     purchasedDate: "31/10/2026",
     licenseCount: "Bản quyền Pro Vĩnh Viễn",
@@ -29,7 +29,7 @@ const DEFAULT_PLUGINS: PluginAsset[] = [
   {
     id: "autoviewbase-flexible",
     name: "AutoViewBase Flexible v2.1 (Trích Xuất Hình Chiếu 2D)",
-    fileName: "AutoPlot_Flexible_v2.2_Setup.zip",
+    fileName: "AutoPlot_Flexible_v2.3_Setup.zip",
     commandName: "AUTOVIEWBASE",
     purchasedDate: "01/11/2026",
     licenseCount: "Bản quyền Pro Vĩnh Viễn",
@@ -104,8 +104,8 @@ export default function MyAssetsPage() {
   const handleDownloadFile = (plugin: PluginAsset) => {
     if (plugin.fileName.endsWith(".zip") || plugin.id.includes("flexible")) {
       const a = document.createElement("a");
-      a.href = "/downloads/AutoPlot_Flexible_v2.2_Setup.zip";
-      a.download = "AutoPlot_Flexible_v2.2_Setup.zip";
+      a.href = "/downloads/AutoPlot_Flexible_v2.3_Setup.zip";
+      a.download = "AutoPlot_Flexible_v2.3_Setup.zip";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
