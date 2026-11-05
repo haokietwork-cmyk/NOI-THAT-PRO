@@ -11,11 +11,16 @@ export interface TermDefinition {
 }
 
 export const WORKSHOP_TERMS = {
-  // 1. Cutlist -> Danh sách tấm
+  // 1. Costing Sheet -> Bảng chiết tính giá vốn
+  costingSheet: {
+    label: "Bảng chiết tính giá vốn",
+    labelWithOriginal: "Bảng chiết tính giá vốn (Costing Sheet)",
+    shortExplanation: "Bảng phân tích giá vốn đa tầng chuẩn xưởng: Vật tư, nhân công trực tiếp (L&M), chi phí chung (OH) và giá bán đề xuất.",
+  },
   cutlist: {
-    label: "Danh sách tấm",
-    labelWithOriginal: "Danh sách tấm (Cutlist)",
-    shortExplanation: "Bảng quy cách kích thước Dài × Rộng × Dày và dán cạnh từng chi tiết phôi xưởng cần cắt.",
+    label: "Chiết tính giá vốn",
+    labelWithOriginal: "Chiết tính giá vốn (Costing Sheet)",
+    shortExplanation: "Bảng phân tích giá vốn đa tầng chuẩn xưởng: Vật tư, nhân công trực tiếp (L&M), chi phí chung (OH) và giá bán đề xuất.",
   },
 
   // 2. BOM -> Bảng đặt vật tư
@@ -53,11 +58,16 @@ export const WORKSHOP_TERMS = {
     shortExplanation: "Khối sản phẩm đồ gỗ hoàn thiện trong công trình (như Tủ áo Master, Hệ tủ bếp dưới, Kệ TV...).",
   },
 
-  // 7. Input Modes (AX6)
+  // 7. Input Modes
+  questionnaireMode: {
+    label: "Báo giá thông số",
+    labelWithOriginal: "Báo giá thông số nhanh (Costing V2)",
+    shortExplanation: "Nhập quy cách sản phẩm Rộng × Sâu × Cao và chọn vật liệu để tự động sinh chiết tính giá vốn trong 30 giây.",
+  },
   cutlistMode: {
-    label: "Bóc tách chi tiết",
-    labelWithOriginal: "Bóc tách phôi tấm chi tiết (Cutlist Mode)",
-    shortExplanation: "Nhập danh sách phôi tấm Dài × Rộng × Dày từ AutoCAD / SketchUp hoặc Excel để bóc tách ván và chỉ dán cạnh.",
+    label: "Báo giá thông số",
+    labelWithOriginal: "Báo giá thông số nhanh (Costing V2)",
+    shortExplanation: "Nhập quy cách sản phẩm Rộng × Sâu × Cao và chọn vật liệu để tự động sinh chiết tính giá vốn trong 30 giây.",
   },
   quickModuleMode: {
     label: "Báo giá nhanh",
@@ -70,7 +80,7 @@ export const WORKSHOP_TERMS = {
     shortExplanation: "Bổ sung linh hoạt các hạng mục mua ngoài, thầu phụ đá/kính, thiết bị bếp và vận chuyển.",
   },
 
-  // 8. Cost Sources (AX5)
+  // 8. Cost Sources
   defaultReferenceSource: {
     label: "Mặc định tham khảo",
     labelWithOriginal: "Mặc định tham khảo (Default Reference)",
@@ -85,6 +95,18 @@ export const WORKSHOP_TERMS = {
     label: "Ghi đè dự án",
     labelWithOriginal: "Ghi đè riêng cho dự án (Project Override)",
     shortExplanation: "Đơn giá hoặc khối lượng điều chỉnh riêng cho hợp đồng này, không ảnh hưởng thư viện gốc.",
+  },
+
+  // 9. Costing V2 Enhancements
+  confidenceRating: {
+    label: "Độ tin cậy",
+    labelWithOriginal: "Độ tin cậy giá (1-5 sao)",
+    shortExplanation: "Đánh giá mức độ chính xác của giá đề xuất từ 1 đến 5 sao dựa trên phương pháp tính và đơn giá xưởng.",
+  },
+  similarProducts: {
+    label: "Sản phẩm tương tự",
+    labelWithOriginal: "Sản phẩm tương tự (Build from this)",
+    shortExplanation: "Dựng báo giá mới từ mẫu sản phẩm xưởng đã từng làm và tự động co giãn theo kích thước mới.",
   },
 } as const;
 

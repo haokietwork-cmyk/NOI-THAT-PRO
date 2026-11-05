@@ -31,7 +31,7 @@ export default function RootError({
             Đã xảy ra sự cố kỹ thuật
           </h1>
           <p className="text-xs text-slate-500 leading-relaxed">
-            Hệ thống tính toán gặp gián đoạn tạm thời. Dữ liệu bảng tính Cutlist của quý xưởng trên thiết bị vẫn được bảo toàn an toàn.
+            Hệ thống tính toán gặp gián đoạn tạm thời. Dữ liệu dự toán và báo giá của quý xưởng trên thiết bị vẫn được bảo toàn an toàn.
           </p>
           {error.digest && (
             <p className="text-[11px] font-mono text-slate-400">

@@ -227,7 +227,7 @@ export default function ProjectWorkspacePage() {
                 href={`/quoting?id=${project.id}`}
                 className="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
               >
-                Sửa {WORKSHOP_TERMS.cutlist.labelWithOriginal}
+                Sửa Báo giá &amp; Chiết tính
               </Link>
               <button
                 onClick={handleFreezeContract}

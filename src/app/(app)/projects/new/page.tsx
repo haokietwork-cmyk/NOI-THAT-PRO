@@ -13,7 +13,7 @@ export default function NewProjectRedirect() {
 
   return (
     <div className="p-8 text-center text-xs text-slate-400">
-      Đang chuyển tiếp đến không gian bóc tách {WORKSHOP_TERMS.cutlist.label}...
+      Đang chuyển tiếp đến không gian báo giá &amp; chiết tính...
     </div>
   );
 }

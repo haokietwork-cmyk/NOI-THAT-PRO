@@ -7,11 +7,11 @@ import { NextResponse } from "next/server";
  */
 export async function GET() {
   const versionInfo = {
-    latest_version: "2.3.0",
-    release_date: "2026-11-02",
-    download_url: "/downloads/AutoPlot_Flexible_v2.3_Setup.zip",
+    latest_version: "2.3.2",
+    release_date: "2026-11-05",
+    download_url: "https://auto-moc.vercel.app/downloads/AutoPlot_Flexible_v2.3_Setup.zip",
     web_store_url: "/cad-store",
-    changelog: "Phát hành bản v2.3.0: Tương thích toàn diện AutoCAD 2014-2027 (Universal Build). Tích hợp động cơ Native Canvas Render Engine xem trước bản vẽ nội bộ siêu nét, loại bỏ 100% lỗi popup 'File Download' và lỗi mở trình duyệt Cốc Cốc, bổ sung nút hủy tiến trình in tức thời.",
+    changelog: "Phát hành bản v2.3.2 Universal (AutoCAD 2014-2027): Bổ sung hỗ trợ Pickfirst (Implied Selection) thông minh; tự động nhận diện khung vẽ trên Layer 0/Defpoints; khắc phục triệt để hiện tượng cửa sổ Modeless làm mất tương tác AutoCAD; chuẩn hóa khổ giấy A4/A3/A2/A1/A0 chính xác theo tỷ lệ vẽ; tích hợp bộ đệm xem trước bản vẽ Native Canvas Engine siêu nét; tự động kiểm tra phiên bản mới ngầm an toàn qua TLS 1.2.",
     critical: false,
     available_modules: [
       { id: "AUTOPLOT", name: "AutoPlot Flexible", desc: "In gộp PDF hàng loạt chuẩn xưởng (Universal 2014-2026+)" },

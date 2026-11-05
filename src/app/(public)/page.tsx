@@ -270,13 +270,13 @@ export default function LandingPage() {
 
           {/* Main H1 */}
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-slate-900 tracking-tight max-w-4xl mx-auto leading-[1.12]">
-            Dự toán & Bóc tách nội thất chuẩn xác. <br className="hidden sm:block" />
-            <span className="text-amber-600">Một đầu vào Excel, hai đầu ra tự động.</span>
+            Báo giá nội thất nhanh, chuẩn xác &amp; thực dụng. <br className="hidden sm:block" />
+            <span className="text-amber-600">Costing Sheet chuẩn xưởng, xuất báo giá trong 3 phút.</span>
           </h1>
 
           {/* Subtitle */}
           <p className="text-base sm:text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
-            Loại bỏ triệt để nguy cơ tính thiếu ván, sót chỉ dán cạnh và vô tình làm lộ giá vốn. Đưa {WORKSHOP_TERMS.cutlist.labelWithOriginal} từ SketchUp ABF hoặc AutoCAD lên để tự động nhận ngay <strong>{WORKSHOP_TERMS.bom.label} nội bộ</strong> và <strong>Báo giá A4 chuyên nghiệp</strong> cho khách hàng.
+            Loại bỏ phụ thuộc bóc tách tấm lẻ thủ công. Chỉ cần chọn loại sản phẩm, kích thước phủ bì W × D × H và tùy chọn vật liệu để tự động nhận ngay <strong>Bảng chiết tính giá vốn (Costing Sheet)</strong> đa tầng cho xưởng và <strong>Báo giá A4 chuyên nghiệp</strong> gửi khách hàng.
           </p>
 
           {/* CTA Buttons */}
@@ -286,7 +286,7 @@ export default function LandingPage() {
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-4 text-sm font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-md shadow-amber-500/25 transition transform hover:-translate-y-0.5"
             >
               <Zap className="w-4 h-4 fill-amber-300 text-amber-300" />
-              <span>⚡ Dùng thử ngay với file mẫu 48 tấm (Không cần chuẩn bị file)</span>
+              <span>⚡ Trải nghiệm tạo báo giá thông số nhanh (Không cần file 3D)</span>
             </Link>
 
             <Link
@@ -328,51 +328,51 @@ export default function LandingPage() {
               {/* Thân sơ đồ 3 phân khu chức năng */}
               <div className="p-5 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch bg-slate-50/50">
                 
-                {/* 1. KHU VỰC ĐẦU VÀO: BẢNG TÍNH EXCEL CUTLIST */}
+                {/* 1. KHU VỰC ĐẦU VÀO: BẢNG CÂU HỎI THÔNG SỐ (COSTING V2) */}
                 <div className="lg:col-span-4 bg-white rounded-2xl border border-slate-200 p-4 flex flex-col justify-between shadow-xs">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">
-                          XLS
+                        <div className="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs">
+                          V2
                         </div>
                         <div>
-                          <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">1. ĐẦU VÀO</span>
-                          <h4 className="font-bold text-slate-900 text-xs">File Excel {WORKSHOP_TERMS.cutlist.label}</h4>
+                          <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider block">1. ĐẦU VÀO THÔNG SỐ</span>
+                          <h4 className="font-bold text-slate-900 text-xs">Bảng câu hỏi Costing V2</h4>
                         </div>
                       </div>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold">
-                        48 chi tiết
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
+                        30 giây
                       </span>
                     </div>
 
-                    {/* Bảng mini mô phỏng dữ liệu cutlist */}
+                    {/* Bảng mini mô phỏng dữ liệu thông số */}
                     <div className="overflow-hidden rounded-xl border border-slate-100 bg-slate-50/70 text-[10px] font-mono">
                       <div className="bg-slate-100/90 text-slate-600 font-bold px-2 py-1.5 grid grid-cols-12 border-b border-slate-200">
-                        <span className="col-span-5">Tên tấm</span>
-                        <span className="col-span-4 text-center">Dài×Rộng</span>
-                        <span className="col-span-3 text-right">Chỉ</span>
+                        <span className="col-span-5">Thông số</span>
+                        <span className="col-span-4 text-center">Quy cách</span>
+                        <span className="col-span-3 text-right">Lựa chọn</span>
                       </div>
                       <div className="divide-y divide-slate-100 text-slate-700">
                         <div className="px-2 py-1.5 grid grid-cols-12 items-center">
-                          <span className="col-span-5 font-sans font-medium truncate">Hông tủ áo</span>
-                          <span className="col-span-4 text-center text-slate-500">2400×600</span>
-                          <span className="col-span-3 text-right text-amber-700 font-bold">D1,D2</span>
+                          <span className="col-span-5 font-sans font-medium truncate">Loại sản phẩm</span>
+                          <span className="col-span-4 text-center text-slate-500">Tủ áo Master</span>
+                          <span className="col-span-3 text-right text-emerald-700 font-bold">✓ Đã chọn</span>
                         </div>
                         <div className="px-2 py-1.5 grid grid-cols-12 items-center bg-white">
-                          <span className="col-span-5 font-sans font-medium truncate">Cánh kịch trần</span>
-                          <span className="col-span-4 text-center text-slate-500">2350×540</span>
-                          <span className="col-span-3 text-right text-amber-700 font-bold">4 cạnh</span>
+                          <span className="col-span-5 font-sans font-medium truncate">Kích thước phủ bì</span>
+                          <span className="col-span-4 text-center text-slate-500">1800×600×2400</span>
+                          <span className="col-span-3 text-right text-emerald-700 font-bold">✓ Chuẩn</span>
                         </div>
                         <div className="px-2 py-1.5 grid grid-cols-12 items-center">
-                          <span className="col-span-5 font-sans font-medium truncate">Đợt ngang</span>
-                          <span className="col-span-4 text-center text-slate-500">714×580</span>
-                          <span className="col-span-3 text-right text-amber-700 font-bold">D1</span>
+                          <span className="col-span-5 font-sans font-medium truncate">Cốt & Bề mặt</span>
+                          <span className="col-span-4 text-center text-slate-500">MDF / Melamine</span>
+                          <span className="col-span-3 text-right text-emerald-700 font-bold">✓ Sẵn sàng</span>
                         </div>
                         <div className="px-2 py-1.5 grid grid-cols-12 items-center bg-white">
-                          <span className="col-span-5 font-sans font-medium truncate">Ván hậu tủ</span>
-                          <span className="col-span-4 text-center text-slate-500">2380×1180</span>
-                          <span className="col-span-3 text-right text-slate-400">Không</span>
+                          <span className="col-span-5 font-sans font-medium truncate">Độ tin cậy</span>
+                          <span className="col-span-4 text-center text-slate-500">5 sao</span>
+                          <span className="col-span-3 text-right text-emerald-700 font-bold">Rất sát</span>
                         </div>
                       </div>
                     </div>
@@ -597,10 +597,10 @@ export default function LandingPage() {
             </div>
             <div>
               <h4 className="text-sm font-bold text-slate-900">
-                Thử nghiệm với file mẫu {WORKSHOP_TERMS.cutlist.label} thực tế
+                Thử nghiệm với Báo giá &amp; Chiết tính thông số thực tế
               </h4>
               <p className="text-xs text-slate-500">
-                Tương thích định dạng xuất từ SketchUp ABF, OpenCutList, AutoCAD hoặc file Excel nhập tay.
+                Nhập quy cách sản phẩm W × D × H hoặc dựng từ mẫu tương tự (Build from this) trong 30 giây.
               </p>
             </div>
           </div>
@@ -609,7 +609,7 @@ export default function LandingPage() {
             href="/quoting"
             className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg transition"
           >
-            <span>Mở không gian bóc tách (/quoting)</span>
+            <span>Mở không gian báo giá (/quoting)</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -1168,7 +1168,7 @@ export default function LandingPage() {
                   <span className="text-xs font-mono font-semibold text-slate-400">LỆNH: QC</span>
                 </div>
                 <h4 className="text-base font-bold text-slate-900">
-                  Lisp Bóc Tách {WORKSHOP_TERMS.cutlist.label} Tự Động
+                  Lisp Bóc Tách Khối Lượng Bản Vẽ Tự Động
                 </h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
                   Quét chọn khối tủ trên Model hoặc Layout. Tự động đọc Tên chi tiết, Dài, Rộng, Dày, 4 Cạnh dán chỉ và xuất file <strong>.CSV chuẩn UTF-8</strong> nạp thẳng lên web trong 1 click.
@@ -1376,7 +1376,7 @@ export default function LandingPage() {
                 <ul className="text-xs text-slate-700 space-y-3 pt-2 border-t border-slate-100">
                   <li className="flex items-center gap-2.5 font-medium">
                     <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0" />
-                    <span><strong>Không giới hạn</strong> số dự án & số chi tiết {WORKSHOP_TERMS.cutlist.label}</span>
+                    <span><strong>Không giới hạn</strong> số dự án &amp; báo giá Costing Sheet</span>
                   </li>
                   <li className="flex items-center gap-2.5">
                     <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0" />
@@ -1433,7 +1433,7 @@ export default function LandingPage() {
             </div>
 
             <div className="flex items-center gap-6">
-              <Link href="/quoting" className="hover:text-slate-900 transition">Bóc tách {WORKSHOP_TERMS.cutlist.label}</Link>
+              <Link href="/quoting" className="hover:text-slate-900 transition">Báo giá &amp; Chiết tính</Link>
               <Link href="/materials" className="hover:text-slate-900 transition">Thư viện vật tư</Link>
               <Link href="/cad-store" className="hover:text-slate-900 transition">Kho Plugin CAD</Link>
               <Link href="/price-check" className="hover:text-slate-900 transition">Thẩm định giá</Link>

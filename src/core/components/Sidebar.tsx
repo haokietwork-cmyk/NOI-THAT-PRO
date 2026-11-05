@@ -42,12 +42,12 @@ export default function Sidebar({ onCloseMobile }: SidebarProps = {}) {
           requiresAuth: true,
         },
         {
-          name: "Bóc tách & Báo giá",
-          sub: isAuthenticated ? `${WORKSHOP_TERMS.cutlist.label} -> Báo giá A4` : "⚡ Dùng thử mẫu 48 tấm",
+          name: "Báo giá & Chiết tính",
+          sub: isAuthenticated ? "Costing Sheet -> Báo giá A4" : "⚡ Báo giá thông số nhanh",
           href: "/quoting",
           icon: FileSpreadsheet,
           requiresAuth: false,
-          badge: isAuthenticated ? "Chủ lực" : "Dùng thử",
+          badge: isAuthenticated ? "Chủ lực" : "Trải nghiệm",
           badgeColor: isAuthenticated
             ? "bg-amber-50 text-amber-700 border-amber-200"
             : "bg-emerald-50 text-emerald-700 border-emerald-200",

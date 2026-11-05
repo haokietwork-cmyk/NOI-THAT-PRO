@@ -39,6 +39,11 @@ import {
   Table,
   Share2,
   User,
+  Star,
+  Check,
+  AlertCircle,
+  HelpCircle,
+  Calculator,
 } from "lucide-react";
 import { useAppStore, SEED_PARTS } from "@/core/store/useAppStore";
 import { useAuth } from "@/core/store/useAuth";
@@ -61,7 +66,28 @@ import {
   exportWorkshopBOMExcel,
   exportStandardCutlistExcel,
   exportMaterialsTemplateExcel,
+  exportCostingSheetExcel,
 } from "@/core/exporters/excel-exporter";
+import { generateCostingFromQuestionnaire } from "@/core/calculations/parametric-generator";
+import type {
+  CostingQuestionnaire,
+  ProductArchetype,
+  GeneratedCostingResult,
+  MaterialLaborRow,
+  LabourDeptRow,
+  CostSummary,
+  ConfidenceStars,
+} from "@/core/calculations/parametric-types";
+import {
+  evaluateConfidence as evaluateConfidenceHelper,
+  calculateVersionDiff,
+  getConfidenceBadgeStyle,
+} from "@/core/calculations/confidence-and-diff";
+import {
+  scaleFromTemplate,
+  findSimilarItems,
+  type SimilarProjectItem,
+} from "@/core/calculations/template-scaler";
 import { trackFunnelEvent } from "@/core/monitoring/telemetry";
 
 function QuotingWorkspace() {
@@ -114,12 +140,147 @@ function QuotingWorkspace() {
   const [parts, setParts] = useState<CutlistPart[]>(SEED_PARTS);
   const [profitMargin, setProfitMargin] = useState<number>(DEFAULT_NEW_PROFIT_MARGIN);
   const [roundingStep, setRoundingStep] = useState<0.5 | 1>(0.5);
-  const [activeOutputTab, setActiveOutputTab] = useState<"bom" | "quote">("bom");
+  const [activeOutputTab, setActiveOutputTab] = useState<"costing_sheet" | "bom" | "quote">("costing_sheet");
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [showPresetModal, setShowPresetModal] = useState(false);
   const [showHandbookModal, setShowHandbookModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+
+  // ==========================================================================
+  // COSTING V2: BẢNG CÂU HỎI THÔNG SỐ (PARAMETRIC QUESTIONNAIRE)
+  // ==========================================================================
+  const [questionnaire, setQuestionnaire] = useState<CostingQuestionnaire>({
+    productType: "wardrobe",
+    name: "Tủ áo Master kịch trần",
+    calcMode: "detail",
+    dimensions: { widthMm: 1800, depthMm: 600, heightMm: 2400, unit: "mm" },
+    materials: {
+      coreCode: "MDF_17_CHONG_AM",
+      surfaceCode: "Melamine",
+      backPanelCode: "MDF_6_HAU",
+      hasStone: false,
+      stoneType: "vicostone",
+      hasGlass: false,
+      hasMetal: false,
+      hasUpholstery: false,
+      hasLed: false,
+    },
+    details: {
+      drawerCount: 2,
+      doorCount: 4,
+      specialNotes: "Cánh phẳng soi chỉ, bản lề giảm chấn Inox 304, ray âm",
+      moqTiers: [1, 5, 10, 20],
+    },
+  });
+
+  const [inputTab, setInputTab] = useState<"questionnaire" | "detailed_parts">("questionnaire");
+  const [costingActiveTab, setCostingActiveTab] = useState<"summary" | "material_labor" | "labour" | "moq" | "similar">("summary");
+
+  // Động cơ tính toán Costing V2 từ Bảng câu hỏi thông số
+  const parametricCosting = useMemo<GeneratedCostingResult>(() => {
+    return generateCostingFromQuestionnaire(questionnaire, materials, {
+      profitRate: profitMargin >= 1 ? profitMargin - 1 : profitMargin,
+      roundingStep,
+    });
+  }, [questionnaire, materials, profitMargin, roundingStep]);
+
+  // Danh sách sản phẩm tương tự từ lịch sử dự án
+  const similarHistoryItems: SimilarProjectItem[] = useMemo(() => {
+    return projects
+      .filter((p) => p.id !== editId && p.items && p.items.length > 0)
+      .map((p) => ({
+        id: p.id,
+        projectCode: `QOT-${p.id.slice(0, 6).toUpperCase()}`,
+        projectName: p.projectName,
+        productName: p.projectName,
+        archetype: questionnaire.productType,
+        dimensions: {
+          widthMm: 1800,
+          depthMm: 600,
+          heightMm: 2400,
+        },
+        totalLM: p.totalCost || 0,
+        totalCost: p.totalCost || 0,
+        createdAt: p.createdAt,
+      }));
+  }, [projects, editId, questionnaire.productType]);
+
+  const similarItems = useMemo(() => {
+    return findSimilarItems(
+      questionnaire.productType,
+      questionnaire.dimensions.widthMm,
+      questionnaire.dimensions.depthMm,
+      questionnaire.dimensions.heightMm,
+      similarHistoryItems,
+      5
+    );
+  }, [questionnaire, similarHistoryItems]);
+
+  // Hành động dựng từ mẫu lịch sử
+  const handleBuildFromTemplate = (template: SimilarProjectItem) => {
+    try {
+      scaleFromTemplate(template, questionnaire);
+      showToast(`Đã dựng thành công từ mẫu ${template.projectCode} (${template.productName})!`);
+      setCurrentStep(2);
+    } catch (err: any) {
+      showToast(err.message || "Lỗi dựng từ mẫu", "error");
+    }
+  };
+
+  // Hành động tính toán từ questionnaire và chuyển sang Bước 2
+  const handleCalculateFromQuestionnaire = () => {
+    const generatedParts: CutlistPart[] = parametricCosting.materialsLabor
+      .filter((m) => m.block === "Carcass" || m.block === "Fronts" || m.block === "BackPanel")
+      .map((m, idx) => ({
+        id: `ml_${idx}_${Date.now()}`,
+        moduleName: questionnaire.name || "Hạng mục chính",
+        partName: m.name,
+        lengthMm: m.lengthMm || 800,
+        widthMm: m.widthMm || 400,
+        thicknessMm: m.thicknessMm || 17,
+        qty: m.qty,
+        materialCode: questionnaire.materials.coreCode || "MDF_17_CHONG_AM",
+        edgeL1: true,
+        edgeL2: true,
+        edgeW1: false,
+        edgeW2: false,
+      }));
+
+    if (generatedParts.length > 0) {
+      setParts(generatedParts);
+    }
+    setCurrentStep(2);
+    showToast("⚡ Đã tính toán Costing Sheet thành công từ Bảng câu hỏi thông số!", "success");
+  };
+
+  // Reset questionnaire parameters
+  const handleResetQuestionnaire = () => {
+    setQuestionnaire({
+      productType: "wardrobe",
+      name: "Tủ áo Master kịch trần",
+      calcMode: "detail",
+      dimensions: { widthMm: 1800, depthMm: 600, heightMm: 2400, unit: "mm" },
+      materials: {
+        coreCode: "MDF_17_CHONG_AM",
+        surfaceCode: "Melamine",
+        backPanelCode: "MDF_6_HAU",
+        hasStone: false,
+        stoneType: "vicostone",
+        hasGlass: false,
+        hasMetal: false,
+        hasUpholstery: false,
+        hasLed: false,
+      },
+      details: {
+        drawerCount: 2,
+        doorCount: 4,
+        specialNotes: "Cánh phẳng soi chỉ, bản lề giảm chấn Inox 304, ray âm",
+        moqTiers: [1, 5, 10, 20],
+      },
+    });
+    showToast("Đã khôi phục thông số Bảng câu hỏi về mặc định chuẩn xưởng!");
+  };
 
   // ==========================================================================
   // PHỄU LỌC CHI TIẾT TẤM (CUTLIST FILTER FUNNEL)
@@ -884,7 +1045,7 @@ function QuotingWorkspace() {
           <div className="space-y-1">
             <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 uppercase tracking-wider">
               <FileSpreadsheet className="w-3.5 h-3.5" />
-              <span>Không gian bóc tách {WORKSHOP_TERMS.cutlist.labelWithOriginal} & Dự toán Báo giá</span>
+              <span>Không gian Báo Giá &amp; Chiết Tính Giá Vốn (Costing Sheet V2)</span>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <input
@@ -1091,17 +1252,14 @@ function QuotingWorkspace() {
               }`}>
                 1
               </span>
-              <span className="hidden sm:inline">1. Nhập Cutlist</span>
-              <span className="sm:hidden">1. Nhập</span>
+              <span className="hidden sm:inline">1. Thông Số &amp; Bảng Câu Hỏi (Costing V2)</span>
+              <span className="sm:hidden">1. Thông Số</span>
             </button>
 
             <button
               type="button"
-              onClick={() => {
-                if (parts.length > 0) goToStep(2);
-              }}
-              disabled={parts.length === 0}
-              className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl transition text-xs font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+              onClick={() => goToStep(2)}
+              className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl transition text-xs font-bold cursor-pointer ${
                 currentStep === 2
                   ? "bg-amber-500 text-white shadow-xs"
                   : "bg-slate-50 text-slate-600 hover:bg-slate-100"
@@ -1112,17 +1270,14 @@ function QuotingWorkspace() {
               }`}>
                 2
               </span>
-              <span className="hidden sm:inline">2. Xem Báo Giá &amp; BOM</span>
-              <span className="sm:hidden">2. Báo Giá</span>
+              <span className="hidden sm:inline">2. Costing Sheet &amp; Chiết Tính Giá Vốn</span>
+              <span className="sm:hidden">2. Costing Sheet</span>
             </button>
 
             <button
               type="button"
-              onClick={() => {
-                if (parts.length > 0) goToStep(3);
-              }}
-              disabled={parts.length === 0}
-              className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl transition text-xs font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+              onClick={() => goToStep(3)}
+              className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl transition text-xs font-bold cursor-pointer ${
                 currentStep === 3
                   ? "bg-amber-500 text-white shadow-xs"
                   : "bg-slate-50 text-slate-600 hover:bg-slate-100"
@@ -1133,32 +1288,827 @@ function QuotingWorkspace() {
               }`}>
                 3
               </span>
-              <span className="hidden sm:inline">3. Xuất File &amp; In Ấn</span>
-              <span className="sm:hidden">3. Xuất</span>
+              <span className="hidden sm:inline">3. Báo Giá Thương Mại A4 &amp; Chia Sẻ</span>
+              <span className="sm:hidden">3. Báo Giá A4</span>
             </button>
           </div>
         </nav>
       </div>
 
       {/* ================================================================== */}
-      {/* BƯỚC 1: KHUNG KÉO THẢ EXCEL CUTLIST & DANH SÁCH TẤM (no-print)      */}
+      {/* BƯỚC 1: BẢNG CÂU HỎI THÔNG SỐ (COSTING V2) & CHECKLIST (no-print)   */}
       {/* ================================================================== */}
       {currentStep === 1 && (
         <div className="space-y-6">
-          <div className="no-print bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <div className="flex items-center gap-2">
-            <span className="w-6 h-6 rounded-full bg-amber-500 text-white font-black text-xs flex items-center justify-center">
-              1
-            </span>
-            <h3 className="font-bold text-slate-900 text-sm">
-              Đầu vào: Kéo thả file Excel {WORKSHOP_TERMS.cutlist.labelWithOriginal} hoặc nạp mẫu
-            </h3>
+          {/* Sub-tab switcher giữa Costing V2 và Nạp file */}
+          <div className="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setInputTab("questionnaire")}
+                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+                  inputTab === "questionnaire"
+                    ? "bg-amber-500 text-white shadow-xs"
+                    : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200"
+                }`}
+              >
+                <Calculator className="w-3.5 h-3.5" />
+                <span>⚡ Báo giá thông số nhanh (Costing V2 - 30 giây)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setInputTab("detailed_parts")}
+                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+                  inputTab === "detailed_parts"
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200"
+                }`}
+              >
+                <Table className="w-3.5 h-3.5" />
+                <span>📁 Bảng chi tiết từng hạng mục / Nhập Excel</span>
+              </button>
+            </div>
+
+            <div className="text-xs text-slate-500 hidden md:flex items-center gap-1.5 font-medium">
+              {inputTab === "questionnaire" ? (
+                <span className="text-emerald-700 flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  Không cần bản vẽ chi tiết — Tự động tính giá vốn đa tầng từ kích thước phủ bì
+                </span>
+              ) : (
+                <span>Nhập danh sách phôi tấm hoặc dán trực tiếp từ Excel</span>
+              )}
+            </div>
           </div>
-          <span className="text-xs text-slate-500">
-            Hỗ trợ file từ SketchUp ABF, AutoCAD, Aspire (.xlsx, .csv)
-          </span>
-        </div>
+
+          {inputTab === "questionnaire" ? (
+            /* ============================================================ */
+            /* GIAO DIỆN BẢNG CÂU HỎI COSTING V2 (LUỒNG CHỦ LỰC)            */
+            /* ============================================================ */
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* CỘT TRÁI: 3 KHỐI NHẬP LIỆU THÔNG SỐ (8 CỘT) */}
+              <div className="lg:col-span-8 space-y-6">
+                
+                {/* KHỐI 1: SẢN PHẨM & KÍCH THƯỚC PHỦ BÌ (* BẮT BUỘC) */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-amber-500 text-white font-black text-xs flex items-center justify-center">
+                        1
+                      </span>
+                      <h3 className="font-bold text-slate-900 text-sm">
+                        Sản phẩm &amp; Kích thước phủ bì (* Bắt buộc)
+                      </h3>
+                    </div>
+                    <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                      * Nhập đúng kích thước phủ bì
+                    </span>
+                  </div>
+
+                  {/* Lựa chọn loại sản phẩm (Product Archetype) */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-700 block">
+                      Loại sản phẩm đồ gỗ nội thất:
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 text-xs">
+                      {[
+                        { type: "wardrobe", label: "Tủ áo", icon: "🚪", desc: "Kịch trần / lửng" },
+                        { type: "kitchen_base", label: "Tủ bếp dưới", icon: "🍳", desc: "Thùng chậu / bếp" },
+                        { type: "kitchen_upper", label: "Tủ bếp trên", icon: "🥣", desc: "Treo tường" },
+                        { type: "bed", label: "Giường ngủ", icon: "🛏️", desc: "Ngăn kéo / nệm" },
+                        { type: "table", label: "Bàn ăn / Bàn", icon: "🪑", desc: "Bàn làm việc" },
+                        { type: "tv_shelf", label: "Kệ Tivi", icon: "📺", desc: "Tủ thấp trang trí" },
+                        { type: "wall_panel", label: "Vách ốp tường", icon: "🧱", desc: "Lam sóng / phẳng" },
+                        { type: "shoe_cabinet", label: "Tủ giày", icon: "👟", desc: "Cánh nghiêng / phẳng" },
+                        { type: "vanity", label: "Tủ Lavabo", icon: "🪞", desc: "Chống nước" },
+                        { type: "custom", label: "Tùy chỉnh", icon: "📦", desc: "Hạng mục tự do" },
+                      ].map((item) => {
+                        const isSelected = questionnaire.productType === item.type;
+                        return (
+                          <button
+                            key={item.type}
+                            type="button"
+                            onClick={() =>
+                              setQuestionnaire((prev) => ({
+                                ...prev,
+                                productType: item.type as ProductArchetype,
+                                name: `${item.label} tiêu chuẩn`,
+                              }))
+                            }
+                            className={`p-2.5 rounded-xl border text-left transition flex flex-col justify-between cursor-pointer ${
+                              isSelected
+                                ? "bg-amber-50/80 border-amber-500 text-amber-950 font-bold shadow-2xs"
+                                : "bg-slate-50/60 border-slate-200 hover:border-slate-300 text-slate-700"
+                            }`}
+                          >
+                            <span className="text-lg block mb-1">{item.icon}</span>
+                            <span className="font-bold block truncate">{item.label}</span>
+                            <span className="text-[10px] text-slate-400 block truncate">{item.desc}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Kích thước phủ bì Rộng × Sâu × Cao */}
+                  <div className="space-y-2 pt-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                        <span>Kích thước phủ bì tổng thể:</span>
+                        <HelpTooltip content="Nhập quy cách phủ bì (Rộng x Sâu x Cao). Lệch 10% kích thước làm lệch khoảng 14% giá thành." label="Kích thước phủ bì" />
+                      </label>
+                      <span className="text-[11px] font-mono text-slate-500">Đơn vị: mm</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div>
+                        <span className="text-[11px] font-semibold text-slate-500 block mb-1">Rộng (W - Ngang):</span>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            min={100}
+                            step={10}
+                            value={questionnaire.dimensions.widthMm}
+                            onChange={(e) =>
+                              setQuestionnaire((prev) => ({
+                                ...prev,
+                                dimensions: { ...prev.dimensions, widthMm: Number(e.target.value) },
+                              }))
+                            }
+                            className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-500"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] font-mono">mm</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <span className="text-[11px] font-semibold text-slate-500 block mb-1">Sâu (D - Chiều sâu):</span>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            min={50}
+                            step={10}
+                            value={questionnaire.dimensions.depthMm}
+                            onChange={(e) =>
+                              setQuestionnaire((prev) => ({
+                                ...prev,
+                                dimensions: { ...prev.dimensions, depthMm: Number(e.target.value) },
+                              }))
+                            }
+                            className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-500"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] font-mono">mm</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <span className="text-[11px] font-semibold text-slate-500 block mb-1">Cao (H - Chiều cao):</span>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            min={100}
+                            step={10}
+                            value={questionnaire.dimensions.heightMm}
+                            onChange={(e) =>
+                              setQuestionnaire((prev) => ({
+                                ...prev,
+                                dimensions: { ...prev.dimensions, heightMm: Number(e.target.value) },
+                              }))
+                            }
+                            className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-500"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] font-mono">mm</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quick dimension presets */}
+                    <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[11px]">
+                      <span className="text-slate-400">Gợi ý kích thước:</span>
+                      {[
+                        { label: "1.6m × 0.6m × 2.4m", w: 1600, d: 600, h: 2400 },
+                        { label: "1.8m × 0.6m × 2.6m", w: 1800, d: 600, h: 2600 },
+                        { label: "2.2m × 0.6m × 2.8m", w: 2200, d: 600, h: 2800 },
+                        { label: "Bếp dưới 2.4m × 0.6m × 0.81m", w: 2400, d: 600, h: 810 },
+                      ].map((preset, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() =>
+                            setQuestionnaire((prev) => ({
+                              ...prev,
+                              dimensions: { ...prev.dimensions, widthMm: preset.w, depthMm: preset.d, heightMm: preset.h },
+                            }))
+                          }
+                          className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-amber-100 text-slate-600 hover:text-amber-900 transition font-mono cursor-pointer"
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* KHỐI 2: VẬT LIỆU & KẾT CẤU CHỦ LỰC (* BẮT BUỘC) */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-amber-500 text-white font-black text-xs flex items-center justify-center">
+                        2
+                      </span>
+                      <h3 className="font-bold text-slate-900 text-sm">
+                        Vật liệu &amp; Kết cấu chủ lực (* Bắt buộc)
+                      </h3>
+                    </div>
+                    <span className="text-[11px] text-slate-400">5 câu hỏi Có / Không nhạy cảm giá</span>
+                  </div>
+
+                  {/* Cốt ván & Bề mặt */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-semibold text-slate-600 block mb-1">
+                        Cốt ván thùng &amp; đợt:
+                      </label>
+                      <select
+                        value={questionnaire.materials.coreCode}
+                        onChange={(e) =>
+                          setQuestionnaire((prev) => ({
+                            ...prev,
+                            materials: { ...prev.materials, coreCode: e.target.value },
+                          }))
+                        }
+                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:border-amber-500"
+                      >
+                        <option value="MDF_17_CHONG_AM">MDF chống ẩm lõi xanh HMR 17mm</option>
+                        <option value="PLYWOOD_17">Plywood kháng nước 17mm</option>
+                        <option value="PVC_17">Ván nhựa PVC Picomat chống nước tuyệt đối</option>
+                        <option value="NATURAL_WOOD">Gỗ tự nhiên sồi / tần bì ghép thanh</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-semibold text-slate-600 block mb-1">
+                        Bề mặt cánh &amp; mặt tiền:
+                      </label>
+                      <select
+                        value={questionnaire.materials.surfaceCode}
+                        onChange={(e) =>
+                          setQuestionnaire((prev) => ({
+                            ...prev,
+                            materials: { ...prev.materials, surfaceCode: e.target.value },
+                          }))
+                        }
+                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:border-amber-500"
+                      >
+                        <option value="Melamine">Phủ Melamine 2 mặt chống trầy</option>
+                        <option value="Son2K">Sơn bệt 2K cao cấp chống ố vàng</option>
+                        <option value="Acrylic">Cánh phủ Acrylic bóng gương No Line</option>
+                        <option value="Veneer">Phủ Veneer Sồi / Óc chó sơn PU mờ</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* 5 CÂU HỎI BẮT BUỘC CÓ / KHÔNG VỚI CẢNH BÁO NHẠY CẢM GIÁ */}
+                  <div className="space-y-3 pt-2">
+                    <label className="text-xs font-bold text-slate-800 block">
+                      Các thành phần kết cấu đặc thù (Bắt buộc chọn Có/Không):
+                    </label>
+
+                    {/* Câu 1: Mặt đá (Nhạy cảm 35%) */}
+                    <div className="p-3 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">🪨</span>
+                          <div>
+                            <span className="text-xs font-bold text-slate-800 block">Có mặt đá / ốp đá? *</span>
+                            <span className="text-[11px] text-amber-700 font-semibold block">
+                              ⚠️ Chọn nhầm làm lệch giá ~30–35% (Đá gắn nhãn no OH 0%)
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setQuestionnaire((prev) => ({
+                                ...prev,
+                                materials: { ...prev.materials, hasStone: false },
+                              }))
+                            }
+                            className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
+                              !questionnaire.materials.hasStone
+                                ? "bg-slate-900 text-white"
+                                : "text-slate-500 hover:text-slate-900"
+                            }`}
+                          >
+                            Không
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setQuestionnaire((prev) => ({
+                                ...prev,
+                                materials: { ...prev.materials, hasStone: true },
+                              }))
+                            }
+                            className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
+                              questionnaire.materials.hasStone
+                                ? "bg-amber-500 text-white shadow-xs"
+                                : "text-slate-500 hover:text-slate-900"
+                            }`}
+                          >
+                            Có
+                          </button>
+                        </div>
+                      </div>
+
+                      {questionnaire.materials.hasStone && (
+                        <div className="pt-2 border-t border-slate-200 flex items-center gap-2">
+                          <span className="text-[11px] font-semibold text-slate-600 shrink-0">Loại đá áp dụng:</span>
+                          <select
+                            value={questionnaire.materials.stoneType || "vicostone"}
+                            onChange={(e) =>
+                              setQuestionnaire((prev) => ({
+                                ...prev,
+                                materials: { ...prev.materials, stoneType: e.target.value },
+                              }))
+                            }
+                            className="p-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:border-amber-500 w-full"
+                          >
+                            <option value="vicostone">Đá Vicostone thạch anh nhân tạo cao cấp</option>
+                            <option value="white_ceramic">Đá trắng sứ nhân tạo vân mây chống ố</option>
+                            <option value="black_galaxy">Đá Granite Kim sa trung tự nhiên</option>
+                          </select>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Câu 2: Kính / Cánh kính khung nhôm */}
+                    <div className="p-3 rounded-xl border border-slate-200 bg-slate-50/50 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">🪟</span>
+                        <div>
+                          <span className="text-xs font-bold text-slate-800 block">Có kính / gương / cánh kính khung nhôm? *</span>
+                          <span className="text-[11px] text-slate-500 block">Kính cường lực 5mm/8mm hoặc nhôm hệ Slim nội thất</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setQuestionnaire((prev) => ({
+                              ...prev,
+                              materials: { ...prev.materials, hasGlass: false },
+                            }))
+                          }
+                          className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
+                            !questionnaire.materials.hasGlass
+                              ? "bg-slate-900 text-white"
+                              : "text-slate-500 hover:text-slate-900"
+                          }`}
+                        >
+                          Không
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setQuestionnaire((prev) => ({
+                              ...prev,
+                              materials: { ...prev.materials, hasGlass: true },
+                            }))
+                          }
+                          className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
+                            questionnaire.materials.hasGlass
+                              ? "bg-sky-600 text-white shadow-xs"
+                              : "text-slate-500 hover:text-slate-900"
+                          }`}
+                        >
+                          Có
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Câu 3: Khung kim loại sắt sơn / inox */}
+                    <div className="p-3 rounded-xl border border-slate-200 bg-slate-50/50 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">⚙️</span>
+                        <div>
+                          <span className="text-xs font-bold text-slate-800 block">Có khung kim loại (sắt sơn / inox PVD)? *</span>
+                          <span className="text-[11px] text-slate-500 block">Khung chân bàn, giá treo áo hoặc vách ngăn sắt nghệ thuật</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setQuestionnaire((prev) => ({
+                              ...prev,
+                              materials: { ...prev.materials, hasMetal: false },
+                            }))
+                          }
+                          className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
+                            !questionnaire.materials.hasMetal
+                              ? "bg-slate-900 text-white"
+                              : "text-slate-500 hover:text-slate-900"
+                          }`}
+                        >
+                          Không
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setQuestionnaire((prev) => ({
+                              ...prev,
+                              materials: { ...prev.materials, hasMetal: true },
+                            }))
+                          }
+                          className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
+                            questionnaire.materials.hasMetal
+                              ? "bg-indigo-600 text-white shadow-xs"
+                              : "text-slate-500 hover:text-slate-900"
+                          }`}
+                        >
+                          Có
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Câu 4: Bọc nệm / Da / Vải / Mây */}
+                    <div className="p-3 rounded-xl border border-slate-200 bg-slate-50/50 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">🛋️</span>
+                        <div>
+                          <span className="text-xs font-bold text-slate-800 block">Có bọc nệm, da, vải hoặc đan mây? *</span>
+                          <span className="text-[11px] text-slate-500 block">Đầu giường bọc da microfiber, cánh tủ mây mắt cáo</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setQuestionnaire((prev) => ({
+                              ...prev,
+                              materials: { ...prev.materials, hasUpholstery: false },
+                            }))
+                          }
+                          className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
+                            !questionnaire.materials.hasUpholstery
+                              ? "bg-slate-900 text-white"
+                              : "text-slate-500 hover:text-slate-900"
+                          }`}
+                        >
+                          Không
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setQuestionnaire((prev) => ({
+                              ...prev,
+                              materials: { ...prev.materials, hasUpholstery: true },
+                            }))
+                          }
+                          className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
+                            questionnaire.materials.hasUpholstery
+                              ? "bg-amber-600 text-white shadow-xs"
+                              : "text-slate-500 hover:text-slate-900"
+                          }`}
+                        >
+                          Có
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Câu 5: Đèn LED nội thất */}
+                    <div className="p-3 rounded-xl border border-slate-200 bg-slate-50/50 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">💡</span>
+                        <div>
+                          <span className="text-xs font-bold text-slate-800 block">Có hệ đèn LED nội thất / cảm biến? *</span>
+                          <span className="text-[11px] text-slate-500 block">Máng nhôm có tai + dây LED 12V + nguồn tổ ong + cảm ứng vẫy tay</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setQuestionnaire((prev) => ({
+                              ...prev,
+                              materials: { ...prev.materials, hasLed: false },
+                            }))
+                          }
+                          className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
+                            !questionnaire.materials.hasLed
+                              ? "bg-slate-900 text-white"
+                              : "text-slate-500 hover:text-slate-900"
+                          }`}
+                        >
+                          Không
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setQuestionnaire((prev) => ({
+                              ...prev,
+                              materials: { ...prev.materials, hasLed: true },
+                            }))
+                          }
+                          className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
+                            questionnaire.materials.hasLed
+                              ? "bg-amber-500 text-white shadow-xs"
+                              : "text-slate-500 hover:text-slate-900"
+                          }`}
+                        >
+                          Có
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* KHỐI 3: CHI TIẾT & GHI CHÚ ĐẶC BIỆT */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-slate-900 text-white font-black text-xs flex items-center justify-center">
+                        3
+                      </span>
+                      <h3 className="font-bold text-slate-900 text-sm">
+                        Chi tiết phụ kiện &amp; Ghi chú (Tùy chọn)
+                      </h3>
+                    </div>
+                    <span className="text-[11px] text-slate-400">Để trống để hệ thống tự ước tính</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-semibold text-slate-700 block mb-1">
+                        Số ngăn kéo (Hộc kéo ray trượt):
+                      </label>
+                      <input
+                        type="number"
+                        min={0}
+                        placeholder="Để trống -> Tự nội suy theo kích thước"
+                        value={questionnaire.details?.drawerCount ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value === "" ? undefined : Number(e.target.value);
+                          setQuestionnaire((prev) => ({
+                            ...prev,
+                            details: { ...prev.details, drawerCount: val },
+                          }));
+                        }}
+                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-semibold text-slate-700 block mb-1">
+                        Số cánh cửa (Bản lề &amp; tay nắm):
+                      </label>
+                      <input
+                        type="number"
+                        min={0}
+                        placeholder="Để trống -> Tự nội suy theo kích thước"
+                        value={questionnaire.details?.doorCount ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value === "" ? undefined : Number(e.target.value);
+                          setQuestionnaire((prev) => ({
+                            ...prev,
+                            details: { ...prev.details, doorCount: val },
+                          }));
+                        }}
+                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">
+                      Yêu cầu gia công &amp; Hoàn thiện đặc biệt:
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="VD: Cắt mòi vát 45 độ, ray âm nhấn mở, tay nắm âm nhôm..."
+                      value={questionnaire.details?.specialNotes ?? ""}
+                      onChange={(e) =>
+                        setQuestionnaire((prev) => ({
+                          ...prev,
+                          details: { ...prev.details, specialNotes: e.target.value },
+                        }))
+                      }
+                      className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+                </div>
+
+              </div>
+
+              {/* CỘT PHẢI: CHECKLIST 3 TRẠNG THÁI & ĐIỀU KHIỂN (4 CỘT - STICKY) */}
+              <div className="lg:col-span-4 space-y-4 sticky top-4">
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-4">
+                  <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+                    <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      <span>Checklist Kiểm Soát Thông Số</span>
+                    </h3>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold">
+                      Costing V2
+                    </span>
+                  </div>
+
+                  {/* Danh sách 3 trạng thái */}
+                  <div className="space-y-2.5 text-xs">
+                    <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-50/60 border border-emerald-200">
+                      <span className="font-semibold text-emerald-900 flex items-center gap-1.5">
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        Loại sản phẩm:
+                      </span>
+                      <strong className="text-emerald-800 truncate max-w-[120px]">{questionnaire.productType}</strong>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-50/60 border border-emerald-200">
+                      <span className="font-semibold text-emerald-900 flex items-center gap-1.5">
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        Kích thước W×D×H:
+                      </span>
+                      <strong className="text-emerald-800 font-mono">
+                        {questionnaire.dimensions.widthMm}×{questionnaire.dimensions.depthMm}×{questionnaire.dimensions.heightMm}
+                      </strong>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-50/60 border border-emerald-200">
+                      <span className="font-semibold text-emerald-900 flex items-center gap-1.5">
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        Cốt &amp; Bề mặt:
+                      </span>
+                      <strong className="text-emerald-800 truncate max-w-[130px]">
+                        {questionnaire.materials.surfaceCode}
+                      </strong>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-50/60 border border-emerald-200">
+                      <span className="font-semibold text-emerald-900 flex items-center gap-1.5">
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        Kết cấu đặc thù:
+                      </span>
+                      <strong className="text-emerald-800">5/5 đã chọn</strong>
+                    </div>
+
+                    <div className={`flex items-center justify-between p-2 rounded-xl border ${
+                      questionnaire.details?.drawerCount !== undefined && questionnaire.details?.doorCount !== undefined
+                        ? "bg-emerald-50/60 border-emerald-200 text-emerald-900"
+                        : "bg-amber-50/60 border-amber-200 text-amber-900"
+                    }`}>
+                      <span className="font-semibold flex items-center gap-1.5">
+                        {questionnaire.details?.drawerCount !== undefined && questionnaire.details?.doorCount !== undefined ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        ) : (
+                          <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+                        )}
+                        Ngăn kéo &amp; Cánh:
+                      </span>
+                      <strong className="font-mono">
+                        {questionnaire.details?.drawerCount ?? "Auto"} NK · {questionnaire.details?.doorCount ?? "Auto"} Cánh
+                      </strong>
+                    </div>
+                  </div>
+
+                  {/* Lựa chọn phương thức tính */}
+                  <div className="pt-2 border-t border-slate-100 space-y-2">
+                    <label className="text-[11px] font-bold text-slate-600 block">Phương thức chiết tính:</label>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setQuestionnaire((prev) => ({ ...prev, calcMode: "detail" }))}
+                        className={`p-2 rounded-xl border text-center transition font-bold cursor-pointer ${
+                          questionnaire.calcMode === "detail"
+                            ? "bg-amber-500 text-white border-amber-500 shadow-2xs"
+                            : "bg-slate-50 text-slate-600 hover:bg-slate-100 border-slate-200"
+                        }`}
+                      >
+                        Bản Chi Tiết
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setQuestionnaire((prev) => ({ ...prev, calcMode: "quick" }))}
+                        className={`p-2 rounded-xl border text-center transition font-bold cursor-pointer ${
+                          questionnaire.calcMode === "quick"
+                            ? "bg-amber-500 text-white border-amber-500 shadow-2xs"
+                            : "bg-slate-50 text-slate-600 hover:bg-slate-100 border-slate-200"
+                        }`}
+                      >
+                        Ước Nhanh
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Khung xem trước giá & Độ tin cậy */}
+                  <div className="p-3.5 rounded-xl bg-slate-900 text-white space-y-2">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-slate-400">Giá bán đề xuất:</span>
+                      <span className={`px-2 py-0.5 rounded font-bold text-[10px] ${parametricCosting.confidence.colorClass}`}>
+                        {parametricCosting.confidence.stars} Sao · {parametricCosting.confidence.label}
+                      </span>
+                    </div>
+                    <div className="text-xl font-black font-mono text-amber-400">
+                      {formatVND(parametricCosting.summary.calculateSalesPrice)}
+                    </div>
+                    <div className="text-[10px] text-slate-400 flex items-center justify-between pt-1 border-t border-slate-800">
+                      <span>Giá vốn COGS: <strong className="text-white font-mono">{formatVND(parametricCosting.summary.cogs)}</strong></span>
+                      <span>Lợi nhuận: <strong className="text-emerald-400 font-mono">+{((profitMargin - 1) * 100).toFixed(0)}%</strong></span>
+                    </div>
+                  </div>
+
+                  {/* Nút hành động chính */}
+                  <div className="space-y-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={handleCalculateFromQuestionnaire}
+                      className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <Calculator className="w-4 h-4" />
+                      <span>⚡ Tính Toán Costing Sheet Ngay</span>
+                    </button>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={handleResetQuestionnaire}
+                        className="py-2 px-3 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold rounded-xl transition cursor-pointer flex items-center justify-center gap-1"
+                      >
+                        <RotateCcw className="w-3 h-3 text-slate-400" />
+                        <span>Làm Mới</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleSaveProject();
+                          showToast("Đã lưu nháp thông số Bảng câu hỏi thành công!");
+                        }}
+                        className="py-2 px-3 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold rounded-xl transition cursor-pointer flex items-center justify-center gap-1"
+                      >
+                        <Save className="w-3 h-3 text-amber-600" />
+                        <span>Lưu Nháp</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Khối gợi ý Dựng từ mẫu lịch sử */}
+                  {similarItems.length > 0 && (
+                    <div className="pt-3 border-t border-slate-100 space-y-2">
+                      <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                        <Sparkles className="w-3 h-3 text-amber-600" />
+                        Dựng từ mẫu lịch sử gần nhất:
+                      </span>
+                      <div className="space-y-1.5">
+                        {similarItems.slice(0, 2).map((item) => (
+                          <div
+                            key={item.id}
+                            className="p-2 rounded-lg bg-slate-50 hover:bg-amber-50/50 border border-slate-200 flex items-center justify-between text-[11px] transition"
+                          >
+                            <div className="truncate mr-2">
+                              <span className="font-bold text-slate-800 block truncate">{item.productName}</span>
+                              <span className="text-[10px] text-slate-400 font-mono">
+                                {item.dimensions.widthMm}×{item.dimensions.depthMm}×{item.dimensions.heightMm}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleBuildFromTemplate(item)}
+                              className="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded text-[10px] font-bold shrink-0 cursor-pointer"
+                            >
+                              Dựng mẫu này
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="no-print bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-amber-500 text-white font-black text-xs flex items-center justify-center">
+                  1
+                </span>
+                <h3 className="font-bold text-slate-900 text-sm">
+                  Đầu vào: Kéo thả file Excel hoặc nạp mẫu
+                </h3>
+              </div>
+              <span className="text-xs text-slate-500">
+                Hỗ trợ file từ SketchUp, AutoCAD, Aspire (.xlsx, .csv)
+              </span>
+            </div>
 
         {/* Dropzone container */}
         <div
@@ -1736,13 +2686,15 @@ function QuotingWorkspace() {
             disabled={parts.length === 0}
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl transition shadow-xs disabled:opacity-40 cursor-pointer"
           >
-            <span>Tiếp tục: Xem Báo Giá &amp; BOM ({parts.length} tấm)</span>
+            <span>Tiếp tục: Xem Báo Giá &amp; Chiết Tính Giá Vốn</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </div>
     </div>
-  )}
+          )}
+        </div>
+      )}
 
       {/* ================================================================== */}
       {/* BƯỚC 2: KHU VỰC KẾT QUẢ: 2 TAB CHÍNH (XƯỞNG VS KHÁCH HÀNG)         */}
@@ -1789,31 +2741,43 @@ function QuotingWorkspace() {
 
           <div className="space-y-4">
         
-        {/* Tab switcher giữa 2 đầu ra (no-print) */}
+        {/* Tab switcher giữa các góc nhìn (no-print) */}
         <div className="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setActiveOutputTab("costing_sheet")}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                activeOutputTab === "costing_sheet"
+                  ? "bg-amber-500 text-white shadow-xs"
+                  : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+              }`}
+            >
+              <Calculator className="w-3.5 h-3.5" />
+              <span>Costing Sheet V2 (Chiết Tính Giá Vốn)</span>
+            </button>
+
             <button
               onClick={() => setActiveOutputTab("bom")}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                 activeOutputTab === "bom"
                   ? "bg-slate-900 text-white shadow-xs"
                   : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
               }`}
             >
               <Boxes className="w-3.5 h-3.5" />
-              <span>Tab 1 - {WORKSHOP_TERMS.bom.labelWithOriginal} (Góc nhìn Xưởng)</span>
+              <span>BOM Đặt Vật Tư Xưởng</span>
             </button>
 
             <button
               onClick={() => setActiveOutputTab("quote")}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                 activeOutputTab === "quote"
-                  ? "bg-amber-500 text-white shadow-sm shadow-amber-500/20"
+                  ? "bg-emerald-600 text-white shadow-sm shadow-emerald-500/20"
                   : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
-              <span>Tab 2 - Báo Giá Khách Hàng (Chuẩn In A4)</span>
+              <span>Báo Giá Khách Hàng (Chuẩn In A4)</span>
             </button>
           </div>
 
@@ -1829,14 +2793,451 @@ function QuotingWorkspace() {
             </span>
             <div className="h-3 w-px bg-slate-200" />
             <span>
-              Giá vốn: <strong suppressHydrationWarning className="text-slate-900 font-mono">{formatVND(calcResult.totalBaseCost)}</strong>
+              Giá vốn: <strong suppressHydrationWarning className="text-slate-900 font-mono">{formatVND(activeOutputTab === "costing_sheet" ? parametricCosting.summary.cogs : calcResult.totalBaseCost)}</strong>
             </span>
             <div className="h-3 w-px bg-slate-200" />
             <span>
-              Báo khách: <strong suppressHydrationWarning className="text-amber-600 font-mono">{formatVND(calcResult.totalQuotePrice)}</strong>
+              Báo khách: <strong suppressHydrationWarning className="text-amber-600 font-mono">{formatVND(activeOutputTab === "costing_sheet" ? parametricCosting.summary.calculateSalesPrice : calcResult.totalQuotePrice)}</strong>
             </span>
           </div>
         </div>
+
+        {/* ================================================================ */}
+        {/* TAB 0: COSTING SHEET V2: CHIẾT TÍNH GIÁ VỐN & ĐỘ TIN CẬY (no-print)*/}
+        {/* ================================================================ */}
+        {activeOutputTab === "costing_sheet" && (
+          <div className="no-print space-y-6">
+            {/* 3 KPI Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-500">GIÁ BÁN ĐỀ XUẤT</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    +{((profitMargin - 1) * 100).toFixed(0)}% LỢI NHUẬN
+                  </span>
+                </div>
+                <div className="text-2xl font-black text-emerald-600 font-mono">
+                  {formatVND(parametricCosting.summary.calculateSalesPrice)}
+                </div>
+                <p className="text-xs text-slate-500">Giá đề xuất gửi khách hàng (đã gồm chi phí + lợi nhuận mục tiêu)</p>
+              </div>
+
+              <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-500">GIÁ VỐN TOÀN DIỆN (COGS)</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                    12 NHÓM CHI PHÍ
+                  </span>
+                </div>
+                <div className="text-2xl font-black text-slate-900 font-mono">
+                  {formatVND(parametricCosting.summary.cogs)}
+                </div>
+                <p className="text-xs text-slate-500">Vật tư + Nhân công trực tiếp + Quản lý xưởng OH & thầu phụ</p>
+              </div>
+
+              <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-500">LỢI NHUẬN MỤC TIÊU</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                    RÒNG DỰ TÍNH
+                  </span>
+                </div>
+                <div className="text-2xl font-black text-amber-600 font-mono">
+                  {formatVND(parametricCosting.summary.profitAmount)}
+                </div>
+                <p className="text-xs text-slate-500">Mức chênh lệch an toàn để đảm bảo dòng tiền & tái đầu tư xưởng</p>
+              </div>
+            </div>
+
+            {/* Confidence Rating & Checklist Banner */}
+            <div className={`p-4 rounded-2xl border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xs ${
+              parametricCosting.confidence.stars >= 4
+                ? "bg-emerald-50/60 border-emerald-200 text-emerald-950"
+                : parametricCosting.confidence.stars === 3
+                ? "bg-sky-50/60 border-sky-200 text-sky-950"
+                : "bg-amber-50/60 border-amber-200 text-amber-950"
+            }`}>
+              <div className="space-y-1.5 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-700">Độ tin cậy báo giá:</span>
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star
+                        key={s}
+                        className={`w-4 h-4 ${
+                          s <= parametricCosting.confidence.stars
+                            ? "fill-amber-400 text-amber-500"
+                            : "text-slate-200 fill-slate-100"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-xs font-bold font-mono">
+                    ({parametricCosting.confidence.stars}/5 Sao - {parametricCosting.confidence.label})
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600">{parametricCosting.confidence.recommendation}</p>
+
+                {/* Reasons & Checklist Tags */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[11px]">
+                  {parametricCosting.confidence.reasons.map((r, idx) => (
+                    <span key={idx} className="px-2 py-0.5 rounded-md bg-amber-100/80 text-amber-800 font-medium border border-amber-200">
+                      • {r}
+                    </span>
+                  ))}
+                  <span className="px-2 py-0.5 rounded-md bg-emerald-100/80 text-emerald-800 font-medium border border-emerald-200">
+                    ✓ {questionnaire.name} ({questionnaire.dimensions.widthMm} × {questionnaire.dimensions.depthMm} × {questionnaire.dimensions.heightMm} mm)
+                  </span>
+                  <span className="px-2 py-0.5 rounded-md bg-emerald-100/80 text-emerald-800 font-medium border border-emerald-200">
+                    ✓ Cốt: {questionnaire.materials.coreCode} | {questionnaire.materials.surfaceCode}
+                  </span>
+                </div>
+              </div>
+
+              {/* Version & Export Button */}
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => exportCostingSheetExcel(projectName, projectVersionNo, clientName, parametricCosting)}
+                  className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Xuất Excel Costing Sheet</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => goToStep(3)}
+                  className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>Báo Giá A4</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Stone Warning */}
+            {questionnaire.materials.hasStone && (
+              <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs flex items-center gap-3">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>
+                  <strong>Lưu ý hạng mục Đá:</strong> Không áp dụng Overhead xưởng (0% OH). Giá đá chiếm ~30-35% giá vốn và dao động mạnh theo nhà cung cấp — Nên chốt mã đá thực tế trước khi ký hợp đồng.
+                </span>
+              </div>
+            )}
+
+            {/* Sub-tabs Navigation */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-1.5 overflow-x-auto text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setCostingActiveTab("summary")}
+                    className={`px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ${
+                      costingActiveTab === "summary"
+                        ? "bg-slate-900 text-white"
+                        : "bg-slate-50 text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    1. Tổng hợp COGS (12 Nhóm)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCostingActiveTab("material_labor")}
+                    className={`px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ${
+                      costingActiveTab === "material_labor"
+                        ? "bg-slate-900 text-white"
+                        : "bg-slate-50 text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    2. Bảng vật tư chi tiết ({parametricCosting.materialsLabor.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCostingActiveTab("labour")}
+                    className={`px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ${
+                      costingActiveTab === "labour"
+                        ? "bg-slate-900 text-white"
+                        : "bg-slate-50 text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    3. Nhân công ({parametricCosting.labourDepts.length} công đoạn)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCostingActiveTab("moq")}
+                    className={`px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ${
+                      costingActiveTab === "moq"
+                        ? "bg-slate-900 text-white"
+                        : "bg-slate-50 text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    4. Bậc thang MOQ ({Object.keys(parametricCosting.summary.moqPrices || {}).length} bậc)
+                  </button>
+                  {similarItems.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setCostingActiveTab("similar")}
+                      className={`px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ${
+                        costingActiveTab === "similar"
+                          ? "bg-slate-900 text-white"
+                          : "bg-slate-50 text-slate-600 hover:bg-slate-100"
+                      }`}
+                    >
+                      5. Sản phẩm tương tự ({similarItems.length})
+                    </button>
+                  )}
+                </div>
+
+                <span className="text-xs text-slate-500 font-mono hidden sm:inline">
+                  Tổng COGS: <strong className="text-slate-900 font-bold">{formatVND(parametricCosting.summary.cogs)}</strong>
+                </span>
+              </div>
+
+              {/* Sub-tab 1: Summary 12 Nhóm */}
+              {costingActiveTab === "summary" && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left">
+                    <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
+                      <tr>
+                        <th className="p-2.5">Nhóm Chi Phí</th>
+                        <th className="p-2.5">Mô Tả & Cơ Chế Phân Bổ</th>
+                        <th className="p-2.5 text-right">Chi Phí (VNĐ)</th>
+                        <th className="p-2.5 text-right">Tỷ Trọng %</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {[
+                        { label: "1. Đá tự nhiên / Nhân tạo (Stone)", desc: "Mặt đá Vicostone/Marble (0% OH Xưởng)", amount: parametricCosting.summary.stone, highlight: "0% OH" },
+                        { label: "2. Bọc nệm / Da / Vải (Upholstery)", desc: "Mút xốp D40 + bọc da/nỉ cao cấp", amount: parametricCosting.summary.upholstery },
+                        { label: "3. Khung kim loại gia công ngoài", desc: "Chân bàn, tay nắm kim loại ngoài (10% OH)", amount: parametricCosting.summary.metalFrameS },
+                        { label: "4. Gia công ngoài / Thầu phụ", desc: "Cánh Acrylic bóng gương, gia công CNC ngoài (10% OH)", amount: parametricCosting.summary.subContract },
+                        { label: "5. Gỗ & Ván công nghiệp", desc: "Cốt MDF/HDF chống ẩm thùng & cánh tủ", amount: parametricCosting.summary.wood },
+                        { label: "6. Khung kim loại tự sản xuất", desc: "Khung sắt hộp xưởng tự cắt hàn sơn", amount: parametricCosting.summary.metalFrameP },
+                        { label: "7. Kính / Cánh kính khung nhôm", desc: "Kính cường lực / khung nhôm định hình", amount: parametricCosting.summary.glass },
+                        { label: "8. Hóa chất / Sơn / Dung môi", desc: "Sơn 2K, bả matit, keo dán chuyên dụng", amount: parametricCosting.summary.chemical },
+                        { label: "9. Phụ kiện kim khí (Hardware)", desc: "Bản lề giảm chấn, ray âm, tay nắm, LED", amount: parametricCosting.summary.hardware },
+                        { label: "10. Chỉ dán & Vật tư tiêu hao", desc: "Chỉ nẹp PVC, keo PUR, ốc vít cam", amount: parametricCosting.summary.consumables },
+                        { label: "11. Đóng gói & Vận chuyển", desc: "Màng PE, xốp nổ bọc góc, xe tải giao hàng", amount: parametricCosting.summary.packingDelivery },
+                        { label: "12. Tổng nhân công trực tiếp", desc: "Nhân công 4 bộ phận cắt, dán, ráp, lắp đặt", amount: parametricCosting.summary.laborCostTotal },
+                      ].map((row, idx) => {
+                        const pct = parametricCosting.summary.cogs > 0
+                          ? ((row.amount / parametricCosting.summary.cogs) * 100).toFixed(1)
+                          : "0.0";
+                        return (
+                          <tr key={idx} className="hover:bg-slate-50/60">
+                            <td className="p-2.5 font-bold text-slate-800">{row.label}</td>
+                            <td className="p-2.5 text-slate-500">
+                              {row.desc}
+                              {row.highlight && (
+                                <span className="ml-2 px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 text-[10px] font-bold">
+                                  {row.highlight}
+                                </span>
+                              )}
+                            </td>
+                            <td className="p-2.5 text-right font-mono font-bold text-slate-900">
+                              {formatVND(row.amount)}
+                            </td>
+                            <td className="p-2.5 text-right font-mono text-slate-500">
+                              {pct}%
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      <tr className="bg-amber-50/40 font-semibold">
+                        <td className="p-2.5 text-amber-900">+ OH Xưởng ({((parametricCosting.summary.ohWorkshopRate) * 100).toFixed(0)}%)</td>
+                        <td className="p-2.5 text-amber-800 text-[11px]">Khấu hao máy CNC, nhà xưởng, điện 3 pha áp cho nhóm nội bộ</td>
+                        <td className="p-2.5 text-right font-mono font-bold text-amber-900">{formatVND(parametricCosting.summary.ohWorkshopAmount)}</td>
+                        <td className="p-2.5 text-right font-mono text-amber-800">{parametricCosting.summary.cogs > 0 ? ((parametricCosting.summary.ohWorkshopAmount / parametricCosting.summary.cogs) * 100).toFixed(1) : 0}%</td>
+                      </tr>
+                      <tr className="bg-sky-50/40 font-semibold">
+                        <td className="p-2.5 text-sky-900">+ OH Thầu phụ ({((parametricCosting.summary.ohSubcontractRate) * 100).toFixed(0)}%)</td>
+                        <td className="p-2.5 text-sky-800 text-[11px]">Quản lý & rủi ro lắp đặt thầu phụ</td>
+                        <td className="p-2.5 text-right font-mono font-bold text-sky-900">{formatVND(parametricCosting.summary.ohSubcontractAmount)}</td>
+                        <td className="p-2.5 text-right font-mono text-sky-800">{parametricCosting.summary.cogs > 0 ? ((parametricCosting.summary.ohSubcontractAmount / parametricCosting.summary.cogs) * 100).toFixed(1) : 0}%</td>
+                      </tr>
+                    </tbody>
+                    <tfoot className="bg-slate-50 font-bold border-t-2 border-slate-300">
+                      <tr>
+                        <td colSpan={2} className="p-2.5 text-slate-900 uppercase">TỔNG GIÁ VỐN TOÀN DIỆN (COGS)</td>
+                        <td className="p-2.5 text-right font-mono text-slate-900 text-sm">
+                          {formatVND(parametricCosting.summary.cogs)}
+                        </td>
+                        <td className="p-2.5 text-right font-mono text-slate-900">100.0%</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              )}
+
+              {/* Sub-tab 2: Material Labor Detail */}
+              {costingActiveTab === "material_labor" && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left">
+                    <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
+                      <tr>
+                        <th className="p-2.5">Khối</th>
+                        <th className="p-2.5">Tên Chi Tiết / Vật Tư</th>
+                        <th className="p-2.5">Quy Chuẩn Kỹ Thuật</th>
+                        <th className="p-2.5 text-center">ĐVT</th>
+                        <th className="p-2.5 text-right">Khối Lượng</th>
+                        <th className="p-2.5 text-right">Đơn Giá (VNĐ)</th>
+                        <th className="p-2.5 text-right">Hao Hụt</th>
+                        <th className="p-2.5 text-right">Thành Tiền (VNĐ)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {parametricCosting.materialsLabor.map((row) => (
+                        <tr key={row.id} className="hover:bg-slate-50/60">
+                          <td className="p-2.5">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
+                              {row.block}
+                            </span>
+                          </td>
+                          <td className="p-2.5 font-bold text-slate-800">{row.name}</td>
+                          <td className="p-2.5 text-[11px] text-slate-500">{row.description}</td>
+                          <td className="p-2.5 text-center text-slate-500">{row.unit}</td>
+                          <td className="p-2.5 text-right font-mono font-semibold text-slate-800">
+                            {row.qty.toLocaleString("vi-VN", { maximumFractionDigits: 2 })}
+                          </td>
+                          <td className="p-2.5 text-right font-mono text-slate-600">
+                            {formatVND(row.unitPrice)}
+                          </td>
+                          <td className="p-2.5 text-right font-mono text-slate-500">
+                            x{row.wasteFactor}
+                          </td>
+                          <td className="p-2.5 text-right font-mono font-bold text-slate-900">
+                            {formatVND(row.totalAmount)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Sub-tab 3: Labour Departments */}
+              {costingActiveTab === "labour" && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left">
+                    <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
+                      <tr>
+                        <th className="p-2.5">Công Đoạn / Bộ Phận</th>
+                        <th className="p-2.5">Mã Phân Xưởng</th>
+                        <th className="p-2.5 text-right">Số Giờ Định Mức</th>
+                        <th className="p-2.5 text-right">Đơn Giá / Giờ (VNĐ)</th>
+                        <th className="p-2.5 text-right">Thành Tiền (VNĐ)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {parametricCosting.labourDepts.map((d, idx) => (
+                        <tr key={idx} className="hover:bg-slate-50/60">
+                          <td className="p-2.5 font-bold text-slate-800">{d.name}</td>
+                          <td className="p-2.5 text-slate-500 font-mono text-[11px]">{d.department}</td>
+                          <td className="p-2.5 text-right font-mono font-semibold text-slate-800">
+                            {d.hours.toFixed(1)} h
+                          </td>
+                          <td className="p-2.5 text-right font-mono text-slate-600">
+                            {formatVND(d.hourlyRate)}
+                          </td>
+                          <td className="p-2.5 text-right font-mono font-bold text-slate-900">
+                            {formatVND(d.totalAmount)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot className="bg-slate-50 font-bold border-t-2 border-slate-300">
+                      <tr>
+                        <td colSpan={4} className="p-2.5 text-slate-900 uppercase">TỔNG NHÂN CÔNG TRỰC TIẾP</td>
+                        <td className="p-2.5 text-right font-mono text-slate-900 text-sm">
+                          {formatVND(parametricCosting.summary.laborCostTotal)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              )}
+
+              {/* Sub-tab 4: MOQ Tiers */}
+              {costingActiveTab === "moq" && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left">
+                    <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
+                      <tr>
+                        <th className="p-2.5">Bậc Số Lượng (MOQ)</th>
+                        <th className="p-2.5 text-right">Đơn Giá / Cái (VNĐ)</th>
+                        <th className="p-2.5 text-right">Chiết Khấu Quy Mô</th>
+                        <th className="p-2.5 text-right">Tổng Giá Trị Đơn Hàng (VNĐ)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {Object.entries(parametricCosting.summary.moqPrices || {}).map(([qtyStr, unitPrice]) => {
+                        const q = Number(qtyStr);
+                        const basePrice = parametricCosting.summary.moqPrices[1] || parametricCosting.summary.calculateSalesPrice;
+                        const discount = basePrice > 0 ? Math.round((1 - unitPrice / basePrice) * 100) : 0;
+                        const total = q * unitPrice;
+                        return (
+                          <tr key={q} className="hover:bg-slate-50/60">
+                            <td className="p-2.5 font-bold text-slate-800 flex items-center gap-1.5">
+                              <span className="w-5 h-5 rounded-full bg-slate-900 text-white font-mono text-[10px] flex items-center justify-center font-bold">
+                                {q}
+                              </span>
+                              <span>{q} sản phẩm</span>
+                            </td>
+                            <td className="p-2.5 text-right font-mono font-bold text-slate-900">
+                              {formatVND(unitPrice)}
+                            </td>
+                            <td className="p-2.5 text-right font-mono text-emerald-700 font-semibold">
+                              {discount > 0 ? `-${discount}%` : "Chuẩn (0%)"}
+                            </td>
+                            <td className="p-2.5 text-right font-mono font-black text-amber-600">
+                              {formatVND(total)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Sub-tab 5: Similar Items */}
+              {costingActiveTab === "similar" && (
+                <div className="space-y-3">
+                  <p className="text-xs text-slate-500">
+                    Hệ thống tự động tìm kiếm các sản phẩm cùng chủng loại và quy cách tương tự trong lịch sử dự án để đối chiếu giá:
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {similarItems.map((item) => (
+                      <div
+                        key={item.id}
+                        className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 flex items-center justify-between gap-3 hover:border-amber-400 transition"
+                      >
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-mono font-bold text-slate-400">{item.projectCode}</span>
+                          <h4 className="font-bold text-slate-900 text-xs">{item.productName}</h4>
+                          <span className="text-[11px] font-mono text-slate-500">
+                            {item.dimensions.widthMm} × {item.dimensions.depthMm} × {item.dimensions.heightMm} mm
+                          </span>
+                          <div className="text-xs font-mono font-bold text-slate-800">
+                            Giá vốn: {formatVND(item.totalCost)}
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleBuildFromTemplate(item)}
+                          className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg transition cursor-pointer"
+                        >
+                          Dựng mẫu này
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* ================================================================ */}
         {/* TAB 1: BẢNG TỔNG HỢP VẬT TƯ (XƯỞNG) (no-print)                    */}
@@ -2285,26 +3686,26 @@ function QuotingWorkspace() {
             </button>
           </div>
 
-          {/* Card 2: Xuất Excel Cutlist Tấm Ván Cho Máy CNC */}
+          {/* Card 2: Xuất Excel Costing Sheet V2 Chiết Tính Giá Vốn */}
           <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-sky-300 transition flex flex-col justify-between space-y-3 shadow-2xs">
             <div className="space-y-2">
               <div className="w-9 h-9 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center">
-                <Table className="w-5 h-5" />
+                <Calculator className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-xs font-bold text-slate-900">Cutlist Tấm Ván (.xlsx)</h3>
+                <h3 className="text-xs font-bold text-slate-900">Costing Sheet V2 (.xlsx)</h3>
                 <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-                  Bảng kê 8 cột chuẩn gồm {parts.length} chi tiết phôi để nạp trực tiếp vào phần mềm xếp ván (Cutlist Plus, ABF, Aspire).
+                  Bảng tổng hợp chi phí 12 danh mục, phân bổ OH đa tầng (Đá 0%, Xưởng 25-35%, Thầu phụ 10%), nhân công 8 công đoạn và bậc thang MOQ.
                 </p>
               </div>
             </div>
             <button
               type="button"
-              onClick={handleExportProjectCutlist}
+              onClick={() => exportCostingSheetExcel(projectName, projectVersionNo, clientName, parametricCosting)}
               className="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer"
             >
               <Download className="w-4 h-4" />
-              <span>Tải Excel Cutlist CNC</span>
+              <span>Tải Excel Costing Sheet</span>
             </button>
           </div>
 

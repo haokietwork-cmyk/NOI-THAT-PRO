@@ -16,7 +16,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "NỘI THẤT PRO - Dự Toán & Báo Giá Xưởng Tự Động",
-  description: "Nền tảng bóc tách Cutlist Excel, tính khối lượng ván, mét dài chỉ, xuất bảng vật tư xưởng và báo giá khách hàng A4 chuyên nghiệp.",
+  description: "Nền tảng chiết tính giá vốn đa tầng, báo giá nhanh thông số Costing V2, xuất bảng vật tư xưởng và báo giá khách hàng A4 chuyên nghiệp.",
 };
 
 export default function RootLayout({

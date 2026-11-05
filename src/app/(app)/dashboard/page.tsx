@@ -131,15 +131,15 @@ export default function DashboardPage() {
         <div className="max-w-2xl space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
             <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-            <span>Nền tảng dự toán & bóc tách gỗ công nghiệp chuẩn xưởng</span>
+            <span>Nền tảng chiết tính &amp; báo giá nội thất thông minh chuẩn xưởng</span>
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Một đầu vào {WORKSHOP_TERMS.cutlist.labelWithOriginal} Excel, hai đầu ra tự động.
+            Báo giá nhanh, chính xác &amp; thực dụng trong 3 phút.
           </h1>
 
           <p className="text-sm text-slate-600 leading-relaxed">
-            Quy đổi tự động khổ ván tiêu chuẩn 1220x2440mm, tính chính xác mét dài chỉ dán cạnh PVC và xuất bản báo giá A4 chuyên nghiệp có logo riêng của xưởng.
+            Chọn loại sản phẩm, nhập quy cách phủ bì W × D × H và thông số vật liệu để tự động sinh bảng chiết tính giá vốn (Costing Sheet) đa tầng và xuất báo giá khách hàng chuyên nghiệp.
           </p>
 
           <div className="pt-2 flex flex-wrap gap-3">
@@ -148,7 +148,7 @@ export default function DashboardPage() {
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-xs text-white bg-amber-500 hover:bg-amber-600 shadow-sm shadow-amber-500/20 transition"
             >
               <Plus className="w-4 h-4" />
-              <span>Bóc tách dự án mới (/quoting)</span>
+              <span>Báo giá dự án mới (/quoting)</span>
             </Link>
 
             <Link
@@ -224,7 +224,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2">
             <FileSpreadsheet className="w-4 h-4 text-amber-600" />
             <h2 className="font-bold text-slate-900 text-sm">
-              Danh sách dự án đã bóc tách
+              Danh sách dự án &amp; Báo giá
             </h2>
             <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">
               {filteredProjects.length === projects.length
@@ -265,7 +265,7 @@ export default function DashboardPage() {
               <option value="oldest">Cũ nhất trước</option>
               <option value="quote_desc">Giá trị cao nhất</option>
               <option value="quote_asc">Giá trị thấp nhất</option>
-              <option value="items_desc">Nhiều chi tiết tấm nhất</option>
+              <option value="items_desc">Nhiều hạng mục nhất</option>
             </select>
 
             {/* Nút bật tắt Phễu Lọc mở rộng */}
@@ -374,7 +374,7 @@ export default function DashboardPage() {
                 className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Bóc tách {WORKSHOP_TERMS.cutlist.label} đầu tiên</span>
+                <span>Tạo báo giá đầu tiên</span>
               </Link>
             </div>
           ) : filteredProjects.length === 0 ? (
@@ -434,7 +434,7 @@ export default function DashboardPage() {
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 mt-1">
-                    Khách: <strong className="text-slate-700 font-medium">{prj.clientName}</strong> • {new Date(prj.createdAt).toLocaleDateString("vi-VN")} • {prj.items?.length || 0} chi tiết tấm
+                    Khách: <strong className="text-slate-700 font-medium">{prj.clientName}</strong> • {new Date(prj.createdAt).toLocaleDateString("vi-VN")} • {prj.items?.length || 0} hạng mục
                   </p>
                 </div>
 
@@ -451,7 +451,7 @@ export default function DashboardPage() {
                       href={`/quoting?id=${prj.id}`}
                       className="px-3.5 py-2 text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg transition"
                     >
-                      Mở dự toán
+                      Mở báo giá
                     </Link>
 
                     <button

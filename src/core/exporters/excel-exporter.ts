@@ -6,6 +6,7 @@
 import * as XLSX from "xlsx";
 import { WorkshopBOMBoard, WorkshopBOMEdge, CutlistItem } from "@/core/calculations/quote-engine";
 import type { WorkshopCostConfig } from "@/core/types";
+import type { GeneratedCostingResult } from "@/core/calculations/parametric-types";
 
 /**
  * Xuất file Excel Bảng Tổng Hợp Vật Tư Xưởng (BOM)
@@ -230,4 +231,91 @@ export function exportMaterialsTemplateExcel() {
   const ws = XLSX.utils.json_to_sheet(templateData);
   XLSX.utils.book_append_sheet(wb, ws, "Mau_Don_Gia_Vat_Tu");
   XLSX.writeFile(wb, "Mau_Bang_Gia_Vat_Tu_Xuong.xlsx");
+}
+
+/**
+ * Xuất file Excel Costing Sheet V2 chuẩn PTC
+ */
+export function exportCostingSheetExcel(
+  projectName: string,
+  versionNo: number = 1,
+  clientName: string = "",
+  costing: GeneratedCostingResult
+) {
+  const wb = XLSX.utils.book_new();
+
+  // 1. Sheet Tổng Hợp Chi Phí (Cost Summary)
+  const summaryRows = [
+    { "Hạng Mục Chi Phí": "Tên Dự Án", "Giá Trị": projectName },
+    { "Hạng Mục Chi Phí": "Khách Hàng", "Giá Trị": clientName || "Khách Hàng" },
+    { "Hạng Mục Chi Phí": "Phiên Bản", "Giá Trị": `v${versionNo}` },
+    { "Hạng Mục Chi Phí": "Độ Tin Cậy", "Giá Trị": `${costing.confidence.stars} Sao (${costing.confidence.label})` },
+    { "Hạng Mục Chi Phí": "----------------------------------------", "Giá Trị": "--------------------" },
+    { "Hạng Mục Chi Phí": "1. Mặt đá tự nhiên / nhân tạo (Stone) [no OH 0%]", "Giá Trị": costing.summary.stone },
+    { "Hạng Mục Chi Phí": "2. Bọc nệm / Da / Vải / Đan mây (Upholstery)", "Giá Trị": costing.summary.upholstery },
+    { "Hạng Mục Chi Phí": "3. Khung kim loại gia công ngoài (Metal-S)", "Giá Trị": costing.summary.metalFrameS },
+    { "Hạng Mục Chi Phí": "4. Gia công ngoài / Thầu phụ (Sub.Con)", "Giá Trị": costing.summary.subContract },
+    { "Hạng Mục Chi Phí": "5. Gỗ & Ván công nghiệp (Wood/Board)", "Giá Trị": costing.summary.wood },
+    { "Hạng Mục Chi Phí": "6. Khung kim loại tự sản xuất (Metal-P)", "Giá Trị": costing.summary.metalFrameP },
+    { "Hạng Mục Chi Phí": "7. Kính / Gương / Cánh kính (Glass)", "Giá Trị": costing.summary.glass },
+    { "Hạng Mục Chi Phí": "8. Sơn / Hóa chất / Hoàn thiện (Chemical)", "Giá Trị": costing.summary.chemical },
+    { "Hạng Mục Chi Phí": "9. Phụ kiện kim khí: Bản lề, ray, LED (Hardware)", "Giá Trị": costing.summary.hardware },
+    { "Hạng Mục Chi Phí": "10. Chỉ dán cạnh & Vật tư tiêu hao (Consumables)", "Giá Trị": costing.summary.consumables },
+    { "Hạng Mục Chi Phí": "11. Đóng gói & Vận chuyển (Packing & Delivery)", "Giá Trị": costing.summary.packingDelivery },
+    { "Hạng Mục Chi Phí": "12. Chi phí nhân công trực tiếp (Labour Total)", "Giá Trị": costing.summary.laborCostTotal },
+    { "Hạng Mục Chi Phí": "========================================", "Giá Trị": "====================" },
+    { "Hạng Mục Chi Phí": "TỔNG VẬT TƯ & NHÂN CÔNG TRỰC TIẾP (L&M)", "Giá Trị": costing.summary.totalDirectLM },
+    { "Hạng Mục Chi Phí": `• OH Xưởng sản xuất (${(costing.summary.ohWorkshopRate * 100).toFixed(0)}%)`, "Giá Trị": costing.summary.ohWorkshopAmount },
+    { "Hạng Mục Chi Phí": `• OH Gia công kết hợp (${(costing.summary.ohSubcontractRate * 100).toFixed(0)}%)`, "Giá Trị": costing.summary.ohSubcontractAmount },
+    { "Hạng Mục Chi Phí": "• Đá mặt bếp/bàn (no OH 0%)", "Giá Trị": 0 },
+    { "Hạng Mục Chi Phí": "TỔNG CHI PHÍ CHUNG (OH)", "Giá Trị": costing.summary.totalOH },
+    { "Hạng Mục Chi Phí": "========================================", "Giá Trị": "====================" },
+    { "Hạng Mục Chi Phí": "GIÁ VỐN TOÀN DIỆN (COGS = L&M + OH)", "Giá Trị": costing.summary.cogs },
+    { "Hạng Mục Chi Phí": `Lợi Nhuận Mục Tiêu (${(costing.summary.profitRate * 100).toFixed(0)}%)`, "Giá Trị": costing.summary.profitAmount },
+    { "Hạng Mục Chi Phí": "========================================", "Giá Trị": "====================" },
+    { "Hạng Mục Chi Phí": "GIÁ BÁN ĐỀ XUẤT (SALES PRICE)", "Giá Trị": costing.summary.calculateSalesPrice },
+  ];
+  const wsSummary = XLSX.utils.json_to_sheet(summaryRows);
+  XLSX.utils.book_append_sheet(wb, wsSummary, "Cost_Summary");
+
+  // 2. Sheet Bậc Số Lượng MOQ (MOQ Tiers)
+  const moqRows = Object.entries(costing.summary.moqPrices || {}).map(([qty, price]) => ({
+    "Số Lượng (MOQ)": Number(qty),
+    "Đơn Giá Bán Đề Xuất (VNĐ)": price,
+    "Tổng Thành Tiền (VNĐ)": price * Number(qty),
+  }));
+  const wsMoq = XLSX.utils.json_to_sheet(moqRows);
+  XLSX.utils.book_append_sheet(wb, wsMoq, "MOQ_Tiers");
+
+  // 3. Sheet Nhân Công Theo Bộ Phận (Labour)
+  const labourRows = costing.labourDepts.map((l) => ({
+    "Công Đoạn": l.name,
+    "Bộ Phận": l.department,
+    "Số Giờ Công (Hours)": l.hours,
+    "Đơn Giá Giờ (VNĐ/h)": l.hourlyRate,
+    "Thành Tiền Nhân Công (VNĐ)": l.totalAmount,
+  }));
+  const wsLabour = XLSX.utils.json_to_sheet(labourRows);
+  XLSX.utils.book_append_sheet(wb, wsLabour, "Labour_Depts");
+
+  // 4. Sheet Chi Tiết MaterialLabor
+  const mlRows = costing.materialsLabor.map((m, idx) => ({
+    "STT": idx + 1,
+    "Khối": m.block,
+    "Tên Chi Tiết / Vật Tư": m.name,
+    "Mô Tả / Quy Cách": m.description,
+    "Dài (mm)": m.lengthMm || 0,
+    "Rộng (mm)": m.widthMm || 0,
+    "Dày (mm)": m.thicknessMm || 0,
+    "Số Lượng": m.qty,
+    "Đơn Vị": m.unit,
+    "Đơn Giá (VNĐ)": m.unitPrice,
+    "Hệ Số Hao Hụt": m.wasteFactor,
+    "Thành Tiền (VNĐ)": m.totalAmount,
+  }));
+  const wsML = XLSX.utils.json_to_sheet(mlRows);
+  XLSX.utils.book_append_sheet(wb, wsML, "MaterialLabor_Detail");
+
+  const safeName = projectName.replace(/[^a-zA-Z0-9_\u00C0-\u024F\u1E00-\u1EFF]/g, "_");
+  XLSX.writeFile(wb, `Costing_Sheet_${safeName}_v${versionNo}.xlsx`);
 }
