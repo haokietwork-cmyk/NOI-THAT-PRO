@@ -4,6 +4,21 @@
  * Độc lập hoàn toàn với file Cutlist tấm lẻ; tính toán từ Bảng câu hỏi thông số (Costing V2)
  */
 
+export type {
+  CostGroupConfig,
+  DynamicQuestionField,
+  DeclarativeLineRule,
+  AdhocCostLine,
+  BaseDimensionContext,
+  CostingArchetypeDefinition,
+  ResolvedOpenCostLine,
+  DynamicCostSummary,
+  OverheadTier,
+  LineRoundingMode,
+} from "./open-schema-types.ts";
+
+import type { AdhocCostLine } from "./open-schema-types.ts";
+
 export type ProductArchetype =
   | "wardrobe"       // Tủ áo (kịch trần / lửng)
   | "kitchen_base"   // Tủ bếp dưới
@@ -50,6 +65,7 @@ export interface CostingQuestionnaire {
   materials: MaterialAnswers;
   details?: DetailAnswers;
   calcMode: "detail" | "quick"; // "detail": bung đủ từng dòng | "quick": ước nhanh theo nhóm
+  adhocLines?: AdhocCostLine[]; // Dòng vật tư / công đoạn tự do người dùng thêm tay (Open Schema)
 }
 
 export interface MaterialLaborRow {
@@ -106,6 +122,7 @@ export interface CostSummary {
   profitAmount: number;      // Lợi nhuận gộp
   calculateSalesPrice: number; // Giá bán đề xuất (Sales Price = COGS + Profit)
   moqPrices: Record<number, number>; // Bảng giá theo bậc MOQ: { 1: price, 5: price, 10: price }
+  customGroups?: Record<string, number>; // Các nhóm chi phí mở rộng từ Adhoc Lines
 }
 
 export type ConfidenceStars = 1 | 2 | 3 | 4 | 5;
@@ -124,6 +141,7 @@ export interface GeneratedCostingResult {
   materialsLabor: MaterialLaborRow[];
   labourDepts: LabourDeptRow[];
   confidence: ConfidenceRating;
+  adhocLines?: AdhocCostLine[];
   drivers: {
     boardAreaNetM2: number;
     boardAreaGrossM2: number;

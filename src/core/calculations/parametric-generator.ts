@@ -16,6 +16,7 @@ import type {
 } from "./parametric-types.ts";
 import type { MaterialItem } from "../types/index.ts";
 import { STANDARD_BOARD } from "./board-calculator.ts";
+import { evaluateMathExpression, buildDimensionContext } from "./declarative-resolver.ts";
 
 export interface GeneratorOptions {
   workshopOhRate?: number;     // Tỷ lệ OH Xưởng (mặc định 25% = 0.25)
@@ -644,6 +645,60 @@ export function generateCostingFromQuestionnaire(
   const laborCostTotal = cncCost + assCost + sprayCost + installCost;
 
   // ==========================================================================
+  // GIẢI PHÓNG OPEN SCHEMA: XỬ LÝ CÁC DÒNG AD-HOC DO NGƯỜI DÙNG THÊM TỰ DO
+  // ==========================================================================
+  const customGroups: Record<string, number> = {};
+  let adhocDirectLM = 0;
+  let adhocWorkshopOH = 0;
+  let adhocSubcontractOH = 0;
+
+  if (q.adhocLines && q.adhocLines.length > 0) {
+    const dimCtx = buildDimensionContext(q.dimensions, {
+      ...q.materials,
+      ...q.details,
+      drawerCount,
+      doorCount,
+    });
+
+    for (const adhoc of q.adhocLines) {
+      const rawQty = typeof adhoc.quantityOrExpression === "number"
+        ? adhoc.quantityOrExpression
+        : evaluateMathExpression(adhoc.quantityOrExpression, dimCtx);
+
+      if (rawQty <= 0) continue;
+
+      const wasteRate = Math.max(0, adhoc.wasteRate || 0);
+      const effectiveQty = Number((rawQty * (1 + wasteRate)).toFixed(3));
+      const lineCost = Math.round(effectiveQty * adhoc.unitPrice);
+
+      adhocDirectLM += lineCost;
+      customGroups[adhoc.costGroupKey] = (customGroups[adhoc.costGroupKey] || 0) + lineCost;
+
+      const tier = adhoc.overheadTierOverride || "workshop_full";
+      let ohAmt = 0;
+      if (tier === "workshop_full") {
+        ohAmt = Math.round(lineCost * ohWorkshopRate);
+        adhocWorkshopOH += ohAmt;
+      } else if (tier === "subcon_light") {
+        ohAmt = Math.round(lineCost * ohSubcontractRate);
+        adhocSubcontractOH += ohAmt;
+      }
+
+      materialsLabor.push({
+        id: adhoc.lineId || `adhoc_${materialsLabor.length}`,
+        block: (adhoc.blockName as any) || "Custom",
+        name: adhoc.description,
+        description: `Mã nhóm: ${adhoc.costGroupKey} | ĐVT: ${adhoc.unit}`,
+        qty: rawQty,
+        unit: adhoc.unit,
+        unitPrice: adhoc.unitPrice,
+        wasteFactor: 1 + wasteRate,
+        totalAmount: lineCost,
+      });
+    }
+  }
+
+  // ==========================================================================
   // BẢNG TỔNG HỢP CHI PHÍ — COST SUMMARY (THEO CHUẨN PTC)
   // ==========================================================================
   const woodTotal = carcassWoodCost + frontsWoodCost + backWoodCost;
@@ -661,17 +716,18 @@ export function generateCostingFromQuestionnaire(
     hardwareCost +
     consumablesTotal +
     packingDeliveryCost +
-    laborCostTotal;
+    laborCostTotal +
+    adhocDirectLM;
 
-  // OH Xưởng (áp cho nhóm làm tại xưởng: Gỗ + Sơn + Tiêu hao + Nhân công)
+  // OH Xưởng (áp cho nhóm làm tại xưởng: Gỗ + Sơn + Tiêu hao + Nhân công + Adhoc workshop_full)
   const workshopBasis = woodTotal + paintChemicalCost + consumablesTotal + laborCostTotal;
-  const ohWorkshopAmount = Math.round(workshopBasis * ohWorkshopRate);
+  const ohWorkshopAmount = Math.round(workshopBasis * ohWorkshopRate) + adhocWorkshopOH;
 
-  // OH Gia công ngoài (áp cho nhóm thầu phụ: Khung sắt + Bọc nệm + Acrylic + Kính)
+  // OH Gia công ngoài (áp cho nhóm thầu phụ: Khung sắt + Bọc nệm + Acrylic + Kính + Adhoc subcon_light)
   const subcontractBasis = metalCost + upholsteryCost + subConAcrylicCost + glassCost;
-  const ohSubcontractAmount = Math.round(subcontractBasis * ohSubcontractRate);
+  const ohSubcontractAmount = Math.round(subcontractBasis * ohSubcontractRate) + adhocSubcontractOH;
 
-  // Đá: 0% OH (no OH)
+  // Đá & Adhoc exempt_no_oh: 0% OH (no OH)
   const totalOH = ohWorkshopAmount + ohSubcontractAmount;
   const cogs = totalDirectLM + totalOH;
   const profitAmount = Math.round(cogs * profitRate);
@@ -709,6 +765,7 @@ export function generateCostingFromQuestionnaire(
     profitAmount,
     calculateSalesPrice,
     moqPrices,
+    customGroups,
   };
 
   // ==========================================================================
@@ -722,6 +779,7 @@ export function generateCostingFromQuestionnaire(
     materialsLabor,
     labourDepts,
     confidence,
+    adhocLines: q.adhocLines,
     drivers: {
       boardAreaNetM2: Number((carcassAreaNetM2 + woodFrontsAreaM2).toFixed(2)),
       boardAreaGrossM2: Number(((carcassAreaNetM2 + woodFrontsAreaM2) * 1.15).toFixed(2)),

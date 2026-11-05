@@ -263,6 +263,12 @@ export function exportCostingSheetExcel(
     { "Hạng Mục Chi Phí": "10. Chỉ dán cạnh & Vật tư tiêu hao (Consumables)", "Giá Trị": costing.summary.consumables },
     { "Hạng Mục Chi Phí": "11. Đóng gói & Vận chuyển (Packing & Delivery)", "Giá Trị": costing.summary.packingDelivery },
     { "Hạng Mục Chi Phí": "12. Chi phí nhân công trực tiếp (Labour Total)", "Giá Trị": costing.summary.laborCostTotal },
+    ...(costing.summary.customGroups
+      ? Object.entries(costing.summary.customGroups).map(([k, v]) => ({
+          "Hạng Mục Chi Phí": `+ Nhóm Tự Do (Adhoc): ${k.toUpperCase()}`,
+          "Giá Trị": v,
+        }))
+      : []),
     { "Hạng Mục Chi Phí": "========================================", "Giá Trị": "====================" },
     { "Hạng Mục Chi Phí": "TỔNG VẬT TƯ & NHÂN CÔNG TRỰC TIẾP (L&M)", "Giá Trị": costing.summary.totalDirectLM },
     { "Hạng Mục Chi Phí": `• OH Xưởng sản xuất (${(costing.summary.ohWorkshopRate * 100).toFixed(0)}%)`, "Giá Trị": costing.summary.ohWorkshopAmount },

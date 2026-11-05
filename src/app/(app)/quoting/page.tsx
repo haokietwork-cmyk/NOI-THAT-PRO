@@ -77,6 +77,8 @@ import type {
   LabourDeptRow,
   CostSummary,
   ConfidenceStars,
+  AdhocCostLine,
+  OverheadTier,
 } from "@/core/calculations/parametric-types";
 import {
   evaluateConfidence as evaluateConfidenceHelper,
@@ -176,6 +178,64 @@ function QuotingWorkspace() {
 
   const [inputTab, setInputTab] = useState<"questionnaire" | "detailed_parts">("questionnaire");
   const [costingActiveTab, setCostingActiveTab] = useState<"summary" | "material_labor" | "labour" | "moq" | "similar">("summary");
+
+  // Open Schema: Quản lý các dòng chi phí / vật tư tự do (Ad-hoc Lines - Quy tắc #14)
+  const [showAdhocForm, setShowAdhocForm] = useState(false);
+  const [newAdhocLine, setNewAdhocLine] = useState<Partial<AdhocCostLine>>({
+    blockName: "CustomStructure",
+    costGroupKey: "custom_group",
+    overheadTierOverride: "workshop_full",
+    description: "",
+    unit: "m2",
+    quantityOrExpression: 1,
+    unitPrice: 150000,
+    wasteRate: 0.1,
+    saveToLibrary: false,
+  });
+
+  const handleAddAdhocLine = () => {
+    if (!newAdhocLine.description?.trim()) {
+      showToast("Vui lòng nhập tên/mô tả dòng vật tư mở rộng!", "error");
+      return;
+    }
+    const adhocItem: AdhocCostLine = {
+      lineId: `adhoc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      blockName: newAdhocLine.blockName || "CustomStructure",
+      costGroupKey: newAdhocLine.costGroupKey || "custom_group",
+      overheadTierOverride: (newAdhocLine.overheadTierOverride as OverheadTier) || "workshop_full",
+      description: newAdhocLine.description.trim(),
+      unit: newAdhocLine.unit || "m2",
+      quantityOrExpression: newAdhocLine.quantityOrExpression ?? 1,
+      unitPrice: Number(newAdhocLine.unitPrice) || 0,
+      wasteRate: Number(newAdhocLine.wasteRate) || 0,
+      saveToLibrary: Boolean(newAdhocLine.saveToLibrary),
+    };
+    setQuestionnaire((prev) => ({
+      ...prev,
+      adhocLines: [...(prev.adhocLines || []), adhocItem],
+    }));
+    setNewAdhocLine({
+      blockName: "CustomStructure",
+      costGroupKey: "custom_group",
+      overheadTierOverride: "workshop_full",
+      description: "",
+      unit: "m2",
+      quantityOrExpression: 1,
+      unitPrice: 150000,
+      wasteRate: 0.1,
+      saveToLibrary: false,
+    });
+    setShowAdhocForm(false);
+    showToast(`Đã thêm dòng mở rộng: ${adhocItem.description}!`, "success");
+  };
+
+  const handleRemoveAdhocLine = (lineId: string) => {
+    setQuestionnaire((prev) => ({
+      ...prev,
+      adhocLines: (prev.adhocLines || []).filter((l) => l.lineId !== lineId),
+    }));
+    showToast("Đã xóa dòng chi phí tự do!");
+  };
 
   // Động cơ tính toán Costing V2 từ Bảng câu hỏi thông số
   const parametricCosting = useMemo<GeneratedCostingResult>(() => {
@@ -1906,6 +1966,246 @@ function QuotingWorkspace() {
                   </div>
                 </div>
 
+                {/* KHỐI 4: VẬT LIỆU & CHI PHÍ MỞ RỘNG TỰ DO (OPEN SCHEMA - QUY TẮC #14) */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-emerald-600 text-white font-black text-xs flex items-center justify-center">
+                        4
+                      </span>
+                      <div>
+                        <h3 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                          <span>Vật liệu &amp; Chi phí mở rộng tự do</span>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold">
+                            Open Schema
+                          </span>
+                        </h3>
+                        <p className="text-[11px] text-slate-500">
+                          Thêm bất kỳ vật tư, kết cấu lạ hoặc công đoạn đặc thù (Mây tre, Resin, Sơn hiệu ứng, Ray điện từ...)
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowAdhocForm(!showAdhocForm)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition shadow-xs cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Thêm dòng tự do</span>
+                    </button>
+                  </div>
+
+                  {/* Danh sách các dòng Ad-hoc hiện có */}
+                  {questionnaire.adhocLines && questionnaire.adhocLines.length > 0 ? (
+                    <div className="space-y-2">
+                      {questionnaire.adhocLines.map((line) => (
+                        <div
+                          key={line.lineId}
+                          className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs"
+                        >
+                          <div className="space-y-0.5">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-900">{line.description}</span>
+                              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-200 text-slate-700 font-semibold">
+                                {line.blockName}
+                              </span>
+                              <span className={`text-[10px] font-semibold px-1.5 py-0.2 rounded border ${
+                                line.overheadTierOverride === "exempt_no_oh"
+                                  ? "bg-amber-50 text-amber-700 border-amber-200 font-bold"
+                                  : line.overheadTierOverride === "subcon_light"
+                                  ? "bg-blue-50 text-blue-700 border-blue-200"
+                                  : "bg-slate-100 text-slate-700 border-slate-300"
+                              }`}>
+                                {line.overheadTierOverride === "exempt_no_oh"
+                                  ? "Miễn OH (0%)"
+                                  : line.overheadTierOverride === "subcon_light"
+                                  ? "OH Thầu phụ (10%)"
+                                  : "OH Xưởng (25%)"}
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-slate-500 font-mono">
+                              SL: <strong>{String(line.quantityOrExpression)}</strong> {line.unit} · Đơn giá: <strong>{formatVND(line.unitPrice)}</strong> · Hao hụt: +{((line.wasteRate || 0) * 100).toFixed(0)}%
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveAdhocLine(line.lineId)}
+                            className="p-1.5 text-slate-400 hover:text-rose-600 transition cursor-pointer"
+                            title="Xóa dòng này"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center rounded-xl border border-dashed border-slate-200 bg-slate-50/50 text-xs text-slate-500">
+                      Chưa có dòng vật liệu mở rộng. Bấm <strong className="text-emerald-700 font-semibold">[Thêm dòng tự do]</strong> nếu sản phẩm có kết cấu hoặc phụ kiện nằm ngoài mẫu.
+                    </div>
+                  )}
+
+                  {/* Form thêm Ad-hoc Line mới */}
+                  {showAdhocForm && (
+                    <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/30 space-y-3 animate-in fade-in duration-150 text-xs">
+                      <div className="font-bold text-slate-900 text-xs flex items-center justify-between">
+                        <span>Nhập thông số vật liệu / chi phí tự do mới:</span>
+                        <button
+                          type="button"
+                          onClick={() => setShowAdhocForm(false)}
+                          className="text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
+                        >
+                          ✕ Đóng
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                            Tên vật liệu / Công đoạn (*):
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="VD: Mây mắt cáo tự nhiên đan cánh..."
+                            value={newAdhocLine.description || ""}
+                            onChange={(e) => setNewAdhocLine({ ...newAdhocLine, description: e.target.value })}
+                            className="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-emerald-500 font-medium"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                            Khối hiển thị (Block):
+                          </label>
+                          <select
+                            value={newAdhocLine.blockName || "CustomStructure"}
+                            onChange={(e) => setNewAdhocLine({ ...newAdhocLine, blockName: e.target.value })}
+                            className="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-emerald-500 font-medium"
+                          >
+                            <option value="CustomStructure">CustomStructure (Kết cấu mở rộng)</option>
+                            <option value="Carcass">Carcass (Thùng tủ)</option>
+                            <option value="Fronts">Fronts (Cánh tủ &amp; Mặt tiền)</option>
+                            <option value="Hardware">Hardware (Phụ kiện)</option>
+                            <option value="Finishing">Finishing (Sơn / Hoàn thiện)</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                            Nhóm chi phí (Cost Group Key):
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="VD: rattan, smart_led, cnc_stone..."
+                            value={newAdhocLine.costGroupKey || "custom_group"}
+                            onChange={(e) => setNewAdhocLine({ ...newAdhocLine, costGroupKey: e.target.value })}
+                            className="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-mono focus:outline-none focus:border-emerald-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                            Mức tính chi phí chung (Overhead Tier):
+                          </label>
+                          <select
+                            value={newAdhocLine.overheadTierOverride || "workshop_full"}
+                            onChange={(e) => setNewAdhocLine({ ...newAdhocLine, overheadTierOverride: e.target.value as OverheadTier })}
+                            className="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:border-emerald-500"
+                          >
+                            <option value="workshop_full">workshop_full — Chịu OH Xưởng (25–35%)</option>
+                            <option value="subcon_light">subcon_light — Chịu OH Thầu phụ (5–10%)</option>
+                            <option value="exempt_no_oh">exempt_no_oh — Miễn OH (0% - Giá trị cao)</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                            ĐVT &amp; Số lượng / Biểu thức:
+                          </label>
+                          <div className="grid grid-cols-2 gap-2">
+                            <input
+                              type="text"
+                              placeholder="ĐVT: m2, md, tấm, bộ..."
+                              value={newAdhocLine.unit || "m2"}
+                              onChange={(e) => setNewAdhocLine({ ...newAdhocLine, unit: e.target.value })}
+                              className="p-2 bg-white border border-slate-200 rounded-lg text-xs text-center"
+                            />
+                            <input
+                              type="text"
+                              placeholder="SL hoặc FACE_AREA*0.5"
+                              value={newAdhocLine.quantityOrExpression ?? 1}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                const num = Number(val);
+                                setNewAdhocLine({
+                                  ...newAdhocLine,
+                                  quantityOrExpression: isNaN(num) || val.trim() === "" ? val : num,
+                                });
+                              }}
+                              className="p-2 bg-white border border-slate-200 rounded-lg text-xs font-mono text-right"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                            Đơn giá (VNĐ) &amp; Hao hụt (%):
+                          </label>
+                          <div className="grid grid-cols-2 gap-2">
+                            <input
+                              type="number"
+                              min={0}
+                              step={5000}
+                              placeholder="Đơn giá VNĐ"
+                              value={newAdhocLine.unitPrice || 0}
+                              onChange={(e) => setNewAdhocLine({ ...newAdhocLine, unitPrice: Number(e.target.value) })}
+                              className="p-2 bg-white border border-slate-200 rounded-lg text-xs font-mono text-right"
+                            />
+                            <input
+                              type="number"
+                              min={0}
+                              max={1}
+                              step={0.05}
+                              placeholder="0.1 = 10%"
+                              value={newAdhocLine.wasteRate ?? 0.1}
+                              onChange={(e) => setNewAdhocLine({ ...newAdhocLine, wasteRate: Number(e.target.value) })}
+                              className="p-2 bg-white border border-slate-200 rounded-lg text-xs font-mono text-right"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2">
+                        <label className="flex items-center gap-2 cursor-pointer text-[11px] text-slate-600">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(newAdhocLine.saveToLibrary)}
+                            onChange={(e) => setNewAdhocLine({ ...newAdhocLine, saveToLibrary: e.target.checked })}
+                            className="rounded text-emerald-600 focus:ring-emerald-500"
+                          />
+                          <span>Lưu vật tư mới này vào Thư viện đơn giá xưởng</span>
+                        </label>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setShowAdhocForm(false)}
+                            className="px-3 py-1.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 rounded-lg font-semibold cursor-pointer"
+                          >
+                            Hủy
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleAddAdhocLine}
+                            className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-xs cursor-pointer"
+                          >
+                            Xác nhận thêm
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
               </div>
 
               {/* CỘT PHẢI: CHECKLIST 3 TRẠNG THÁI & ĐIỀU KHIỂN (4 CỘT - STICKY) */}
@@ -1974,6 +2274,16 @@ function QuotingWorkspace() {
                       </span>
                       <strong className="font-mono">
                         {questionnaire.details?.drawerCount ?? "Auto"} NK · {questionnaire.details?.doorCount ?? "Auto"} Cánh
+                      </strong>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200">
+                      <span className="font-semibold text-slate-700 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                        Vật liệu mở rộng:
+                      </span>
+                      <strong className="text-slate-800 font-mono">
+                        {questionnaire.adhocLines?.length || 0} dòng tự do
                       </strong>
                     </div>
                   </div>
@@ -3043,6 +3353,29 @@ function QuotingWorkspace() {
                           </tr>
                         );
                       })}
+                      {parametricCosting.summary.customGroups &&
+                        Object.entries(parametricCosting.summary.customGroups).map(([groupKey, amount], idx) => {
+                          const pct = parametricCosting.summary.cogs > 0
+                            ? ((amount / parametricCosting.summary.cogs) * 100).toFixed(1)
+                            : "0.0";
+                          return (
+                            <tr key={`cg_${idx}`} className="hover:bg-slate-50/60 bg-emerald-50/20">
+                              <td className="p-2.5 font-bold text-emerald-950 flex items-center gap-1.5">
+                                <span>{groupKey}</span>
+                                <span className="px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 text-[9px] font-mono font-bold">Open Schema</span>
+                              </td>
+                              <td className="p-2.5 text-slate-500 text-[11px]">
+                                Nhóm chi phí mở rộng theo Quy tắc #14
+                              </td>
+                              <td className="p-2.5 text-right font-mono font-bold text-emerald-900">
+                                {formatVND(amount)}
+                              </td>
+                              <td className="p-2.5 text-right font-mono text-emerald-800">
+                                {pct}%
+                              </td>
+                            </tr>
+                          );
+                        })}
                       <tr className="bg-amber-50/40 font-semibold">
                         <td className="p-2.5 text-amber-900">+ OH Xưởng ({((parametricCosting.summary.ohWorkshopRate) * 100).toFixed(0)}%)</td>
                         <td className="p-2.5 text-amber-800 text-[11px]">Khấu hao máy CNC, nhà xưởng, điện 3 pha áp cho nhóm nội bộ</td>
@@ -3093,7 +3426,14 @@ function QuotingWorkspace() {
                               {row.block}
                             </span>
                           </td>
-                          <td className="p-2.5 font-bold text-slate-800">{row.name}</td>
+                          <td className="p-2.5 font-bold text-slate-800">
+                            <span>{row.name}</span>
+                            {row.id.startsWith("adhoc_") && (
+                              <span className="ml-2 px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                Tự do / Adhoc
+                              </span>
+                            )}
+                          </td>
                           <td className="p-2.5 text-[11px] text-slate-500">{row.description}</td>
                           <td className="p-2.5 text-center text-slate-500">{row.unit}</td>
                           <td className="p-2.5 text-right font-mono font-semibold text-slate-800">
@@ -3112,6 +3452,22 @@ function QuotingWorkspace() {
                       ))}
                     </tbody>
                   </table>
+                  <div className="p-3 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-[11px] text-slate-500">
+                      Tổng {parametricCosting.materialsLabor.length} dòng định mức ({questionnaire.adhocLines?.length || 0} dòng mở rộng tự do)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCurrentStep(1);
+                        setShowAdhocForm(true);
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl transition shadow-2xs cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>+ Thêm dòng chi phí tự do (Open Schema)</span>
+                    </button>
+                  </div>
                 </div>
               )}
 

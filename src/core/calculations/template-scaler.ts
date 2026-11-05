@@ -78,6 +78,21 @@ export function scaleFromTemplate(
   const newVol = (wNew * dNew * hNew) / 1_000_000_000;
   const volumeRatio = oldVol > 0 ? newVol / oldVol : widthRatio * depthRatio * heightRatio;
 
+  // Sao chép và bảo toàn các dòng Adhoc Lines từ mẫu lịch sử nếu có (Open Schema)
+  if (template.questionnaire?.adhocLines && template.questionnaire.adhocLines.length > 0) {
+    if (!targetQuestionnaire.adhocLines) {
+      targetQuestionnaire.adhocLines = [...template.questionnaire.adhocLines];
+    } else {
+      // Merge không trùng lineId
+      const existingIds = new Set(targetQuestionnaire.adhocLines.map((l) => l.lineId));
+      for (const line of template.questionnaire.adhocLines) {
+        if (!existingIds.has(line.lineId)) {
+          targetQuestionnaire.adhocLines.push(line);
+        }
+      }
+    }
+  }
+
   // Sử dụng parametric-generator với thông số mới, đánh dấu nguồn gốc dựng từ mẫu
   const baseCosting = generateCostingFromQuestionnaire(
     targetQuestionnaire,
