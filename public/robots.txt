@@ -1,0 +1,11 @@
+User-agent: *
+Disallow: /dashboard/
+Disallow: /projects/
+Disallow: /materials/
+Disallow: /settings/
+Disallow: /my-assets/
+Disallow: /api/
+# Chỉ cho phép index trang chủ và trang giới thiệu công khai
+Allow: /
+Allow: /login
+Allow: /quoting?demo=true

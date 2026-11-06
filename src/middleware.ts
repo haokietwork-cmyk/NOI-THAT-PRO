@@ -26,12 +26,18 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
+  const { pathname } = request.nextUrl;
+  const isProtected = PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+
   // Nếu chưa cấu hình Supabase (Chế độ Demo / Offline), cho phép truy cập cục bộ
   if (
     !supabaseUrl ||
     !supabaseAnonKey ||
     supabaseUrl === "your_supabase_project_url_here"
   ) {
+    if (isProtected) {
+      response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+    }
     return response;
   }
 
@@ -68,13 +74,11 @@ export async function middleware(request: NextRequest) {
 
   const effectiveUser = user || localUser;
 
-  const { pathname } = request.nextUrl;
   const origin = request.nextUrl.origin;
 
   // 1. Kiểm tra Route bảo vệ (Protected Route)
   // Ngoại lệ duy nhất: Cho phép dùng thử bóc tách với dữ liệu mẫu 48 tấm (?demo=true) mà không cần đăng nhập
   const isDemoQuoting = pathname === "/quoting" && request.nextUrl.searchParams.get("demo") === "true";
-  const isProtected = PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
   if (isProtected && !effectiveUser && !isDemoQuoting) {
     const redirectUrl = new URL("/login", origin);
     redirectUrl.searchParams.set("redirectTo", pathname);
@@ -85,6 +89,11 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = AUTH_ROUTES.some((route) => pathname === route);
   if (isAuthRoute && effectiveUser) {
     return NextResponse.redirect(new URL("/dashboard", origin));
+  }
+
+  // 3. Chặn crawler/bot quét hoặc lưu cache các trang nội bộ xưởng
+  if (isProtected) {
+    response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
   }
 
   return response;
