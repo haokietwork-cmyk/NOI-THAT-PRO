@@ -14,13 +14,13 @@ export const WORKSHOP_TERMS = {
   // 1. Costing Sheet -> Bảng chiết tính giá vốn
   costingSheet: {
     label: "Bảng chiết tính giá vốn",
-    labelWithOriginal: "Bảng chiết tính giá vốn (Costing Sheet)",
+    labelWithOriginal: "Bảng chiết tính giá vốn",
     shortExplanation: "Bảng phân tích giá vốn đa tầng chuẩn xưởng: Vật tư, nhân công trực tiếp (L&M), chi phí chung (OH) và giá bán đề xuất.",
   },
   cutlist: {
-    label: "Chiết tính giá vốn",
-    labelWithOriginal: "Chiết tính giá vốn (Costing Sheet)",
-    shortExplanation: "Bảng phân tích giá vốn đa tầng chuẩn xưởng: Vật tư, nhân công trực tiếp (L&M), chi phí chung (OH) và giá bán đề xuất.",
+    label: "Chi tiết cấu kiện sản phẩm",
+    labelWithOriginal: "Chi tiết cấu kiện sản phẩm",
+    shortExplanation: "Bảng phân tích chi tiết quy cách từng cấu kiện: Kích thước, vật liệu, dán cạnh và số lượng.",
   },
 
   // 2. BOM -> Bảng đặt vật tư
@@ -33,7 +33,7 @@ export const WORKSHOP_TERMS = {
   // 3. Markup -> Lãi trên giá vốn
   markup: {
     label: "Lãi trên giá vốn",
-    labelWithOriginal: "Lãi trên giá vốn (Markup)",
+    labelWithOriginal: "Lãi trên giá vốn",
     shortExplanation: "Tỷ lệ phần trăm cộng thêm trên tổng giá vốn để cấu thành giá chào khách hàng (Ví dụ: x1.65 tương ứng lãi 65% trên giá vốn).",
   },
 
@@ -60,23 +60,23 @@ export const WORKSHOP_TERMS = {
 
   // 7. Input Modes
   questionnaireMode: {
-    label: "Báo giá thông số",
-    labelWithOriginal: "Báo giá thông số nhanh (Costing V2)",
-    shortExplanation: "Nhập quy cách sản phẩm Rộng × Sâu × Cao và chọn vật liệu để tự động sinh chiết tính giá vốn trong 30 giây.",
+    label: "Báo giá theo thông số",
+    labelWithOriginal: "Báo giá theo thông số quy cách",
+    shortExplanation: "Nhập quy cách sản phẩm Rộng × Sâu × Cao và chọn vật liệu để tự động sinh chiết tính giá vốn nhanh và chính xác.",
   },
   cutlistMode: {
-    label: "Báo giá thông số",
-    labelWithOriginal: "Báo giá thông số nhanh (Costing V2)",
-    shortExplanation: "Nhập quy cách sản phẩm Rộng × Sâu × Cao và chọn vật liệu để tự động sinh chiết tính giá vốn trong 30 giây.",
+    label: "Chi tiết cấu kiện",
+    labelWithOriginal: "Chi tiết cấu kiện sản phẩm",
+    shortExplanation: "Phân tích quy cách chi tiết từng cấu kiện: Ván, chỉ dán cạnh, phụ kiện kim khí.",
   },
   quickModuleMode: {
     label: "Báo giá nhanh",
-    labelWithOriginal: "Báo giá nhanh theo m² / mét dài (Quick Mode)",
+    labelWithOriginal: "Báo giá nhanh theo m² / mét dài",
     shortExplanation: "Dự toán sơ bộ khối lượng theo diện tích m² hoặc mét dài tủ khi chưa có bản vẽ chi tiết.",
   },
   manualLinesMode: {
     label: "Dòng nhập tay",
-    labelWithOriginal: "Dòng chi phí nhập tay (Manual Lines)",
+    labelWithOriginal: "Dòng chi phí nhập tay",
     shortExplanation: "Bổ sung linh hoạt các hạng mục mua ngoài, thầu phụ đá/kính, thiết bị bếp và vận chuyển.",
   },
 
