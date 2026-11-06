@@ -82,7 +82,9 @@ export async function middleware(request: NextRequest) {
   if (isProtected && !effectiveUser && !isDemoQuoting) {
     const redirectUrl = new URL("/login", origin);
     redirectUrl.searchParams.set("redirectTo", pathname);
-    return NextResponse.redirect(redirectUrl);
+    const redirectResponse = NextResponse.redirect(redirectUrl);
+    redirectResponse.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+    return redirectResponse;
   }
 
   // 2. Nếu đã đăng nhập mà truy cập trang đăng nhập/đăng ký -> chuyển sang Dashboard
