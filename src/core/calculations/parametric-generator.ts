@@ -769,9 +769,50 @@ export function generateCostingFromQuestionnaire(
   };
 
   // ==========================================================================
-  // THANG ĐO ĐỘ TIN CẬY (CONFIDENCE STARS: 1 - 5 SAO)
+  // THANG ĐO ĐỘ TIN CẬY (CONFIDENCE STARS: 1 - 5 SAO) & DỰ PHÒNG RỦI RO
   // ==========================================================================
   const confidence = evaluateConfidence(q, summary);
+
+  // 4 Mức độ báo giá (1: Khoảng giá bao, 2: Mẫu kết cấu sinh BOM giả định, 3: Mẫu lịch sử, 4: BOM chi tiết)
+  const estimationLevel = q.estimationLevel || (q.calcMode === "quick" ? 1 : 2);
+
+  // Danh sách các giả định kỹ thuật hiển thị sát cạnh giá (Assumptions Checklist)
+  const assumptions: string[] = [
+    `Thùng kết cấu: ${q.materials.coreCode || "MDF chống ẩm"} tiêu chuẩn xưởng`,
+    `Hoàn thiện bề mặt: ${q.materials.surfaceCode || "Melamine kháng trầy"}`,
+    `Ván hậu tủ: ${q.materials.backPanelCode || "MDF 6mm chống ẩm giấu rãnh âm"}`,
+    `Phụ kiện định mức: Giả định ${doorCount} cánh cửa và ${drawerCount} hộc kéo ray âm giảm chấn`,
+  ];
+
+  if (q.materials.hasStone) {
+    assumptions.push(`Mặt đá: ${q.materials.stoneType || "Đá tự nhiên"} (Nhóm 0% Overhead nhạy cảm giá)`);
+  }
+  if (q.materials.hasGlass) {
+    assumptions.push("Cánh kính: Khung nhôm Anode Slim 16mm kèm kính cường lực an toàn");
+  }
+  if (q.materials.hasMetal) {
+    assumptions.push("Khung kim loại: Sắt sơn tĩnh điện hoặc Inox 304 mạ PVD");
+  }
+  if (q.materials.hasUpholstery) {
+    assumptions.push("Bọc nệm: Mút foam D40 đàn hồi cao chống lún xẹp");
+  }
+  if (q.materials.hasLed) {
+    assumptions.push("Hệ thống điện: Đèn LED thanh nhôm hắt sáng kèm bộ nguồn hạ áp 12V");
+  }
+
+  // Tỷ lệ dự phòng rủi ro kỹ thuật khi còn ở mức sơ bộ (Contingency Buffer)
+  const contingencyRate = estimationLevel === 1 ? 0.10 : estimationLevel === 2 ? 0.05 : estimationLevel === 3 ? 0.05 : 0;
+  const contingencyAmount = Math.round(cogs * contingencyRate);
+
+  // Khoảng giá dao động (Price Range) cho Mức 1
+  const baseRangeCenter = calculateSalesPrice + contingencyAmount;
+  const priceMin = Math.round((baseRangeCenter * 0.85) / 1000) * 1000;
+  const priceMax = Math.round((baseRangeCenter * 1.15) / 1000) * 1000;
+  const priceRange = {
+    min: priceMin,
+    max: priceMax,
+    formatted: `${priceMin.toLocaleString("vi-VN")} đ - ${priceMax.toLocaleString("vi-VN")} đ`,
+  };
 
   return {
     questionnaire: q,
@@ -780,6 +821,11 @@ export function generateCostingFromQuestionnaire(
     labourDepts,
     confidence,
     adhocLines: q.adhocLines,
+    estimationLevel,
+    assumptions,
+    contingencyRate,
+    contingencyAmount,
+    priceRange,
     drivers: {
       boardAreaNetM2: Number((carcassAreaNetM2 + woodFrontsAreaM2).toFixed(2)),
       boardAreaGrossM2: Number(((carcassAreaNetM2 + woodFrontsAreaM2) * 1.15).toFixed(2)),

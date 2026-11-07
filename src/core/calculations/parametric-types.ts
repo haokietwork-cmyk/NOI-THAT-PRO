@@ -57,6 +57,12 @@ export interface DetailAnswers {
   moqTiers?: number[];       // Các bậc số lượng (vd [1, 5, 10, 20])
 }
 
+export type EstimationLevel = 1 | 2 | 3 | 4;
+// Level 1: rough_range (giá khoảng từ kích thước bao ±15-20%)
+// Level 2: archetype_draft_bom (chọn mẫu kết cấu, tự sinh chi tiết giả định)
+// Level 3: historical_scale (lấy từ báo giá cũ tương tự co giãn)
+// Level 4: production_bom (BOM chi tiết sản xuất đầy đủ từ CAD / nhập tay)
+
 export interface CostingQuestionnaire {
   id?: string;
   productType: ProductArchetype;
@@ -65,6 +71,7 @@ export interface CostingQuestionnaire {
   materials: MaterialAnswers;
   details?: DetailAnswers;
   calcMode: "detail" | "quick"; // "detail": bung đủ từng dòng | "quick": ước nhanh theo nhóm
+  estimationLevel?: EstimationLevel; // Mức độ báo giá từ 1 đến 4
   adhocLines?: AdhocCostLine[]; // Dòng vật tư / công đoạn tự do người dùng thêm tay (Open Schema)
 }
 
@@ -142,6 +149,15 @@ export interface GeneratedCostingResult {
   labourDepts: LabourDeptRow[];
   confidence: ConfidenceRating;
   adhocLines?: AdhocCostLine[];
+  estimationLevel?: EstimationLevel;
+  assumptions?: string[];          // Danh sách giả định kỹ thuật hiển thị sát cạnh giá
+  contingencyRate?: number;        // Tỷ lệ dự phòng rủi ro khi thiếu chi tiết (vd 0.10 cho Mức 1, 0.05 cho Mức 2)
+  contingencyAmount?: number;      // Số tiền dự phòng rủi ro bảo vệ lợi nhuận
+  priceRange?: {
+    min: number;                   // Giá sàn dao động
+    max: number;                   // Giá trần dao động (vd ±15%)
+    formatted: string;             // Chuỗi hiển thị khoảng giá: vd "14.500.000 đ - 17.500.000 đ"
+  };
   drivers: {
     boardAreaNetM2: number;
     boardAreaGrossM2: number;
