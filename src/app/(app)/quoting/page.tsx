@@ -101,6 +101,8 @@ import {
   type SimilarProjectItem,
 } from "@/core/calculations/template-scaler";
 import { trackFunnelEvent } from "@/core/monitoring/telemetry";
+import ProductArchetypeSelector from "@/core/components/ProductArchetypeSelector";
+import { PRODUCT_ARCHETYPES_CATALOG, type ProductArchetypeItem } from "@/core/data/productArchetypesCatalog";
 
 function QuotingWorkspace() {
   const router = useRouter();
@@ -185,6 +187,73 @@ function QuotingWorkspace() {
       moqTiers: [1, 5, 10, 20],
     },
   });
+
+  const [selectedArchetypeId, setSelectedArchetypeId] = useState<string>("wardrobe_master");
+
+  const handleArchetypeSelect = (item: ProductArchetypeItem) => {
+    setSelectedArchetypeId(item.id);
+
+    let baseArchetype: ProductArchetype = "custom";
+    if (item.id.includes("wardrobe")) baseArchetype = "wardrobe";
+    else if (item.id.includes("kitchen_base")) baseArchetype = "kitchen_base";
+    else if (item.id.includes("kitchen_upper")) baseArchetype = "kitchen_upper";
+    else if (item.id.includes("bed")) baseArchetype = "bed";
+    else if (item.id.includes("table") || item.id.includes("desk")) baseArchetype = "table";
+    else if (item.id.includes("tv_shelf")) baseArchetype = "tv_shelf";
+    else if (item.id.includes("shoe_cabinet")) baseArchetype = "shoe_cabinet";
+    else if (item.id.includes("vanity")) baseArchetype = "vanity";
+    else if (item.id.includes("wall_panel")) baseArchetype = "wall_panel";
+
+    setQuestionnaire((prev) => ({
+      ...prev,
+      productType: baseArchetype,
+      name: item.name,
+      dimensions: {
+        ...prev.dimensions,
+        widthMm: item.defaultDimensions.widthMm,
+        depthMm: item.defaultDimensions.depthMm,
+        heightMm: item.defaultDimensions.heightMm,
+      },
+      materials: {
+        ...prev.materials,
+        coreCode: item.defaultCoreCode || prev.materials.coreCode,
+        surfaceCode: item.defaultSurfaceCode || prev.materials.surfaceCode,
+        hasStone: item.defaultFlags.hasStone,
+        stoneType: item.defaultFlags.stoneType || prev.materials.stoneType,
+        hasGlass: item.defaultFlags.hasGlass,
+        hasMetal: item.defaultFlags.hasMetal,
+        hasUpholstery: item.defaultFlags.hasUpholstery,
+        hasLed: item.defaultFlags.hasLed,
+      },
+    }));
+  };
+
+  useEffect(() => {
+    const archetypeParam = searchParams.get("archetype");
+    const wParam = searchParams.get("w");
+    const dParam = searchParams.get("d");
+    const hParam = searchParams.get("h");
+
+    if (archetypeParam) {
+      const match = PRODUCT_ARCHETYPES_CATALOG.find(
+        (p) => p.id === archetypeParam || p.id.includes(archetypeParam)
+      );
+      if (match) {
+        handleArchetypeSelect(match);
+      }
+    }
+    if (wParam || dParam || hParam) {
+      setQuestionnaire((prev) => ({
+        ...prev,
+        dimensions: {
+          ...prev.dimensions,
+          widthMm: wParam ? Number(wParam) : prev.dimensions.widthMm,
+          depthMm: dParam ? Number(dParam) : prev.dimensions.depthMm,
+          heightMm: hParam ? Number(hParam) : prev.dimensions.heightMm,
+        },
+      }));
+    }
+  }, [searchParams]);
 
   const [inputTab, setInputTab] = useState<"questionnaire" | "detailed_parts">("questionnaire");
   const [costingActiveTab, setCostingActiveTab] = useState<"summary" | "material_labor" | "labour" | "moq" | "similar">("summary");
@@ -1440,53 +1509,16 @@ function QuotingWorkspace() {
                     </span>
                   </div>
 
-                  {/* Lựa chọn loại sản phẩm (Product Archetype) */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-700 block">
-                      Loại sản phẩm nội thất:
-                    </label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 text-xs">
-                      {[
-                        { type: "wardrobe", label: "Tủ áo", icon: DoorClosed, desc: "Kịch trần / lửng" },
-                        { type: "kitchen_base", label: "Tủ bếp dưới", icon: CookingPot, desc: "Thùng chậu / bếp" },
-                        { type: "kitchen_upper", label: "Tủ bếp trên", icon: Layers, desc: "Treo tường" },
-                        { type: "bed", label: "Giường ngủ", icon: Bed, desc: "Ngăn kéo / nệm" },
-                        { type: "table", label: "Bàn ăn / Bàn", icon: Table, desc: "Bàn làm việc" },
-                        { type: "tv_shelf", label: "Kệ Tivi", icon: Tv, desc: "Tủ thấp trang trí" },
-                        { type: "wall_panel", label: "Vách ốp tường", icon: Grid, desc: "Lam sóng / phẳng" },
-                        { type: "shoe_cabinet", label: "Tủ giày", icon: Archive, desc: "Cánh nghiêng / phẳng" },
-                        { type: "vanity", label: "Tủ Lavabo", icon: Bath, desc: "Chống nước" },
-                        { type: "custom", label: "Tùy chỉnh", icon: Box, desc: "Hạng mục tự do" },
-                      ].map((item) => {
-                        const isSelected = questionnaire.productType === item.type;
-                        const Icon = item.icon;
-                        return (
-                          <button
-                            key={item.type}
-                            type="button"
-                            onClick={() =>
-                              setQuestionnaire((prev) => ({
-                                ...prev,
-                                productType: item.type as ProductArchetype,
-                                name: `${item.label} tiêu chuẩn`,
-                              }))
-                            }
-                            className={`p-2.5 rounded-lg border text-left transition flex flex-col justify-between cursor-pointer ${
-                              isSelected
-                                ? "bg-slate-900 border-slate-900 text-white font-medium shadow-2xs"
-                                : "bg-white border-slate-200 hover:border-slate-300 text-slate-700 hover:bg-slate-50"
-                            }`}
-                          >
-                            <div className="flex items-center justify-between w-full mb-1.5">
-                              <Icon className={`w-4 h-4 ${isSelected ? "text-amber-400" : "text-slate-500"}`} />
-                            </div>
-                            <span className="font-semibold block truncate text-xs">{item.label}</span>
-                            <span className={`text-[10px] block truncate ${isSelected ? "text-slate-300" : "text-slate-400"}`}>{item.desc}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
+                  {/* Lựa chọn loại sản phẩm nội thất đa dòng hàng & tìm kiếm thông minh */}
+                  <ProductArchetypeSelector
+                    selectedArchetypeId={selectedArchetypeId}
+                    onSelectArchetype={handleArchetypeSelect}
+                    onCustomTextChange={(text) => {
+                      if (text.trim()) {
+                        setQuestionnaire((prev) => ({ ...prev, name: text }));
+                      }
+                    }}
+                  />
 
                   {/* Kích thước phủ bì Rộng × Sâu × Cao */}
                   <div className="space-y-2 pt-2">
