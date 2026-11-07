@@ -58,3 +58,26 @@
   - `npx tsc --noEmit` -> exit code 0
   - `npm test` -> exit code 0 (132/132 tests pass)
   - `npm run build` -> exit code 0 (30/30 routes pass, bao gồm `/api/ai/estimate`)
+
+---
+
+## Bước 4 — Nâng Cấp Giao Diện Web & Sơ Đồ Vận Hành Toàn Diện — 2026-11-07
+- **Đã làm:**
+  - Tái thiết kế toàn diện trang chủ `src/app/(public)/page.tsx` theo chuẩn Thẩm mỹ kỹ thuật xưởng mộc (Technical Wood Palette: Slate 50, lưới blueprint 24px, viền Slate 200, Amber 600, Emerald 600, Sky 600, font Inter + JetBrains Mono tabular-nums). Nghiêm cấm 100% AI slop (không 3D tilt, không nền đen neon, không hạt lơ lửng, không chữ cực quang).
+  - Tích hợp **CostingSandboxWidget** trực tiếp vào Hero:
+    + 5 Archetypes đa dòng hàng đại diện: Tủ áo MDF chống ẩm Melamine, Bàn ăn Gỗ Sồi Bắc Mỹ FAS, Bàn trà Mặt đá Onyx chân đồng (Đá 0% OH + Ant-Marb 3.42x), Cửa lùa Slim nhôm kính 16mm, Ghế Lounge da bò Ý.
+    + 3 thanh trượt tham số (W x D x H) và bộ chọn bậc thang số lượng MOQ (1 / 5 / 10 / 20).
+    + Các con số Giá vốn (COGS), Giá bán khách, Biên lãi %, Quy cách vật tư & Số giờ công lao động nhảy số mượt mà theo thời gian thực (Reactive numbers tabular-nums).
+    + Tính năng mở/gập xem phân rã chi phí chi tiết 4 nhóm (Vật liệu, Nhân công, Overhead, Hao hụt).
+  - Xây dựng **OperationalWorkflowDiagram**:
+    + Sơ đồ vận hành 4 giai đoạn tương tác: 01. Đầu vào đa dạng (W×D×H vs BOM) -> 02. Động cơ tính toán kép (`panel_cnc` & `export_furniture`) + Trợ lý Gemini AI -> 03. Một đầu vào, hai đầu ra (Xưởng Excel & Khách A4 PDF) -> 04. 4 Trụ cột hậu báo giá.
+  - Xây dựng **Bento Grid 4 Trụ Cột Nghiệp Vụ** (Houzz Pro for Vietnam):
+    + 1. Financial & Costing Suite (37 công đoạn thực tế, 15 nhóm chi phí).
+    + 2. Selections Portal (Cổng duyệt mẫu vật tư online qua di động).
+    + 3. Change Orders (Phiếu phát sinh thi công ký số trên màn hình cảm ứng).
+    + 4. Client Portal (Cổng tra cứu tiến độ thi công & nghiệm thu theo SĐT).
+  - Xây dựng mục **Accordion FAQ** (shadcn pattern): Giải tỏa 5 thắc mắc thực tế của xưởng (Đa dòng hàng, bảo mật giá vốn, ký số trên di động, Snapshot giá bất biến, vai trò của Gemini AI).
+- **Kiểm tra đã chạy:**
+  - `npx tsc --noEmit` -> exit code 0
+  - `npm test` -> exit code 0 (132/132 tests pass)
+  - `npm run build` -> exit code 0 (30/30 static & dynamic routes pass)

@@ -4,17 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { 
   FileSpreadsheet, 
-  Printer, 
   ArrowRight, 
   ShieldCheck, 
   Layers, 
-  FileText, 
-  Download, 
   CheckCircle2, 
   ChevronRight, 
   TrendingUp, 
-  Lock, 
-  Building2, 
   Check, 
   User, 
   Menu, 
@@ -23,21 +18,61 @@ import {
   Boxes,
   LayoutDashboard,
   Plus,
-  Wrench,
   Clock,
   LogOut,
   ShoppingBag,
+  Sliders,
+  Smartphone,
+  PenTool,
+  Sparkles,
+  HelpCircle,
+  ChevronDown,
+  ChevronUp,
+  Cpu
 } from "lucide-react";
 import TechnicalHandbookModal from "@/core/components/TechnicalHandbookModal";
+import CostingSandboxWidget from "@/core/components/CostingSandboxWidget";
+import OperationalWorkflowDiagram from "@/core/components/OperationalWorkflowDiagram";
 import { useAuth } from "@/core/store/useAuth";
-import { WORKSHOP_TERMS } from "@/core/constants/terms";
+
+// Accordion FAQ items
+const FAQ_ITEMS = [
+  {
+    id: "multi-trade",
+    question: "Hệ thống có bị bó hẹp trong ván MDF 1220×2440 cố định không?",
+    answer: "Hoàn toàn không. Nền tảng được thiết kế cho xưởng sản xuất hiện đại đa dòng hàng: hỗ trợ đồng thời ván gỗ công nghiệp (MDF, Plywood, HDF, MFC khổ tiêu chuẩn & Jumbo), gỗ tự nhiên nguyên khối (Sồi, Tần bì, Óc chó sấy), mặt đá tự nhiên & nhân tạo (Onyx, Marble, Granite với cơ chế 0% Overhead nhạy cảm giá), nhôm kính kiến trúc và sofa da bọc nệm thủ công.",
+  },
+  {
+    id: "cost-secrecy",
+    question: "Báo giá gửi cho khách hàng có nguy cơ bị lộ giá vốn nội bộ không?",
+    answer: "Tuyệt đối an toàn. Hệ thống áp dụng triết lý 'Một đầu vào, hai đầu ra'. Khi xuất Báo giá khách hàng (bản in PDF chuẩn A4), hệ thống tự động ẩn sạch toàn bộ thông số chi tiết tấm lẻ, định mức hao hụt phôi cưa và công thức giá vốn nội bộ. Chỉ có chủ xưởng và quản đốc mới xem được Bảng bóc tách giá vốn chi tiết (COGS) và tải bảng đặt hàng xưởng (.xlsx).",
+  },
+  {
+    id: "mobile-signing",
+    question: "Khách hàng có thể ký duyệt phát sinh hay duyệt mẫu trên điện thoại mà không cần cài app không?",
+    answer: "Có. Cổng duyệt mẫu Selections Portal và Phiếu phát sinh Change Orders được gửi cho khách hàng qua đường link bảo mật độc lập, giao diện tối ưu 100% cho màn hình điện thoại cảm ứng (iOS & Android). Chủ nhà chỉ cần bấm vào link, xem ảnh swatch mã màu ván/da/đá, rồi ký tay trực tiếp lên màn hình điện thoại để xác nhận.",
+  },
+  {
+    id: "snapshot-pricing",
+    question: "Đơn giá vật tư trên thị trường thay đổi thì các dự án cũ đã lưu có bị nhảy số không?",
+    answer: "Không bao giờ. Hệ thống ứng dụng công nghệ Snapshot Pricing bất biến: Mỗi khi một dự án hoặc báo giá được tạo ra, hệ thống sao chép một bản chụp đơn giá độc lập tại ngày tạo. Dù sau này bạn cập nhật đơn giá thị trường trong Thư viện, mọi hồ sơ hợp đồng cũ đã chốt với khách hàng vẫn giữ nguyên 100% số liệu lịch sử.",
+  },
+  {
+    id: "gemini-ai-role",
+    question: "Trợ lý Google Gemini AI đóng vai trò gì và có tự ý quyết định giá bán không?",
+    answer: "Toàn bộ công thức tính giá, tỷ lệ hao hụt, Overhead xưởng và lợi nhuận đều do động cơ toán học (deterministic) thực hiện theo quy tắc của xưởng, AI tuyệt đối không bao giờ được tự quyết định giá tiền. Trợ lý Gemini AI chỉ đóng vai trò hỗ trợ khi bạn nhập một quy cách lạ ngoài danh mục hoặc cần ước tính nhanh khi chưa có bản vẽ chi tiết; mọi kết quả do AI đề xuất đều mang nhãn 'ước tính AI chưa xác nhận' để bạn duyệt trước khi áp dụng.",
+  },
+];
 
 export default function LandingPage() {
   const { user, isAuthenticated, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showSpecHandbook, setShowSpecHandbook] = useState(false);
+  const [openFaqId, setOpenFaqId] = useState<string | null>("multi-trade");
 
-  const formatVND = (val: number) => val.toLocaleString("vi-VN") + " đ";
+  const toggleFaq = (id: string) => {
+    setOpenFaqId(openFaqId === id ? null : id);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-amber-100 selection:text-amber-900">
@@ -63,13 +98,13 @@ export default function LandingPage() {
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 font-normal -mt-0.5 whitespace-nowrap">
-                Dự toán &amp; Báo giá Xưởng Gỗ
+                Hệ Báo Giá &amp; Quản Lý Xưởng Nội Thất
               </p>
             </div>
           </Link>
 
           {/* Navigation Bar (Segmented Pill Style) */}
-          <nav className="hidden lg:flex items-center p-1 rounded-lg bg-slate-100 border border-slate-200 text-xs font-medium text-slate-600 whitespace-nowrap">
+          <nav className="hidden xl:flex items-center p-1 rounded-lg bg-slate-100 border border-slate-200 text-xs font-medium text-slate-600 whitespace-nowrap">
             <Link 
               href="/quoting" 
               className="px-3.5 py-1.5 rounded-md hover:bg-white hover:text-slate-900 hover:shadow-2xs transition"
@@ -84,6 +119,20 @@ export default function LandingPage() {
               Thư viện vật tư &amp; đơn giá
             </Link>
 
+            <a 
+              href="#workflow" 
+              className="px-3.5 py-1.5 rounded-md hover:bg-white hover:text-slate-900 hover:shadow-2xs transition"
+            >
+              Sơ đồ vận hành
+            </a>
+
+            <a 
+              href="#pillars" 
+              className="px-3.5 py-1.5 rounded-md hover:bg-white hover:text-slate-900 hover:shadow-2xs transition"
+            >
+              4 Trụ cột nghiệp vụ
+            </a>
+
             <Link 
               href="/cad-store" 
               className="px-3.5 py-1.5 rounded-md hover:bg-white hover:text-slate-900 hover:shadow-2xs transition"
@@ -92,17 +141,17 @@ export default function LandingPage() {
             </Link>
 
             <a 
-              href="#features" 
-              className="px-3.5 py-1.5 rounded-md hover:bg-white hover:text-slate-900 hover:shadow-2xs transition"
-            >
-              Quy chuẩn kỹ thuật
-            </a>
-
-            <a 
               href="#pricing" 
               className="px-3.5 py-1.5 rounded-md hover:bg-white hover:text-slate-900 hover:shadow-2xs transition"
             >
               Bảng giá dịch vụ
+            </a>
+
+            <a 
+              href="#faq" 
+              className="px-3.5 py-1.5 rounded-md hover:bg-white hover:text-slate-900 hover:shadow-2xs transition"
+            >
+              Hỏi đáp
             </a>
           </nav>
 
@@ -172,7 +221,7 @@ export default function LandingPage() {
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-1.5 rounded-lg text-slate-700 hover:bg-slate-100 transition border border-slate-200"
+              className="xl:hidden p-1.5 rounded-lg text-slate-700 hover:bg-slate-100 transition border border-slate-200"
               aria-label="Menu điều hướng"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -182,7 +231,7 @@ export default function LandingPage() {
 
         {/* Mobile Drawer Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-white border-b border-slate-200 px-5 py-4 space-y-3 shadow-xl animate-in slide-in-from-top-2 duration-150 text-xs">
+          <div className="xl:hidden bg-white border-b border-slate-200 px-5 py-4 space-y-3 shadow-xl animate-in slide-in-from-top-2 duration-150 text-xs">
             {isAuthenticated && (
               <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -232,6 +281,24 @@ export default function LandingPage() {
                 <Boxes className="w-4 h-4 text-slate-600" />
                 <span>Thư viện đơn giá xưởng</span>
               </Link>
+
+              <a 
+                href="#workflow" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2.5 rounded-lg hover:bg-slate-50 flex items-center gap-2"
+              >
+                <Layers className="w-4 h-4 text-slate-600" />
+                <span>Sơ đồ vận hành</span>
+              </a>
+
+              <a 
+                href="#pillars" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2.5 rounded-lg hover:bg-slate-50 flex items-center gap-2"
+              >
+                <ShieldCheck className="w-4 h-4 text-slate-600" />
+                <span>4 Trụ cột nghiệp vụ</span>
+              </a>
               
               <Link 
                 href="/cad-store" 
@@ -249,6 +316,15 @@ export default function LandingPage() {
               >
                 <TrendingUp className="w-4 h-4 text-slate-600" />
                 <span>Bảng giá dịch vụ</span>
+              </a>
+
+              <a 
+                href="#faq" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2.5 rounded-lg hover:bg-slate-50 flex items-center gap-2"
+              >
+                <HelpCircle className="w-4 h-4 text-slate-600" />
+                <span>Hỏi đáp</span>
               </a>
             </div>
             
@@ -275,28 +351,28 @@ export default function LandingPage() {
       </header>
 
       {/* ================================================================== */}
-      {/* HERO SECTION: THẨM MỸ KỸ THUẬT XƯỞNG MỘC (TASTE & BANNER STANDARDS)  */}
+      {/* HERO SECTION: THẨM MỸ KỸ THUẬT XƯỞNG MỘC & SANDBOX TRỰC TIẾP       */}
       {/* ================================================================== */}
-      <section className="no-print relative pt-14 pb-16 md:pt-20 md:pb-24 overflow-hidden bg-blueprint-grid border-b border-slate-200">
+      <section className="no-print relative pt-12 pb-16 md:pt-16 md:pb-20 overflow-hidden bg-blueprint-grid border-b border-slate-200">
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
           
           {/* Badge kỹ thuật định danh */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-medium bg-white border border-slate-200 text-slate-700 shadow-2xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-600" />
-            <span className="font-mono text-slate-500 text-[11px]">QUY CHUẨN KỸ THUẬT GỖ CÔNG NGHIỆP</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+            <span className="font-mono text-slate-500 text-[11px]">HỆ BÁO GIÁ ĐA DÒNG HÀNG V2.0</span>
             <span className="text-slate-300">|</span>
-            <span className="text-slate-800 font-semibold">Khổ 1220×2440 &amp; Jumbo 1830×2440</span>
+            <span className="text-slate-800 font-semibold">Ván Gỗ • Gỗ Sồi • Mặt Đá • Nhôm Kính • Sofa Da</span>
           </div>
 
           {/* H1 Headline: Đạt chuẩn 2 dòng, tự tin, không câu từ AI sáo rỗng */}
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-[1.15] max-w-4xl mx-auto">
-            Dự toán &amp; Báo giá nội thất chuẩn xưởng. <br className="hidden sm:block" />
-            <span className="text-amber-700">Chính xác giá vốn, chuyên nghiệp cho khách hàng.</span>
+            Báo giá nhanh, chính xác giá vốn xưởng. <br className="hidden sm:block" />
+            <span className="text-amber-700">Chuyên nghiệp cho khách hàng, đa dạng mọi dòng hàng.</span>
           </h1>
 
           {/* Subtitle: Trực diện vào giải pháp */}
           <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            Thiết lập nhanh quy cách sản phẩm, hệ thống tự động bóc tách chi phí ván phôi, chỉ dán cạnh, phụ kiện kim khí và nhân công. Xuất bản in báo giá A4 gửi khách trong vài phút, bảo mật tuyệt đối giá vốn nội bộ.
+            Chiết tính giá vốn toàn diện cho cả ván gỗ công nghiệp, gỗ tự nhiên khối, đá tự nhiên và kim loại. Tích hợp 37 công đoạn sản xuất thực tế, tự động xuất bản in báo giá A4 bảo mật giá vốn và bảng đặt hàng xưởng trong vài phút.
           </p>
 
           {/* Primary Action Buttons */}
@@ -343,14 +419,14 @@ export default function LandingPage() {
           </div>
 
           {/* Technical Trust Strip */}
-          <div className="pt-4 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-slate-500">
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-slate-500">
             <span className="flex items-center gap-1.5">
               <Check className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Khổ ván 1220×2440 &amp; Jumbo</span>
+              <span>Đa dòng hàng: Gỗ, Đá, Kính, Sofa</span>
             </span>
             <span className="flex items-center gap-1.5">
               <Check className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Tùy chỉnh hệ số hao hụt (+15%)</span>
+              <span>37 Công đoạn sản xuất thực tế</span>
             </span>
             <span className="flex items-center gap-1.5">
               <Check className="w-3.5 h-3.5 text-emerald-600" />
@@ -364,181 +440,143 @@ export default function LandingPage() {
         </div>
 
         {/* ================================================================ */}
-        {/* SHOWCASE MATRIX: 1 QUY CÁCH -> 2 ĐẦU RA KỸ THUẬT                  */}
+        {/* INTERACTIVE COSTING SANDBOX WIDGET (LIVE HEART OF THE PAGE)     */}
         {/* ================================================================ */}
-        <div className="mt-12 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden text-left">
-            
-            {/* Window Top Bar */}
-            <div className="bg-slate-900 px-4 py-2.5 flex items-center justify-between text-xs text-slate-300">
-              <div className="flex items-center gap-2 font-mono text-[11px]">
-                <FileSpreadsheet className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-white font-semibold">NỘI THẤT PRO</span>
-                <span className="text-slate-500">/</span>
-                <span>MÔ HÌNH DỰ TOÁN BÁO GIÁ THỰC DỤNG</span>
-              </div>
-              <span className="text-[10px] font-mono text-slate-400">
-                CHUẨN HÓA SẢN XUẤT 2026
-              </span>
-            </div>
-
-            {/* 3 Pillars */}
-            <div className="p-5 sm:p-6 grid grid-cols-1 md:grid-cols-3 gap-5 bg-slate-50/50">
-              
-              {/* Cột 1: Thông số quy cách đầu vào */}
-              <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-2xs space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                  <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wider">
-                    BƯỚC 1: QUY CÁCH
-                  </span>
-                  <span className="text-[10px] font-mono text-slate-500">Kích thước</span>
-                </div>
-                <div className="space-y-1.5 text-xs">
-                  <div className="flex justify-between py-1 border-b border-slate-50">
-                    <span className="text-slate-500">Sản phẩm:</span>
-                    <strong className="text-slate-900">Tủ áo Master kịch trần</strong>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-50">
-                    <span className="text-slate-500">Kích thước (W×D×H):</span>
-                    <strong className="text-slate-900 font-mono">1800 × 600 × 2400 mm</strong>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-50">
-                    <span className="text-slate-500">Vật liệu thùng:</span>
-                    <strong className="text-slate-900">MDF Chống ẩm 17mm</strong>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-50">
-                    <span className="text-slate-500">Vật liệu cánh:</span>
-                    <strong className="text-slate-900">MDF Phủ Melamine vân gỗ</strong>
-                  </div>
-                  <div className="flex justify-between py-1">
-                    <span className="text-slate-500">Phụ kiện:</span>
-                    <strong className="text-slate-900">Bản lề giảm chấn &amp; Ray âm</strong>
-                  </div>
-                </div>
-              </div>
-
-              {/* Cột 2: Bảng phân tích giá vốn nội bộ */}
-              <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-2xs space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                  <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">
-                    BƯỚC 2: GIÁ VỐN NỘI BỘ
-                  </span>
-                  <span className="text-[10px] font-mono text-slate-500">Dành cho xưởng</span>
-                </div>
-                <div className="space-y-1.5 text-xs font-mono">
-                  <div className="flex justify-between py-1 border-b border-slate-50">
-                    <span className="text-slate-500 font-sans">Ván thùng &amp; cánh (1220×2440):</span>
-                    <strong className="text-slate-800">14 tấm</strong>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-50">
-                    <span className="text-slate-500 font-sans">Chỉ dán cạnh PVC (+8% bo):</span>
-                    <strong className="text-slate-800">176.7 md</strong>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-50">
-                    <span className="text-slate-500 font-sans">Phụ kiện cam chốt &amp; ray:</span>
-                    <strong className="text-slate-800">32 cái / 4 bộ</strong>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-50">
-                    <span className="text-slate-500 font-sans">Nhân công thợ &amp; lắp ráp:</span>
-                    <strong className="text-slate-800">2.220.000 đ</strong>
-                  </div>
-                  <div className="flex justify-between py-1 pt-2 border-t border-slate-200 font-bold font-sans">
-                    <span className="text-slate-700">Tổng giá vốn (COGS):</span>
-                    <strong className="text-emerald-700 font-mono text-sm">16.282.000 đ</strong>
-                  </div>
-                </div>
-              </div>
-
-              {/* Cột 3: Báo giá thương mại gửi khách */}
-              <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-2xs space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                  <span className="text-[10px] font-bold text-sky-800 uppercase tracking-wider">
-                    BƯỚC 3: BÁO GIÁ KHÁCH
-                  </span>
-                  <span className="text-[10px] font-mono text-slate-500">Bản in A4</span>
-                </div>
-                <div className="space-y-1.5 text-xs">
-                  <div className="py-1 border-b border-slate-50">
-                    <strong className="block text-slate-900 font-medium">Hệ Tủ Áo Master Kịch Trần</strong>
-                    <span className="text-[11px] text-slate-500">MDF chống ẩm 17mm Melamine kháng trầy, phụ kiện đồng bộ</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-50 text-[11px]">
-                    <span className="text-slate-500">Đơn vị tính:</span>
-                    <span className="font-mono text-slate-700">1 Bộ (4.32 m²)</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-50 text-[11px]">
-                    <span className="text-slate-500">Hệ số lợi nhuận:</span>
-                    <span className="font-mono text-emerald-700 font-semibold">+65% (x1.65)</span>
-                  </div>
-                  <div className="flex justify-between py-1 pt-2 border-t border-slate-200 font-bold">
-                    <span className="text-slate-700">Báo giá đề xuất:</span>
-                    <strong className="text-amber-700 font-mono text-sm">26.865.218 đ</strong>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
+        <div className="mt-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <CostingSandboxWidget />
         </div>
       </section>
 
       {/* ================================================================== */}
-      {/* 3 GIÁ TRỊ CỐT LÕI (TECHNICAL INVARIANTS)                           */}
+      {/* SƠ ĐỒ VẬN HÀNH TOÀN DIỆN (OPERATIONAL ARCHITECTURE & WORKFLOW)     */}
       {/* ================================================================== */}
-      <section id="features" className="py-16 md:py-20 bg-white border-b border-slate-200">
+      <section id="workflow" className="py-16 md:py-20 bg-slate-50 border-b border-slate-200">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <OperationalWorkflowDiagram />
+        </div>
+      </section>
+
+      {/* ================================================================== */}
+      {/* 4 TRỤ CỘT NGHIỆP VỤ XƯỞNG NỘI THẤT (BENTO GRID - HOUZZ PRO FOR VN) */}
+      {/* ================================================================== */}
+      <section id="pillars" className="py-16 md:py-20 bg-white border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <span className="text-xs font-mono font-semibold text-slate-500 uppercase tracking-wider">
-              NGHIỆP VỤ NỘI THẤT CHUẨN XƯỞNG
+              HỆ SINH THÁI KHÉP KÍN CHO XƯỞNG SẢN XUẤT
             </span>
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
-              3 Nguyên Tắc Bảo Vệ Lợi Nhuận Xưởng Gỗ
+              4 Trụ Cột Nghiệp Vụ Bảo Vệ Lợi Nhuận
             </h2>
             <p className="text-xs sm:text-sm text-slate-500">
-              Thiết kế giải quyết triệt để các rủi ro sót giá, thiếu ván và lộ giá vốn khi làm việc trên Excel.
+              Giải quyết triệt để rủi ro sai sót giá vốn, mất lòng khách hàng và tranh chấp phát sinh công trình.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5">
             
-            {/* Feature 1 */}
-            <div className="p-6 rounded-lg bg-slate-50 border border-slate-200 shadow-2xs space-y-3">
-              <div className="w-9 h-9 rounded-md bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
-                <ShieldCheck className="w-5 h-5 text-amber-700" />
+            {/* Pillar 1: Financial & Costing Suite (Span 7 cols) */}
+            <div className="lg:col-span-7 p-6 rounded-xl bg-slate-50 border border-slate-200 shadow-2xs flex flex-col justify-between space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                    <TrendingUp className="w-5 h-5 text-emerald-700" />
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white text-emerald-800 font-bold border border-emerald-200">
+                    TRỤ CỘT 1: FINANCIAL SUITE
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-slate-900">
+                  Chiết Tính Giá Vốn Đa Ngành &amp; 37 Công Đoạn
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Không ép buộc mọi sản phẩm phải là ván hộp công nghiệp. Hệ thống phân rã chi phí thành 15 nhóm (L&amp;M, Wood, Stone, Upholstery, Metal, Glass, Packing...) cùng 37 công đoạn thực tế (RAW, CNC, Veneer, Antique, Sơn PU, Bọc đệm) kèm đơn giá 105.000 đ/giờ công có thể tinh chỉnh linh hoạt.
+                </p>
               </div>
-              <h3 className="text-base font-bold text-slate-900">
-                Bảo Vệ Bí Mật Giá Vốn
-              </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Tách biệt hoàn toàn bảng giá vốn xưởng nội bộ và báo giá khách hàng. Bản in A4 tự động ẩn thông số kỹ thuật tấm lẻ, tránh rủi ro khách hàng soi công thức giá vốn như khi gửi file Excel.
-              </p>
+
+              <div className="pt-3 border-t border-slate-200/80 flex flex-wrap gap-2 text-[11px] font-mono text-slate-600">
+                <span className="px-2 py-0.5 bg-white rounded border border-slate-200">Đá 0% OH nhạy cảm</span>
+                <span className="px-2 py-0.5 bg-white rounded border border-slate-200">Thầu phụ 10% OH</span>
+                <span className="px-2 py-0.5 bg-white rounded border border-slate-200">Xưởng 35% OH</span>
+                <span className="px-2 py-0.5 bg-white rounded border border-slate-200">Phụ phí MOQ lô nhỏ</span>
+              </div>
             </div>
 
-            {/* Feature 2 */}
-            <div className="p-6 rounded-lg bg-slate-50 border border-slate-200 shadow-2xs space-y-3">
-              <div className="w-9 h-9 rounded-md bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
-                <Boxes className="w-5 h-5 text-emerald-700" />
+            {/* Pillar 2: Selections Portal (Span 5 cols) */}
+            <div className="lg:col-span-5 p-6 rounded-xl bg-slate-50 border border-slate-200 shadow-2xs flex flex-col justify-between space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="w-9 h-9 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
+                    <Smartphone className="w-5 h-5 text-amber-700" />
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white text-amber-800 font-bold border border-amber-200">
+                    TRỤ CỘT 2: SELECTIONS
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-slate-900">
+                  Cổng Duyệt Mẫu Vật Tư Trực Tuyến
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Gửi link xem mẫu vật liệu (mã Melamine An Cường, da bò Ý, mẫu đá tự nhiên) trực tiếp qua Zalo/SMS cho chủ nhà. Khách duyệt từng mẫu trên điện thoại và ấn "Đồng ý" hoặc "Yêu cầu đổi mẫu" mà không cần đến xưởng.
+                </p>
               </div>
-              <h3 className="text-base font-bold text-slate-900">
-                Tính Đúng Hao Hụt Thực Tế
-              </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Tự động quy đổi diện tích thành số tấm ván nguyên (1220×2440 mm và Jumbo 1830×2440 mm) kèm hệ số hao hụt phôi cưa (+15%) và mét dài dán chỉ (+8% bo góc), không bao giờ lo thiếu vật tư.
-              </p>
+
+              <div className="pt-3 border-t border-slate-200/80 flex items-center justify-between text-[11px] text-slate-500">
+                <span>Không cần cài app</span>
+                <span className="font-mono text-amber-700 font-semibold">Tự động đồng bộ báo giá</span>
+              </div>
             </div>
 
-            {/* Feature 3 */}
-            <div className="p-6 rounded-lg bg-slate-50 border border-slate-200 shadow-2xs space-y-3">
-              <div className="w-9 h-9 rounded-md bg-sky-100 text-sky-800 flex items-center justify-center font-bold">
-                <Clock className="w-5 h-5 text-sky-700" />
+            {/* Pillar 3: Change Orders (Span 5 cols) */}
+            <div className="lg:col-span-5 p-6 rounded-xl bg-slate-50 border border-slate-200 shadow-2xs flex flex-col justify-between space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="w-9 h-9 rounded-lg bg-sky-100 text-sky-800 flex items-center justify-center font-bold">
+                    <PenTool className="w-5 h-5 text-sky-700" />
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white text-sky-800 font-bold border border-sky-200">
+                    TRỤ CỘT 3: CHANGE ORDERS
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-slate-900">
+                  Phiếu Phát Sinh Công Trình Ký Số
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Xóa bỏ vĩnh viễn rủi ro "làm trước rồi cãi nhau về tiền phát sinh sau". Mọi điều chỉnh về kích thước, phụ kiện hay hoàn thiện đều tạo phiếu phát sinh điện tử có chữ ký ngón tay của khách hàng ngay trên màn hình di động.
+                </p>
               </div>
-              <h3 className="text-base font-bold text-slate-900">
-                Bảo Toàn Giá Lịch Sử (Snapshot)
-              </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Mỗi công trình khi lưu trữ sẽ khóa cố định bản sao đơn giá tại ngày tạo dự án. Dù sau này giá thị trường biến động, các báo giá hợp đồng cũ mở lại vẫn giữ nguyên 100% số liệu đã chốt.
-              </p>
+
+              <div className="pt-3 border-t border-slate-200/80 flex items-center justify-between text-[11px] text-slate-500">
+                <span>Lưu vết bằng chứng pháp lý</span>
+                <span className="font-mono text-sky-700 font-semibold">Cộng trừ tiền tự động</span>
+              </div>
+            </div>
+
+            {/* Pillar 4: Client Portal (Span 7 cols) */}
+            <div className="lg:col-span-7 p-6 rounded-xl bg-slate-50 border border-slate-200 shadow-2xs flex flex-col justify-between space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-800 flex items-center justify-center font-bold">
+                    <ShieldCheck className="w-5 h-5 text-indigo-700" />
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white text-indigo-800 font-bold border border-indigo-200">
+                    TRỤ CỘT 4: CLIENT PORTAL
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-slate-900">
+                  Cổng Tra Cứu Tiến Độ Thi Công Theo Số Điện Thoại
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Chủ nhà chỉ cần nhập số điện thoại là có thể tra cứu toàn bộ tiến độ sản xuất, ảnh chụp nghiệm thu từng đợt tại xưởng, lịch giao hàng dự kiến và các đợt thanh toán theo hợp đồng. Tiết kiệm 90% thời gian thợ phải nghe điện thoại trả lời từng thắc mắc vụn vặt.
+                </p>
+              </div>
+
+              <div className="pt-3 border-t border-slate-200/80 flex flex-wrap gap-2 text-[11px] font-mono text-slate-600">
+                <span className="px-2 py-0.5 bg-white rounded border border-slate-200">Tra cứu nhanh OTP</span>
+                <span className="px-2 py-0.5 bg-white rounded border border-slate-200">Bảo mật thông tin xưởng</span>
+                <span className="px-2 py-0.5 bg-white rounded border border-slate-200">Giao diện khách hàng riêng</span>
+              </div>
             </div>
 
           </div>
@@ -546,7 +584,7 @@ export default function LandingPage() {
       </section>
 
       {/* ================================================================== */}
-      {/* KHO CÔNG CỤ AUTOCAD (.NET)                                         */}
+      {/* KHO CÔNG CỤ AUTOCAD (.NET) CHUYÊN DỤNG                             */}
       {/* ================================================================== */}
       <section id="cad-tools" className="py-16 md:py-20 bg-slate-50 border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
@@ -691,15 +729,15 @@ export default function LandingPage() {
                 <ul className="text-xs text-slate-600 space-y-2.5 pt-3 border-t border-slate-200">
                   <li className="flex items-center gap-2">
                     <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>Lập báo giá theo quy cách thông số</span>
+                    <span>Lập báo giá nhanh theo quy cách W×D×H</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>Quy đổi số tấm ván khổ chuẩn 1220×2440 mm</span>
+                    <span>Dự toán đa dòng hàng: Ván, Sồi, Đá, Sofa</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>Hệ số hao hụt ván tiêu chuẩn (+15%)</span>
+                    <span>Hệ số hao hụt tiêu chuẩn theo ngành</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
@@ -739,13 +777,17 @@ export default function LandingPage() {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>Tùy chỉnh thư viện đơn giá xưởng riêng</span>
+                    <span>Thư viện 612 mã vật tư &amp; 37 công đoạn thực tế</span>
                   </li>
                   <li className="flex items-center gap-2 font-medium">
                     <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                     <span><strong>Xuất PDF A4</strong> kèm Logo &amp; Hotline xưởng</span>
                   </li>
                   <li className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>Tải bảng đặt hàng xưởng Excel (.xlsx)</span>
+                  </li>
+                  <li className="flex items-center gap-2 font-medium">
                     <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                     <span>Bảo lưu giá vốn Snapshot chống biến động giá</span>
                   </li>
@@ -765,6 +807,56 @@ export default function LandingPage() {
             </div>
 
           </div>
+        </div>
+      </section>
+
+      {/* ================================================================== */}
+      {/* HỎI ĐÁP THƯỜNG GẶP (SHADCN ACCORDION PATTERN - FAQ)               */}
+      {/* ================================================================== */}
+      <section id="faq" className="py-16 md:py-20 bg-slate-50 border-b border-slate-200">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          
+          <div className="text-center max-w-xl mx-auto space-y-2">
+            <span className="text-xs font-mono font-semibold text-slate-500 uppercase tracking-wider">
+              GIẢI ĐÁP THẮC MẮC
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+              Câu Hỏi Thường Gặp Của Chủ Xưởng
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500">
+              Mọi thắc mắc về tính bảo mật, đa dòng hàng và cách thức vận hành thực tế tại xưởng mộc.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100 shadow-2xs overflow-hidden">
+            {FAQ_ITEMS.map((item) => {
+              const isOpen = openFaqId === item.id;
+              return (
+                <div key={item.id} className="transition-colors">
+                  <button
+                    type="button"
+                    onClick={() => toggleFaq(item.id)}
+                    className="w-full px-5 py-4 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-slate-50/70 transition"
+                  >
+                    <span className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
+                      <HelpCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span>{item.question}</span>
+                    </span>
+                    <span className="p-1 rounded bg-slate-100 text-slate-500 shrink-0">
+                      {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </span>
+                  </button>
+
+                  {isOpen && (
+                    <div className="px-5 pb-5 pt-1 text-xs text-slate-600 leading-relaxed border-t border-slate-50 bg-slate-50/30 animate-in fade-in duration-150">
+                      {item.answer}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
         </div>
       </section>
 
