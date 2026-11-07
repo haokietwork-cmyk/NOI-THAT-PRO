@@ -77,7 +77,7 @@ export default function SettingsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Form Cài đặt */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-6">
+        <div className="lg:col-span-2 bg-white rounded-lg border border-slate-200 p-6 shadow-2xs space-y-6">
           <form onSubmit={handleSave} className="space-y-4 text-xs">
             <div>
               <label className="font-semibold text-slate-700 block mb-1">
@@ -188,7 +188,7 @@ export default function SettingsPage() {
             <span>Xem trước Header Báo giá A4</span>
           </div>
 
-          <div className="bg-white rounded-2xl border-2 border-slate-300 p-5 shadow-sm space-y-4 text-xs">
+          <div className="bg-white rounded-lg border border-slate-200 p-5 shadow-2xs space-y-4 text-xs">
             <div className="pb-4 border-b border-slate-200 space-y-1">
               <strong className="block font-black text-slate-900 text-sm uppercase tracking-tight">
                 {name || "TÊN XƯỞNG SẢN XUẤT"}
@@ -202,7 +202,7 @@ export default function SettingsPage() {
               </p>
             </div>
 
-            <div className="p-3 bg-slate-50 rounded-xl text-[11px] text-slate-500 space-y-1">
+            <div className="p-3 bg-slate-50 rounded-md text-[11px] text-slate-500 space-y-1">
               <span className="font-bold text-slate-700 block">Điều khoản in kèm:</span>
               <p className="italic">
                 &ldquo;{quoteTerms || "Chưa thiết lập điều khoản báo giá..."}&rdquo;

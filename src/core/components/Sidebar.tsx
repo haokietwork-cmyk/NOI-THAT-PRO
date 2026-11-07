@@ -142,42 +142,42 @@ export default function Sidebar({ onCloseMobile }: SidebarProps = {}) {
         )}
       </div>
 
-      {/* Thông số kỹ thuật xưởng */}
+      {/* Thông số & Năng lực báo giá xưởng */}
       <div className="m-3 p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs space-y-2">
         <div className="flex items-center justify-between pb-1.5 border-b border-slate-200">
           <span className="font-semibold text-slate-700 text-[11px]">
-            Định Mức Xưởng Tiêu Chuẩn
+            Hệ Báo Giá Đa Ngành
           </span>
           <span className="text-[10px] text-slate-500 font-mono">
-            CNC
+            V2.0
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 text-[11px]">
+        <div className="space-y-1.5 text-[11px]">
           <div>
-            <span className="text-slate-500 block text-[10px]">Khổ ván:</span>
-            <span className="font-medium text-slate-900 font-mono">1220 × 2440 mm</span>
+            <span className="text-slate-500 block text-[10px]">Dòng hàng hỗ trợ:</span>
+            <span className="font-medium text-slate-900 block truncate">
+              Gỗ CN • Cánh Kính • Nhựa • Gỗ TN • Nệm
+            </span>
           </div>
-          <div>
-            <span className="text-slate-500 block text-[10px]">Mạch cưa:</span>
-            <span className="font-medium text-slate-900 font-mono">3.2 mm</span>
-          </div>
-          <div>
-            <span className="text-slate-500 block text-[10px]">Hao hụt ván:</span>
-            <span className="font-medium text-slate-900 font-mono">+15% (1.15)</span>
-          </div>
-          <div>
-            <span className="text-slate-500 block text-[10px]">Hao hụt chỉ:</span>
-            <span className="font-medium text-slate-900 font-mono">+8% (1.08)</span>
+          <div className="grid grid-cols-2 gap-2 pt-0.5">
+            <div>
+              <span className="text-slate-500 block text-[10px]">Phương pháp:</span>
+              <span className="font-medium text-slate-900 font-mono">W×D×H phủ bì</span>
+            </div>
+            <div>
+              <span className="text-slate-500 block text-[10px]">Độ tin cậy:</span>
+              <span className="font-medium text-emerald-700 font-mono">Sai số &lt; 1%</span>
+            </div>
           </div>
         </div>
 
         <div className="pt-1.5 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-500">
-          <span>Trạng thái:</span>
+          <span>Trạng thái xưởng:</span>
           {isAuthenticated ? (
             <span className="font-medium text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
               <ShieldCheck className="w-3 h-3 text-emerald-700" />
-              Đã xác thực
+              Đã kích hoạt
             </span>
           ) : (
             <span className="font-medium text-slate-600 bg-white px-1.5 py-0.5 rounded border border-slate-200">

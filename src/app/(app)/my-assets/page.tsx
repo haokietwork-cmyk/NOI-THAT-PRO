@@ -156,7 +156,7 @@ export default function MyAssetsPage() {
   return (
     <div className="max-w-5xl space-y-6 font-sans text-slate-800">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200/80">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
             <Key className="w-6 h-6 text-amber-600" />
@@ -180,7 +180,7 @@ export default function MyAssetsPage() {
         {plugins.map((plugin) => (
           <div
             key={plugin.id}
-            className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs flex flex-col justify-between space-y-4 hover:border-amber-200 transition"
+            className="bg-white rounded-lg border border-slate-200 p-5 shadow-2xs flex flex-col justify-between space-y-4 hover:border-slate-300 transition"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -248,7 +248,7 @@ export default function MyAssetsPage() {
       </div>
 
       {/* Trình Tạo License Key Theo Mã Máy */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-7 shadow-xs space-y-4">
+      <div className="bg-white rounded-lg border border-slate-200 p-6 sm:p-7 shadow-2xs space-y-4">
         <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
           <Laptop className="w-5 h-5 text-amber-600" />
           Kích Hoạt Bản Quyền Cho Máy Tính Mới
@@ -319,7 +319,7 @@ export default function MyAssetsPage() {
       </div>
 
       {/* Hướng Dẫn Cài Đặt Trong AutoCAD */}
-      <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600 space-y-3">
+      <div className="p-6 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-3">
         <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
           <HelpCircle className="w-4 h-4 text-amber-600" />
           Hướng Dẫn Cài Đặt & Sử Dụng Trên AutoCAD:

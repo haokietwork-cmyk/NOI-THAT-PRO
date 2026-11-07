@@ -75,7 +75,7 @@ export default function WorkshopProfileSettingsPage() {
     <div className="space-y-8 font-sans max-w-6xl pb-16">
       
       {/* Top navigation */}
-      <div className="flex items-center justify-between border-b border-slate-200/80 pb-4">
+      <div className="flex items-center justify-between border-b border-slate-200 pb-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-xs font-bold text-amber-600 uppercase tracking-wider">
             <Link href="/settings" className="hover:underline flex items-center gap-1">
@@ -106,7 +106,7 @@ export default function WorkshopProfileSettingsPage() {
         {/* ================================================================ */}
         {/* CỘT TRÁI: FORM CÀI ĐẶT HỒ SƠ XƯỞNG                               */}
         {/* ================================================================ */}
-        <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-6">
+        <div className="lg:col-span-7 bg-white rounded-lg border border-slate-200 p-6 shadow-2xs space-y-6">
           <form onSubmit={handleSave} className="space-y-5 text-xs">
             
             {/* Tên xưởng */}
@@ -182,7 +182,7 @@ export default function WorkshopProfileSettingsPage() {
             </div>
 
             {/* Thông tin tài khoản ngân hàng */}
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+            <div className="p-4 bg-slate-50 rounded-md border border-slate-200 space-y-3">
               <span className="font-bold text-slate-900 text-xs block flex items-center gap-1.5">
                 <CreditCard className="w-4 h-4 text-amber-600" />
                 <span>Thông tin tài khoản nhận đặt cọc (in lên Báo giá A4)</span>
@@ -196,7 +196,7 @@ export default function WorkshopProfileSettingsPage() {
                     value={bankName}
                     onChange={(e) => setBankName(e.target.value)}
                     placeholder="MB Bank, Techcombank..."
-                    className="w-full p-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 font-medium"
+                    className="w-full p-2 bg-white border border-slate-200 rounded-md focus:outline-none focus:border-slate-900 font-medium"
                   />
                 </div>
                 <div>
@@ -206,7 +206,7 @@ export default function WorkshopProfileSettingsPage() {
                     value={accountNumber}
                     onChange={(e) => setAccountNumber(e.target.value)}
                     placeholder="99990912345678"
-                    className="w-full p-2 font-mono font-bold bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500"
+                    className="w-full p-2 font-mono font-bold bg-white border border-slate-200 rounded-md focus:outline-none focus:border-slate-900"
                   />
                 </div>
                 <div>
@@ -216,14 +216,14 @@ export default function WorkshopProfileSettingsPage() {
                     value={accountName}
                     onChange={(e) => setAccountName(e.target.value.toUpperCase())}
                     placeholder="NGUYEN VAN A"
-                    className="w-full p-2 uppercase font-bold bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500"
+                    className="w-full p-2 uppercase font-bold bg-white border border-slate-200 rounded-md focus:outline-none focus:border-slate-900"
                   />
                 </div>
               </div>
             </div>
 
             {/* Cấu hình định mức chi phí sản xuất xưởng */}
-            <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-3">
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-md space-y-3">
               <div>
                 <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                   <Sliders className="w-4 h-4 text-amber-600" />
@@ -299,7 +299,7 @@ export default function WorkshopProfileSettingsPage() {
               </div>
 
               {/* Ngưỡng bản lề theo chiều cao cánh tủ (Tiers) */}
-              <div className="pt-3 border-t border-slate-200/80 space-y-2">
+              <div className="pt-3 border-t border-slate-200 space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="text-[11px] font-bold text-slate-800">
                     Ngưỡng số lượng bản lề theo chiều cao cánh tủ (mm):
@@ -393,7 +393,7 @@ export default function WorkshopProfileSettingsPage() {
           </div>
 
           {/* Mô phỏng tờ giấy A4 Header */}
-          <div className="bg-white rounded-2xl border-2 border-slate-300 p-6 shadow-sm space-y-5 text-xs">
+          <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-2xs space-y-5 text-xs">
             
             {/* Header thương hiệu */}
             <div className="flex justify-between items-start pb-5 border-b-2 border-slate-900">

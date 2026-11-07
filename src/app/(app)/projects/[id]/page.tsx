@@ -160,7 +160,7 @@ export default function ProjectWorkspacePage() {
     <div className="space-y-6 font-sans pb-16">
       {/* Banner cảnh báo công thức cũ */}
       {isLegacyCalculationProject(project) && (
-        <div className="no-print p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs">
+        <div className="no-print p-4 rounded-lg bg-amber-50 border border-amber-300 text-amber-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs">
           <div className="flex items-center gap-2">
             <span className="text-base">⚠️</span>
             <div>
@@ -172,19 +172,19 @@ export default function ProjectWorkspacePage() {
           </div>
           <button
             onClick={handleOpenUpgradeModal}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition shadow-xs shrink-0 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-md transition shadow-xs shrink-0 cursor-pointer"
           >
-            <span>Xem Mức Chênh & Nâng Cấp</span>
+            <span>Xem Mức Chênh &amp; Nâng Cấp</span>
           </button>
         </div>
       )}
 
       {/* Top action header */}
-      <div className="no-print bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="no-print bg-white rounded-lg border border-slate-200 p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link
             href="/dashboard"
-            className="p-2 text-slate-400 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-xl transition"
+            className="p-2 text-slate-400 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-md transition"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
@@ -288,7 +288,7 @@ export default function ProjectWorkspacePage() {
 
       {/* TAB 1: BOM */}
       {activeTab === "bom" && (
-        <div className="no-print bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-6">
+        <div className="no-print bg-white rounded-lg border border-slate-200 p-6 shadow-2xs space-y-6">
           <div className="flex items-center justify-between pb-4 border-b border-slate-100">
             <div>
               <h3 className="text-lg font-bold text-slate-900">Bảng Tổng Hợp Vật Tư Gửi Đại Lý</h3>
@@ -402,7 +402,7 @@ export default function ProjectWorkspacePage() {
       {/* TAB 2: A4 QUOTE */}
       {activeTab === "quote" && (
         <div className="space-y-4">
-          <div className="print-area bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-8 md:p-12 shadow-md space-y-6 text-xs max-w-4xl mx-auto">
+          <div className="print-area bg-white rounded-lg border border-slate-200 p-4 sm:p-8 md:p-12 shadow-md space-y-6 text-xs max-w-4xl mx-auto">
             {/* Header A4 */}
             <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-6 border-b-2 border-slate-800">
               <div className="space-y-1">
@@ -426,7 +426,7 @@ export default function ProjectWorkspacePage() {
             </div>
 
             {/* Info */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-4 rounded-md bg-slate-50 border border-slate-200 text-xs">
               <div>
                 <span className="text-slate-400 block text-[10px]">CÔNG TRÌNH:</span>
                 <strong className="text-slate-900 text-sm font-bold">{project.projectName}</strong>
@@ -488,7 +488,7 @@ export default function ProjectWorkspacePage() {
 
       {/* TAB 3: AUDIT HISTORY */}
       {activeTab === "history" && (
-        <div className="no-print bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-4">
+        <div className="no-print bg-white rounded-lg border border-slate-200 p-6 shadow-2xs space-y-4">
           <div className="pb-4 border-b border-slate-100 flex items-center justify-between">
             <div>
               <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -517,7 +517,7 @@ export default function ProjectWorkspacePage() {
                 return (
                   <div
                     key={log.id}
-                    className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                    className="p-4 rounded-md border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
@@ -565,7 +565,7 @@ export default function ProjectWorkspacePage() {
       {/* MODAL XEM TRƯỚC MỨC CHÊNH NÂNG CẤP CÔNG THỨC */}
       {upgradeModalOpen && upgradePreview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs no-print">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-5 text-xs">
+          <div className="bg-white rounded-lg max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-5 text-xs">
             <div className="pb-3 border-b border-slate-100 flex items-center justify-between">
               <div>
                 <h3 className="text-base font-bold text-slate-900">Xem Trước Nâng Cấp Công Thức</h3>
@@ -582,7 +582,7 @@ export default function ProjectWorkspacePage() {
             </div>
 
             <div className="space-y-3">
-              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
+              <div className="p-3.5 rounded-md bg-slate-50 border border-slate-200 space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-slate-600">Giá vốn cũ (chưa có VT phụ):</span>
                   <span className="font-mono font-bold text-slate-700">

@@ -189,6 +189,13 @@ function QuotingWorkspace() {
   const [inputTab, setInputTab] = useState<"questionnaire" | "detailed_parts">("questionnaire");
   const [costingActiveTab, setCostingActiveTab] = useState<"summary" | "material_labor" | "labour" | "moq" | "similar">("summary");
 
+  const [isCustomCore, setIsCustomCore] = useState(false);
+  const [isCustomSurface, setIsCustomSurface] = useState(false);
+
+  const workshopBoardMaterials = useMemo(() => {
+    return (materials || []).filter((m) => m.category === "board");
+  }, [materials]);
+
   // Open Schema: Quản lý các dòng chi phí / vật tư tự do (Ad-hoc Lines - Quy tắc #14)
   const [showAdhocForm, setShowAdhocForm] = useState(false);
   const [newAdhocLine, setNewAdhocLine] = useState<Partial<AdhocCostLine>>({
@@ -1011,9 +1018,9 @@ function QuotingWorkspace() {
 
   if (!mounted) {
     return (
-      <div className="p-12 text-center space-y-3 bg-white rounded-2xl border border-slate-200">
+      <div className="p-12 text-center space-y-3 bg-white rounded-lg border border-slate-200 shadow-2xs">
         <div className="w-8 h-8 mx-auto border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs font-semibold text-slate-600">Đang khởi tạo không gian bóc tách & phễu lọc...</p>
+        <p className="text-xs font-semibold text-slate-600">Đang khởi tạo không gian báo giá &amp; phễu lọc...</p>
       </div>
     );
   }
@@ -1022,7 +1029,7 @@ function QuotingWorkspace() {
     <div className="space-y-6 font-sans pb-16 relative">
       {/* Toast thông báo nổi bật */}
       {toast && (
-        <div className={`fixed top-5 right-5 z-50 p-4 rounded-2xl shadow-xl flex items-center gap-3 border text-xs font-semibold animate-in fade-in slide-in-from-top-3 duration-200 max-w-md ${
+        <div className={`fixed top-5 right-5 z-50 p-4 rounded-lg shadow-lg flex items-center gap-3 border text-xs font-semibold animate-in fade-in slide-in-from-top-3 duration-200 max-w-md ${
           toast.type === "success"
             ? "bg-white text-emerald-900 border-emerald-300 shadow-emerald-500/15"
             : toast.type === "error"
@@ -1049,16 +1056,15 @@ function QuotingWorkspace() {
       {/* Chỉ xuất hiện khi người dùng đã đăng nhập và đang mở một dự án cụ thể đã lưu */}
       {/* ================================================================== */}
       {isAuthenticated && editId && (
-        <div className="no-print bg-slate-900 text-slate-300 text-[11px] py-2 px-4 rounded-2xl font-mono border border-slate-800 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+        <div className="no-print bg-slate-900 text-slate-300 text-[11px] py-2 px-4 rounded-lg font-mono border border-slate-800 flex flex-wrap items-center justify-between gap-3 shadow-xs">
           <div className="flex items-center gap-4 text-[10px]">
             <span className="flex items-center gap-1.5 text-amber-400 font-bold">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               MÃ DỰ ÁN: {`PRJ-${editId.slice(0, 8).toUpperCase()}`}
             </span>
-            <span className="text-slate-400">KHỔ VÁN: <strong className="text-white">1220 × 2440 MM</strong> (2.9768 M²)</span>
-            <span className="text-slate-400">MẠCH CƯA CNC: <strong className="text-white">3.2 MM</strong></span>
-            <span className="text-slate-400">HAO HỤT VÁN: <strong className="text-amber-400">+15% (1.15)</strong></span>
-            <span className="text-slate-400">HAO HỤT CHỈ: <strong className="text-emerald-400">+8% (1.08)</strong></span>
+            <span className="text-slate-400">ĐỊNH MỨC: <strong className="text-white">ĐA DÒNG HÀNG &amp; VẬT TƯ MỞ</strong></span>
+            <span className="text-slate-400">PHƯƠNG PHÁP: <strong className="text-white">CHIẾT TÍNH ĐA TẦNG W×D×H</strong></span>
+            <span className="text-slate-400">KIỂM ĐỊNH: <strong className="text-emerald-400">SAI SỐ &lt; 1%</strong></span>
           </div>
           <div className="flex items-center gap-3 text-[10px] text-slate-400">
             <span className="text-emerald-400 flex items-center gap-1 font-sans font-medium">
@@ -1582,61 +1588,167 @@ function QuotingWorkspace() {
                 </div>
 
                 {/* KHỐI 2: VẬT LIỆU & KẾT CẤU CHỦ LỰC (* BẮT BUỘC) */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-4">
+                <div className="bg-white rounded-lg border border-slate-200 p-5 shadow-2xs space-y-4">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                     <div className="flex items-center gap-2">
-                      <span className="w-6 h-6 rounded-full bg-amber-500 text-white font-black text-xs flex items-center justify-center">
+                      <span className="w-5 h-5 rounded-md bg-slate-900 text-white font-bold text-[11px] flex items-center justify-center">
                         2
                       </span>
-                      <h3 className="font-bold text-slate-900 text-sm">
+                      <h3 className="font-semibold text-slate-900 text-xs tracking-tight">
                         Vật liệu &amp; Kết cấu chủ lực (* Bắt buộc)
                       </h3>
                     </div>
-                    <span className="text-[11px] text-slate-400">5 câu hỏi Có / Không nhạy cảm giá</span>
+                    <span className="text-[11px] text-slate-500">Đa dạng dòng hàng &amp; vật liệu mở</span>
                   </div>
 
                   {/* Cốt ván & Bề mặt */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-semibold text-slate-600 block mb-1">
-                        Cốt ván thùng &amp; đợt:
-                      </label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-xs font-semibold text-slate-700 block">
+                          Cốt vật liệu thùng &amp; đợt:
+                        </label>
+                        <span className="text-[10px] text-slate-500 font-mono">Đa ngành</span>
+                      </div>
                       <select
-                        value={questionnaire.materials.coreCode}
-                        onChange={(e) =>
-                          setQuestionnaire((prev) => ({
-                            ...prev,
-                            materials: { ...prev.materials, coreCode: e.target.value },
-                          }))
-                        }
-                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:border-amber-500"
+                        value={isCustomCore ? "CUSTOM" : questionnaire.materials.coreCode}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === "CUSTOM") {
+                            setIsCustomCore(true);
+                          } else {
+                            setIsCustomCore(false);
+                            setQuestionnaire((prev) => ({
+                              ...prev,
+                              materials: { ...prev.materials, coreCode: val },
+                            }));
+                          }
+                        }}
+                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-md text-xs font-medium text-slate-900 focus:outline-none focus:border-slate-900"
                       >
-                        <option value="MDF_17_CHONG_AM">MDF chống ẩm lõi xanh HMR 17mm</option>
-                        <option value="PLYWOOD_17">Plywood kháng nước 17mm</option>
-                        <option value="PVC_17">Ván nhựa PVC Picomat chống nước tuyệt đối</option>
-                        <option value="NATURAL_WOOD">Gỗ tự nhiên sồi / tần bì ghép thanh</option>
+                        <optgroup label="Gỗ Công Nghiệp Hiện Đại">
+                          <option value="MDF_17_CHONG_AM">MDF chống ẩm lõi xanh HMR 17mm</option>
+                          <option value="MDF_6_HAU">MDF hậu 6mm chống ẩm</option>
+                          <option value="MDF_17_JUMBO">MDF khổ lớn Jumbo 1830×2440×17mm</option>
+                          <option value="HDF_BLACK_17">HDF siêu chống ẩm Black HDF 17mm</option>
+                          <option value="MFC_18_CHONG_AM">MFC lõi xanh kháng ẩm 18mm</option>
+                          <option value="PLYWOOD_17">Plywood Birch / Bạch Dương kháng nước 17mm</option>
+                        </optgroup>
+                        <optgroup label="Ván Nhựa Cao Cấp Chịu Nước 100%">
+                          <option value="PVC_17">Ván nhựa PVC Picomat đặc chịu nước 100%</option>
+                          <option value="WPB_17_CHIU_NUOC">Tấm nhựa WPB An Cường chịu nước tuyệt đối</option>
+                        </optgroup>
+                        <optgroup label="Gỗ Tự Nhiên &amp; Ghép Thanh">
+                          <option value="OAK_NATURAL">Gỗ tự nhiên Sồi Mỹ (Oak) xẻ sấy</option>
+                          <option value="WALNUT_NATURAL">Gỗ Óc Chó (Walnut) Bắc Mỹ vân Nu</option>
+                          <option value="RUBBER_FINGER_18">Gỗ Cao Su ghép thanh loại A 18mm</option>
+                          <option value="ASH_NATURAL">Gỗ Tần Bì (Ash) tự nhiên</option>
+                        </optgroup>
+                        <optgroup label="Khung Kim Loại &amp; Nhôm Kính">
+                          <option value="SLIM_ALU_FRAME">Khung nhôm hệ Slim định hình Anodized</option>
+                          <option value="STEEL_FRAME">Khung sắt hộp sơn tĩnh điện / Inox 304</option>
+                        </optgroup>
+                        {workshopBoardMaterials.length > 0 && (
+                          <optgroup label="Từ Thư Viện Đơn Giá Của Xưởng">
+                            {workshopBoardMaterials.map((mat) => (
+                              <option key={mat.id} value={mat.code}>
+                                {mat.name} ({mat.unitPrice.toLocaleString("vi-VN")} đ/{mat.unit})
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
+                        <optgroup label="Tùy Chọn Khác">
+                          <option value="CUSTOM">Tự nhập mã/tên vật tư tùy chỉnh...</option>
+                        </optgroup>
                       </select>
+
+                      {isCustomCore && (
+                        <div className="mt-2">
+                          <input
+                            type="text"
+                            placeholder="Nhập mã hoặc tên vật liệu cốt..."
+                            value={questionnaire.materials.coreCode}
+                            onChange={(e) =>
+                              setQuestionnaire((prev) => ({
+                                ...prev,
+                                materials: { ...prev.materials, coreCode: e.target.value },
+                              }))
+                            }
+                            className="w-full p-2 bg-white border border-slate-300 rounded-md text-xs font-medium text-slate-900 focus:outline-none focus:border-slate-900"
+                          />
+                        </div>
+                      )}
                     </div>
 
                     <div>
-                      <label className="text-xs font-semibold text-slate-600 block mb-1">
-                        Bề mặt cánh &amp; mặt tiền:
-                      </label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-xs font-semibold text-slate-700 block">
+                          Bề mặt cánh &amp; mặt tiền:
+                        </label>
+                        <span className="text-[10px] text-slate-500 font-mono">Hoàn thiện</span>
+                      </div>
                       <select
-                        value={questionnaire.materials.surfaceCode}
-                        onChange={(e) =>
-                          setQuestionnaire((prev) => ({
-                            ...prev,
-                            materials: { ...prev.materials, surfaceCode: e.target.value },
-                          }))
-                        }
-                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:border-amber-500"
+                        value={isCustomSurface ? "CUSTOM" : questionnaire.materials.surfaceCode}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === "CUSTOM") {
+                            setIsCustomSurface(true);
+                          } else {
+                            setIsCustomSurface(false);
+                            setQuestionnaire((prev) => ({
+                              ...prev,
+                              materials: { ...prev.materials, surfaceCode: val },
+                            }));
+                          }
+                        }}
+                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-md text-xs font-medium text-slate-900 focus:outline-none focus:border-slate-900"
                       >
-                        <option value="Melamine">Phủ Melamine 2 mặt chống trầy</option>
-                        <option value="Son2K">Sơn bệt 2K cao cấp chống ố vàng</option>
-                        <option value="Acrylic">Cánh phủ Acrylic bóng gương No Line</option>
-                        <option value="Veneer">Phủ Veneer Sồi / Óc chó sơn PU mờ</option>
+                        <optgroup label="Bề Mặt Gỗ Công Nghiệp">
+                          <option value="Melamine">Phủ Melamine 2 mặt chống trầy</option>
+                          <option value="Acrylic">Cánh phủ Acrylic bóng gương No Line</option>
+                          <option value="Laminate">Phủ Laminate Kingdom / Formica chống trầy</option>
+                          <option value="Son2K">Sơn bệt men mờ 2K chống ố vàng</option>
+                        </optgroup>
+                        <optgroup label="Cánh Kính Khung Nhôm Slim">
+                          <option value="CanhKinh_Tra">Cánh Kính Khung Nhôm Slim - Kính Trà 5mm</option>
+                          <option value="CanhKinh_Khoi">Cánh Kính Khung Nhôm Slim - Kính Xám Khói</option>
+                          <option value="CanhKinh_Fluted">Cánh Kính Khung Nhôm Slim - Kính Sọc Fluted</option>
+                          <option value="CanhKinh_Trong">Cánh Kính Khung Nhôm Slim - Kính Siêu Trong</option>
+                        </optgroup>
+                        <optgroup label="Gỗ Tự Nhiên &amp; Mộc Mạc">
+                          <option value="Veneer">Phủ Veneer Sồi / Óc chó sơn PU mờ</option>
+                          <option value="SonInchem">Sơn PU Inchem 5 lớp cao cấp tiêu chuẩn Mỹ</option>
+                          <option value="LauDau_Rubio">Hoàn thiện lau dầu dưỡng gỗ mộc cao cấp</option>
+                          <option value="CanhLongMay">Cánh khung gỗ lồng mây mắt cáo tự nhiên</option>
+                        </optgroup>
+                        <optgroup label="Bọc Da &amp; Bọc Nệm">
+                          <option value="BocDa_Microfiber">Bọc Da Bò Nhân Tạo Microfiber cao cấp</option>
+                          <option value="BocVai_Ni">Bọc Vải Nỉ Nhung Tuyết / Vải Bố Hàn Quốc</option>
+                        </optgroup>
+                        <optgroup label="Tân Cổ Điển Soi Pano">
+                          <option value="Pano_CNC">Cánh phay Pano CNC sơn 2K tân cổ điển</option>
+                        </optgroup>
+                        <optgroup label="Tùy Chọn Khác">
+                          <option value="CUSTOM">Tự nhập bề mặt / hoàn thiện tùy chỉnh...</option>
+                        </optgroup>
                       </select>
+
+                      {isCustomSurface && (
+                        <div className="mt-2">
+                          <input
+                            type="text"
+                            placeholder="Nhập tên hoặc quy cách bề mặt hoàn thiện..."
+                            value={questionnaire.materials.surfaceCode}
+                            onChange={(e) =>
+                              setQuestionnaire((prev) => ({
+                                ...prev,
+                                materials: { ...prev.materials, surfaceCode: e.target.value },
+                              }))
+                            }
+                            className="w-full p-2 bg-white border border-slate-300 rounded-md text-xs font-medium text-slate-900 focus:outline-none focus:border-slate-900"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -1888,17 +2000,17 @@ function QuotingWorkspace() {
                 </div>
 
                 {/* KHỐI 3: CHI TIẾT & GHI CHÚ ĐẶC BIỆT */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-4">
+                <div className="bg-white rounded-lg border border-slate-200 p-5 shadow-2xs space-y-4">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                     <div className="flex items-center gap-2">
-                      <span className="w-6 h-6 rounded-full bg-slate-900 text-white font-black text-xs flex items-center justify-center">
+                      <span className="w-5 h-5 rounded-md bg-slate-900 text-white font-bold text-[11px] flex items-center justify-center">
                         3
                       </span>
-                      <h3 className="font-bold text-slate-900 text-sm">
+                      <h3 className="font-semibold text-slate-900 text-xs tracking-tight">
                         Chi tiết phụ kiện &amp; Ghi chú (Tùy chọn)
                       </h3>
                     </div>
-                    <span className="text-[11px] text-slate-400">Để trống để hệ thống tự ước tính</span>
+                    <span className="text-[11px] text-slate-500">Để trống để hệ thống tự ước tính</span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -2206,9 +2318,9 @@ function QuotingWorkspace() {
 
               {/* CỘT PHẢI: CHECKLIST 3 TRẠNG THÁI & ĐIỀU KHIỂN (4 CỘT - STICKY) */}
               <div className="lg:col-span-4 space-y-4 sticky top-4">
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-4">
+                <div className="bg-white rounded-lg border border-slate-200 p-5 shadow-2xs space-y-4">
                   <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
-                    <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                    <h3 className="font-semibold text-slate-900 text-xs tracking-tight flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                       <span>Checklist Kiểm Soát Thông Số</span>
                     </h3>
@@ -2218,8 +2330,8 @@ function QuotingWorkspace() {
                   </div>
 
                   {/* Danh sách 3 trạng thái */}
-                  <div className="space-y-2.5 text-xs">
-                    <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-50/60 border border-emerald-200">
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-center justify-between p-2 rounded-md bg-emerald-50/60 border border-emerald-200">
                       <span className="font-semibold text-emerald-900 flex items-center gap-1.5">
                         <Check className="w-3.5 h-3.5 text-emerald-600" />
                         Loại sản phẩm:
@@ -2227,7 +2339,7 @@ function QuotingWorkspace() {
                       <strong className="text-emerald-800 truncate max-w-[120px]">{questionnaire.productType}</strong>
                     </div>
 
-                    <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-50/60 border border-emerald-200">
+                    <div className="flex items-center justify-between p-2 rounded-md bg-emerald-50/60 border border-emerald-200">
                       <span className="font-semibold text-emerald-900 flex items-center gap-1.5">
                         <Check className="w-3.5 h-3.5 text-emerald-600" />
                         Kích thước W×D×H:
@@ -2237,7 +2349,7 @@ function QuotingWorkspace() {
                       </strong>
                     </div>
 
-                    <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-50/60 border border-emerald-200">
+                    <div className="flex items-center justify-between p-2 rounded-md bg-emerald-50/60 border border-emerald-200">
                       <span className="font-semibold text-emerald-900 flex items-center gap-1.5">
                         <Check className="w-3.5 h-3.5 text-emerald-600" />
                         Cốt &amp; Bề mặt:
@@ -2247,7 +2359,7 @@ function QuotingWorkspace() {
                       </strong>
                     </div>
 
-                    <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-50/60 border border-emerald-200">
+                    <div className="flex items-center justify-between p-2 rounded-md bg-emerald-50/60 border border-emerald-200">
                       <span className="font-semibold text-emerald-900 flex items-center gap-1.5">
                         <Check className="w-3.5 h-3.5 text-emerald-600" />
                         Kết cấu đặc thù:
@@ -2255,7 +2367,7 @@ function QuotingWorkspace() {
                       <strong className="text-emerald-800">5/5 đã chọn</strong>
                     </div>
 
-                    <div className={`flex items-center justify-between p-2 rounded-xl border ${
+                    <div className={`flex items-center justify-between p-2 rounded-md border ${
                       questionnaire.details?.drawerCount !== undefined && questionnaire.details?.doorCount !== undefined
                         ? "bg-emerald-50/60 border-emerald-200 text-emerald-900"
                         : "bg-amber-50/60 border-amber-200 text-amber-900"
@@ -2401,13 +2513,13 @@ function QuotingWorkspace() {
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="no-print bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-4">
+              <div className="no-print bg-white rounded-lg border border-slate-200 p-5 shadow-2xs space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-amber-500 text-white font-black text-xs flex items-center justify-center">
+                <span className="w-5 h-5 rounded-md bg-slate-900 text-white font-bold text-[11px] flex items-center justify-center">
                   1
                 </span>
-                <h3 className="font-bold text-slate-900 text-sm">
+                <h3 className="font-semibold text-slate-900 text-xs tracking-tight">
                   Đầu vào: Kéo thả file Excel hoặc nạp mẫu
                 </h3>
               </div>
@@ -2422,7 +2534,7 @@ function QuotingWorkspace() {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center gap-3 ${
+          className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition flex flex-col items-center justify-center gap-3 ${
             isDragging
               ? "border-amber-500 bg-amber-50/70"
               : "border-slate-200 hover:border-amber-400 bg-slate-50/60 hover:bg-amber-50/20"
@@ -2435,8 +2547,8 @@ function QuotingWorkspace() {
             accept=".xlsx, .xls, .csv"
             className="hidden"
           />
-          <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center shadow-xs">
-            <Upload className="w-6 h-6" />
+          <div className="w-10 h-10 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shadow-xs">
+            <Upload className="w-5 h-5" />
           </div>
           <div className="space-y-1">
             <p className="text-sm font-bold text-slate-900">
@@ -2615,7 +2727,7 @@ function QuotingWorkspace() {
 
         {/* Khối Phễu Lọc Mở Rộng (Advanced Filter Funnel) */}
         {(showCutlistFilter || activeCutlistFilterCount > 0) && (
-          <div className="bg-slate-50/90 border-b border-slate-200/80 p-3.5 space-y-3 animate-in fade-in duration-150">
+          <div className="bg-slate-50/90 border-b border-slate-200 p-3.5 space-y-3 animate-in fade-in duration-150">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 text-xs">
               {/* Lọc Hạng mục (Module) */}
               <div className="space-y-1">
@@ -2982,7 +3094,7 @@ function QuotingWorkspace() {
         </div>
 
         {/* Step 1 Footer Action Bar */}
-        <div className="no-print flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+        <div className="no-print flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-white rounded-lg border border-slate-200 shadow-2xs">
           <span className="text-xs text-slate-500">
             Dự án hiện có <strong>{parts.length}</strong> chi tiết phôi ván trong danh sách.
           </span>
@@ -2990,10 +3102,10 @@ function QuotingWorkspace() {
             type="button"
             onClick={() => goToStep(2)}
             disabled={parts.length === 0}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl transition shadow-xs disabled:opacity-40 cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-md transition shadow-xs disabled:opacity-40 cursor-pointer"
           >
             <span>Tiếp tục: Xem Báo Giá &amp; Chiết Tính Giá Vốn</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
@@ -3115,48 +3227,48 @@ function QuotingWorkspace() {
           <div className="no-print space-y-6">
             {/* 3 KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-2">
+              <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-2xs space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-500">GIÁ BÁN ĐỀ XUẤT</span>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span className="text-xs font-semibold text-slate-500">GIÁ BÁN ĐỀ XUẤT</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
                     +{((profitMargin - 1) * 100).toFixed(0)}% LỢI NHUẬN
                   </span>
                 </div>
-                <div className="text-2xl font-black text-emerald-600 font-mono">
+                <div className="text-2xl font-bold text-emerald-600 font-mono">
                   {formatVND(parametricCosting.summary.calculateSalesPrice)}
                 </div>
                 <p className="text-xs text-slate-500">Giá đề xuất gửi khách hàng (đã gồm chi phí + lợi nhuận mục tiêu)</p>
               </div>
 
-              <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-2">
+              <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-2xs space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-500">GIÁ VỐN TOÀN DIỆN (COGS)</span>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                  <span className="text-xs font-semibold text-slate-500">GIÁ VỐN TOÀN DIỆN (COGS)</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
                     12 NHÓM CHI PHÍ
                   </span>
                 </div>
-                <div className="text-2xl font-black text-slate-900 font-mono">
+                <div className="text-2xl font-bold text-slate-900 font-mono">
                   {formatVND(parametricCosting.summary.cogs)}
                 </div>
-                <p className="text-xs text-slate-500">Vật tư + Nhân công trực tiếp + Quản lý xưởng OH & thầu phụ</p>
+                <p className="text-xs text-slate-500">Vật tư + Nhân công trực tiếp + Quản lý xưởng OH &amp; thầu phụ</p>
               </div>
 
-              <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-2">
+              <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-2xs space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-500">LỢI NHUẬN MỤC TIÊU</span>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                  <span className="text-xs font-semibold text-slate-500">LỢI NHUẬN MỤC TIÊU</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200">
                     RÒNG DỰ TÍNH
                   </span>
                 </div>
-                <div className="text-2xl font-black text-amber-600 font-mono">
+                <div className="text-2xl font-bold text-amber-600 font-mono">
                   {formatVND(parametricCosting.summary.profitAmount)}
                 </div>
-                <p className="text-xs text-slate-500">Mức chênh lệch an toàn để đảm bảo dòng tiền & tái đầu tư xưởng</p>
+                <p className="text-xs text-slate-500">Mức chênh lệch an toàn để đảm bảo dòng tiền &amp; tái đầu tư xưởng</p>
               </div>
             </div>
 
             {/* Confidence Rating & Checklist Banner */}
-            <div className={`p-4 rounded-2xl border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xs ${
+            <div className={`p-4 rounded-lg border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-2xs ${
               parametricCosting.confidence.stars >= 4
                 ? "bg-emerald-50/60 border-emerald-200 text-emerald-950"
                 : parametricCosting.confidence.stars === 3
@@ -3232,7 +3344,7 @@ function QuotingWorkspace() {
             )}
 
             {/* Sub-tabs Navigation */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-4">
+            <div className="bg-white rounded-lg border border-slate-200 p-5 shadow-2xs space-y-4">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-1.5 overflow-x-auto text-xs">
                   <button
@@ -3595,7 +3707,7 @@ function QuotingWorkspace() {
         {/* TAB 1: BẢNG TỔNG HỢP VẬT TƯ (XƯỞNG) (no-print)                    */}
         {/* ================================================================ */}
         {activeOutputTab === "bom" && (
-          <div className="no-print bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-6">
+          <div className="no-print bg-white rounded-lg border border-slate-200 p-6 shadow-2xs space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
               <div>
                 <div className="inline-flex items-center gap-1.5 text-xs font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 mb-1">
@@ -3755,9 +3867,9 @@ function QuotingWorkspace() {
             </div>
 
             {/* Tóm tắt tổng giá vốn xưởng */}
-            <div className="p-5 rounded-2xl bg-slate-900 text-white flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div className="p-5 rounded-lg bg-slate-900 text-white flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
               <div>
-                <span className="font-extrabold text-sm block">TỔNG GIÁ VỐN VẬT TƯ & NHÂN CÔNG:</span>
+                <span className="font-extrabold text-sm block">TỔNG GIÁ VỐN VẬT TƯ &amp; NHÂN CÔNG:</span>
                 <span className="text-slate-300 text-[11px]">Bao gồm đầy đủ 5 thành phần: Ván tấm, chỉ dán cạnh, phụ kiện, thợ gia công/lắp đặt và vật tư phụ/vận chuyển.</span>
               </div>
               <span className="text-2xl font-black text-amber-400 font-mono">
@@ -3774,7 +3886,7 @@ function QuotingWorkspace() {
           <div className="space-y-4">
             
             {/* Thanh điều khiển Lãi & Biên lợi nhuận nhanh (no-print) */}
-            <div className="no-print bg-amber-50 rounded-2xl border border-amber-200 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-900">
+            <div className="no-print bg-amber-50 rounded-lg border border-amber-200 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-900">
               <div className="flex items-center gap-2 flex-wrap">
                 <Sliders className="w-4 h-4 text-amber-600 shrink-0" />
                 <span className="flex items-center gap-1">
@@ -3800,7 +3912,7 @@ function QuotingWorkspace() {
                 />
                 <button
                   onClick={() => window.print()}
-                  className="px-4 py-2 font-semibold text-xs text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition shadow-xs flex items-center gap-2 cursor-pointer"
+                  className="px-4 py-2 font-semibold text-xs text-white bg-slate-900 hover:bg-slate-800 rounded-md transition shadow-xs flex items-center gap-2 cursor-pointer"
                 >
                   <Printer className="w-4 h-4 text-amber-400" />
                   <span>In / Tải PDF Báo Giá A4</span>
@@ -3809,7 +3921,7 @@ function QuotingWorkspace() {
             </div>
 
             {/* Khung tờ giấy Báo Giá A4 thực tế (.print-area) */}
-            <div className="print-area bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-8 md:p-12 shadow-md space-y-6 text-xs max-w-4xl mx-auto">
+            <div className="print-area bg-white rounded-lg border border-slate-200 p-4 sm:p-8 md:p-12 shadow-md space-y-6 text-xs max-w-4xl mx-auto">
               
               {/* Header Tờ Báo Giá A4 */}
               <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-6 border-b-2 border-slate-800">
@@ -3959,22 +4071,22 @@ function QuotingWorkspace() {
       </div>
 
       {/* Step 2 Footer Navigation Bar */}
-      <div className="no-print flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+      <div className="no-print flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-white rounded-lg border border-slate-200 shadow-2xs">
         <button
           type="button"
           onClick={() => goToStep(1)}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-md transition cursor-pointer"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-3.5 h-3.5" />
           <span>Quay lại sửa phôi ván (Bước 1)</span>
         </button>
         <button
           type="button"
           onClick={() => goToStep(3)}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-md transition shadow-xs cursor-pointer"
         >
           <span>Tiếp tục: Xuất File &amp; In Ấn (Bước 3)</span>
-          <ArrowRight className="w-4 h-4" />
+          <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
     </div>
@@ -3986,11 +4098,11 @@ function QuotingWorkspace() {
   {currentStep === 3 && (
     <div className="space-y-6">
       {/* Action Hub: 4 Thẻ Hành Động Chính (Web-Twin Pure White Cards) */}
-      <div className="no-print bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-5">
+      <div className="no-print bg-white rounded-lg border border-slate-200 p-6 shadow-2xs space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
           <div>
-            <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-emerald-600 text-white font-black text-xs flex items-center justify-center">
+            <h2 className="text-xs font-semibold text-slate-900 tracking-tight flex items-center gap-2">
+              <span className="w-5 h-5 rounded-md bg-slate-900 text-white font-bold text-[11px] flex items-center justify-center">
                 3
               </span>
               Trung Tâm Xuất File &amp; In Báo Giá A4
@@ -4001,7 +4113,7 @@ function QuotingWorkspace() {
           </div>
 
           {/* Tóm tắt nhanh số liệu */}
-          <div className="flex items-center gap-3 text-xs font-mono bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
+          <div className="flex items-center gap-3 text-xs font-mono bg-slate-50 p-2.5 rounded-md border border-slate-200">
             <div>
               <span className="text-[10px] text-slate-400 block uppercase">Tổng Ván:</span>
               <strong className="text-slate-900 font-bold">{calcResult.totalSheets} tấm</strong>
@@ -4150,7 +4262,7 @@ function QuotingWorkspace() {
         </div>
 
         {/* Khung tờ giấy Báo Giá A4 thực tế (.print-area) */}
-        <div className="print-area bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-8 md:p-12 shadow-md space-y-6 text-xs max-w-4xl mx-auto">
+        <div className="print-area bg-white rounded-lg border border-slate-200 p-4 sm:p-8 md:p-12 shadow-md space-y-6 text-xs max-w-4xl mx-auto">
           {/* Header Tờ Báo Giá A4 */}
           <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-6 border-b-2 border-slate-800">
             <div className="space-y-1.5 max-w-md">
@@ -4192,7 +4304,7 @@ function QuotingWorkspace() {
           </div>
 
           {/* Thông tin dự án & Khách hàng */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-4 rounded-md bg-slate-50 border border-slate-200 text-xs">
             <div>
               <span className="text-slate-400 block text-[10px] font-bold">CÔNG TRÌNH / DỰ ÁN:</span>
               <strong className="text-slate-900 text-sm font-bold">{projectName}</strong>
@@ -4247,19 +4359,19 @@ function QuotingWorkspace() {
           </div>
 
           {/* Điều khoản & Cam kết của xưởng chuẩn thương mại */}
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 space-y-1.5">
+          <div className="p-4 rounded-md bg-slate-50 border border-slate-200 text-[11px] text-slate-600 space-y-1.5">
             <div className="flex items-center justify-between">
               <strong className="text-slate-900 font-bold uppercase text-[10px] flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                ĐIỀU KHOẢN & TIÊU CHUẨN KỸ THUẬT BẢO HÀNH:
+                ĐIỀU KHOẢN &amp; TIÊU CHUẨN KỸ THUẬT BẢO HÀNH:
               </strong>
               <span className="font-mono text-[10px] text-slate-400">TIÊU CHUẨN XƯỞNG CNC</span>
             </div>
             <ul className="space-y-1 list-disc list-inside text-slate-600 text-[10px] leading-relaxed">
-              <li><strong>Quy cách vật tư:</strong> 100% cốt ván MDF chống ẩm lõi xanh HMR V313 đạt tiêu chuẩn phát thải E1/E2. Dán cạnh chỉ PVC đồng màu bằng keo hạt PUR chống nước cạnh.</li>
-              <li><strong>Thời gian thi công:</strong> Hoàn thiện gia công và lắp đặt trong 07 – 10 ngày làm việc kể từ ngày thống nhất mẫu ván.</li>
-              <li><strong>Chính sách bảo hành:</strong> Bảo hành 24 tháng đối với kết cấu gỗ công nghiệp, 12 tháng đối với phụ kiện kim khí (ray trượt, bản lề).</li>
-              <li><strong>Tiến độ thanh toán:</strong> Đợt 1 tạm ứng 50% khi duyệt mẫu ván & ký hợp đồng; Đợt 2 thanh toán 50% sau khi nghiệm thu bàn giao hoàn thiện.</li>
+              <li><strong>Quy cách vật tư:</strong> 100% cốt ván đạt chuẩn chất lượng, bề mặt sắc nét, dán cạnh chỉ đồng màu bằng keo PUR chống ẩm.</li>
+              <li><strong>Thời gian thi công:</strong> Hoàn thiện gia công và lắp đặt trong 07 – 10 ngày làm việc kể từ ngày thống nhất mẫu.</li>
+              <li><strong>Chính sách bảo hành:</strong> Bảo hành 24 tháng đối với kết cấu nội thất, 12 tháng đối với phụ kiện kim khí.</li>
+              <li><strong>Tiến độ thanh toán:</strong> Đợt 1 tạm ứng 50% khi duyệt mẫu &amp; ký hợp đồng; Đợt 2 thanh toán 50% sau khi nghiệm thu bàn giao hoàn thiện.</li>
             </ul>
           </div>
 
@@ -4272,48 +4384,48 @@ function QuotingWorkspace() {
           <div className="pt-8 grid grid-cols-2 text-center text-xs">
             <div>
               <strong className="block text-slate-900 font-bold uppercase">ĐẠI DIỆN KHÁCH HÀNG</strong>
-              <span className="text-slate-400 text-[10px]">(Ký & ghi rõ họ tên)</span>
+              <span className="text-slate-400 text-[10px]">(Ký &amp; ghi rõ họ tên)</span>
             </div>
             <div>
               <strong className="block text-slate-900 font-bold uppercase">ĐẠI DIỆN XƯỞNG SẢN XUẤT</strong>
-              <span className="text-slate-400 text-[10px]">(Ký & đóng dấu)</span>
+              <span className="text-slate-400 text-[10px]">(Ký &amp; đóng dấu)</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Step 3 Footer Navigation Bar */}
-      <div className="no-print flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+      <div className="no-print flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-white rounded-lg border border-slate-200 shadow-2xs">
         <button
           type="button"
           onClick={() => goToStep(2)}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-md transition cursor-pointer"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-3.5 h-3.5" />
           <span>Quay lại Xem Báo Giá &amp; BOM (Bước 2)</span>
         </button>
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <button
             type="button"
             onClick={() => goToStep(1)}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 text-xs font-semibold rounded-xl transition cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 text-xs font-semibold rounded-md transition cursor-pointer"
           >
-            <span>Về Bước 1 (Sửa phôi)</span>
+            <span>Về Bước 1 (Sửa thông số)</span>
           </button>
           <button
             type="button"
             onClick={() => setShowShareModal(true)}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-xs font-bold rounded-xl transition cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-xs font-semibold rounded-md transition cursor-pointer"
           >
-            <Share2 className="w-4 h-4 text-indigo-600" />
+            <Share2 className="w-3.5 h-3.5 text-indigo-600" />
             <span>Chia sẻ link</span>
           </button>
           <button
             type="button"
             onClick={handlePrintA4}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-md transition shadow-xs cursor-pointer"
           >
-            <Printer className="w-4 h-4" />
+            <Printer className="w-3.5 h-3.5" />
             <span>In Báo Giá A4 Ngay</span>
           </button>
         </div>
@@ -4326,7 +4438,7 @@ function QuotingWorkspace() {
       {/* ================================================================== */}
       {showMappingModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xl max-w-lg w-full space-y-4 animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-2xl max-w-lg w-full space-y-4 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2 text-slate-900 font-bold text-base">
                 <Sparkles className="w-5 h-5 text-amber-500" />

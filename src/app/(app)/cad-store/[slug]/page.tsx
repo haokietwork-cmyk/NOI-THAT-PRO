@@ -20,7 +20,7 @@ export default function PluginDetailPage({
         <ArrowLeft className="w-4 h-4" /> Quay lại Kho Plugin CAD
       </Link>
 
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 shadow-xs space-y-6">
+      <div className="bg-white rounded-lg border border-slate-200 p-6 sm:p-8 shadow-2xs space-y-6">
         <div className="flex items-start justify-between gap-4">
           <div>
             <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 uppercase tracking-wide">
@@ -38,7 +38,7 @@ export default function PluginDetailPage({
         </div>
 
         {/* Video / GIF Demo Mockup dạng Clean Light */}
-        <div className="aspect-video bg-slate-50 rounded-2xl flex flex-col items-center justify-center text-slate-600 text-xs border border-slate-200 p-6 text-center space-y-2">
+        <div className="aspect-video bg-slate-50 rounded-lg flex flex-col items-center justify-center text-slate-600 text-xs border border-slate-200 p-6 text-center space-y-2">
           <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700 text-base font-bold shadow-2xs">
             CAD
           </div>

@@ -123,7 +123,7 @@ export default function DataAndPrivacyPage() {
       </div>
 
       {/* 1. KHU VỰC XUẤT DỮ LIỆU (DATA EXPORT) */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-4">
+      <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-2xs space-y-4">
         <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
           <Download className="w-4 h-4 text-emerald-600" />
           <h2 className="text-sm font-bold text-slate-900">
@@ -139,7 +139,7 @@ export default function DataAndPrivacyPage() {
             type="button"
             onClick={handleExportJson}
             disabled={exporting}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow-xs disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-md transition shadow-xs disabled:opacity-50"
           >
             <Download className="w-4 h-4" />
             {exporting ? "Đang trích xuất dữ liệu..." : "Tải xuống toàn bộ dữ liệu (JSON)"}
@@ -155,7 +155,7 @@ export default function DataAndPrivacyPage() {
       </div>
 
       {/* 2. KHU VỰC NGUY HIỂM: XÓA VĨNH VIỄN TÀI KHOẢN (DANGER ZONE) */}
-      <div className="bg-red-50/40 rounded-2xl border border-red-200 p-6 shadow-sm space-y-4">
+      <div className="bg-red-50/40 rounded-lg border border-red-200 p-6 shadow-2xs space-y-4">
         <div className="flex items-center gap-2 border-b border-red-100 pb-3">
           <AlertTriangle className="w-4 h-4 text-red-600" />
           <h2 className="text-sm font-bold text-red-950">
@@ -174,7 +174,7 @@ export default function DataAndPrivacyPage() {
               setDeleteError(null);
               setIsDeleteModalOpen(true);
             }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition shadow-xs"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-md transition shadow-xs"
           >
             <Trash2 className="w-4 h-4" />
             Yêu cầu xóa tài khoản xưởng
@@ -185,7 +185,7 @@ export default function DataAndPrivacyPage() {
       {/* MODAL XÁC NHẬN 2 BƯỚC */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
+          <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-2 text-red-600 font-bold text-sm">
                 <ShieldAlert className="w-5 h-5 shrink-0" />

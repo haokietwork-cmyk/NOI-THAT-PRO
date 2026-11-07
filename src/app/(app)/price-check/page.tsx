@@ -30,8 +30,8 @@ export default function PriceCheckPage() {
         </p>
       </div>
 
-      <div className="p-8 rounded-3xl bg-white border border-slate-200/80 space-y-6 shadow-sm">
-        <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-amber-50 border border-amber-200/80 text-amber-800 text-xs">
+      <div className="p-8 rounded-lg bg-white border border-slate-200 space-y-6 shadow-2xs">
+        <div className="flex items-center gap-3 p-3.5 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-xs">
           <span className="text-lg">⏳</span>
           <p className="leading-relaxed">
             <strong>Tính năng đang trong giai đoạn khảo sát nhu cầu xưởng:</strong> Chúng tôi đang hoàn thiện thuật toán phân tích dải giá thị trường dựa trên 5.000+ công trình thực tế. Đăng ký nhận thông báo để được dùng thử miễn phí bản Beta đầu tiên.
@@ -39,7 +39,7 @@ export default function PriceCheckPage() {
         </div>
 
         {submitted ? (
-          <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-2">
+          <div className="p-6 rounded-md bg-emerald-50 border border-emerald-200 text-center space-y-2">
             <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
             <h3 className="font-bold text-slate-900 text-base">Đăng ký thành công!</h3>
             <p className="text-xs text-slate-600">

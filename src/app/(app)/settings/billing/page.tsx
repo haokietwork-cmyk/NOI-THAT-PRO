@@ -122,7 +122,7 @@ export default function BillingSettingsPage() {
       </div>
 
       {/* Trạng thái hiện tại của tài khoản */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
             Gói cước hiện tại của xưởng:
@@ -170,7 +170,7 @@ export default function BillingSettingsPage() {
           {/* Gói Tháng */}
           <div
             onClick={() => openPaymentModal("monthly")}
-            className={`p-6 rounded-2xl border-2 transition cursor-pointer relative bg-white hover:border-amber-400 shadow-xs ${
+            className={`p-6 rounded-lg border-2 transition cursor-pointer relative bg-white hover:border-amber-400 shadow-2xs ${
               selectedPlan === "monthly" && showQR
                 ? "border-amber-500 bg-amber-50/20"
                 : "border-slate-200"
@@ -202,7 +202,7 @@ export default function BillingSettingsPage() {
           {/* Gói Năm */}
           <div
             onClick={() => openPaymentModal("yearly")}
-            className={`p-6 rounded-2xl border-2 transition cursor-pointer relative bg-white hover:border-amber-400 shadow-xs ${
+            className={`p-6 rounded-lg border-2 transition cursor-pointer relative bg-white hover:border-amber-400 shadow-2xs ${
               selectedPlan === "yearly" && showQR
                 ? "border-amber-500 bg-amber-50/20"
                 : "border-slate-200"
@@ -241,7 +241,7 @@ export default function BillingSettingsPage() {
       {/* ================================================================== */}
       {showQR && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-200 text-center space-y-4 text-xs">
+          <div className="bg-white rounded-lg max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-200 text-center space-y-4 text-xs">
             
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -282,12 +282,12 @@ export default function BillingSettingsPage() {
                 </div>
 
                 {/* Khung mã VietQR */}
-                <div className="w-56 h-56 mx-auto rounded-2xl border border-slate-200 p-2.5 bg-white shadow-inner flex items-center justify-center">
+                <div className="w-56 h-56 mx-auto rounded-lg border border-slate-200 p-2.5 bg-white shadow-inner flex items-center justify-center">
                   <img src={qrUrl} alt="Mã VietQR" className="w-full h-full object-contain" />
                 </div>
 
                 {/* Thông tin chuyển khoản */}
-                <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-1.5 text-left">
+                <div className="bg-slate-50 p-3.5 rounded-md border border-slate-200 text-xs space-y-1.5 text-left">
                   <div className="flex justify-between">
                     <span className="text-slate-400">Ngân hàng:</span>
                     <strong className="text-slate-900">MB Bank (Quân Đội)</strong>
