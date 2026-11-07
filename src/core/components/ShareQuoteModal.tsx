@@ -133,7 +133,7 @@ export default function ShareQuoteModal({
         {/* Header Modal */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-zinc-200 text-zinc-900 flex items-center justify-center shrink-0">
               <Share2 className="w-4 h-4" />
             </div>
             <div>
@@ -153,12 +153,12 @@ export default function ShareQuoteModal({
 
         {/* Trường hợp: Dự án chưa lưu Cloud hoặc chưa đăng nhập */}
         {(!isAuthenticated || !projectId) && (
-          <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 space-y-3 text-xs text-amber-900">
+          <div className="p-4 rounded-xl bg-zinc-100 border border-zinc-200 space-y-3 text-xs text-zinc-900">
             <div className="flex items-start gap-2.5">
-              <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <ShieldAlert className="w-5 h-5 text-zinc-900 shrink-0 mt-0.5" />
               <div>
                 <p className="font-bold">Yêu cầu lưu dự án lên Cloud trước khi chia sẻ</p>
-                <p className="text-[11px] text-amber-800 mt-1 leading-relaxed">
+                <p className="text-[11px] text-zinc-900 mt-1 leading-relaxed">
                   Để đảm bảo tính bất biến, bảo mật dữ liệu và tạo token ngẫu nhiên, dự án cần được lưu trữ an toàn trên tài khoản xưởng của bạn.
                 </p>
               </div>
@@ -172,7 +172,7 @@ export default function ShareQuoteModal({
                     onClose();
                     onPromptLogin();
                   }}
-                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition shadow-xs text-xs cursor-pointer"
+                  className="px-4 py-2 bg-zinc-900 hover:bg-black text-white font-bold rounded-xl transition shadow-xs text-xs cursor-pointer"
                 >
                   Đăng nhập tài khoản
                 </button>
@@ -183,7 +183,7 @@ export default function ShareQuoteModal({
                     onClose();
                     onSaveProjectFirst();
                   }}
-                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition shadow-xs text-xs cursor-pointer"
+                  className="px-4 py-2 bg-zinc-900 hover:bg-black text-white font-bold rounded-xl transition shadow-xs text-xs cursor-pointer"
                 >
                   Lưu dự án lên Cloud ngay
                 </button>
@@ -203,8 +203,8 @@ export default function ShareQuoteModal({
             )}
 
             {revokedSuccess && (
-              <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+              <div className="p-3 bg-zinc-100 border border-zinc-200 text-zinc-900 rounded-xl text-xs flex items-center gap-2">
+                <Check className="w-4 h-4 text-zinc-900 shrink-0" />
                 <span>Đã thu hồi liên kết thành công. Khách hàng sẽ không thể truy cập liên kết cũ nữa.</span>
               </div>
             )}
@@ -220,7 +220,7 @@ export default function ShareQuoteModal({
                   <select
                     value={expiresDays}
                     onChange={(e) => setExpiresDays(Number(e.target.value))}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-amber-500 text-xs"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-zinc-900 text-xs"
                   >
                     <option value={7}>7 ngày (Báo giá nhanh)</option>
                     <option value={30}>30 ngày (Tiêu chuẩn xưởng mộc)</option>
@@ -234,7 +234,7 @@ export default function ShareQuoteModal({
                       type="checkbox"
                       checked={includeBankInfo}
                       onChange={(e) => setIncludeBankInfo(e.target.checked)}
-                      className="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 border-slate-300"
+                      className="w-4 h-4 rounded text-zinc-900 focus:ring-zinc-900 border-slate-300"
                     />
                     <CreditCard className="w-3.5 h-3.5 text-slate-500" />
                     <span>Hiển thị thông tin tài khoản ngân hàng để khách chuyển khoản cọc</span>
@@ -243,7 +243,7 @@ export default function ShareQuoteModal({
 
                 <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1 text-[11px] text-slate-500">
                   <strong className="text-slate-800 flex items-center gap-1 font-bold">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                    <ShieldCheck className="w-3.5 h-3.5 text-zinc-900" />
                     Cam kết bảo mật bí mật kinh doanh:
                   </strong>
                   <p>
@@ -263,7 +263,7 @@ export default function ShareQuoteModal({
                     type="button"
                     onClick={handleCreateShareLink}
                     disabled={loading}
-                    className="w-full sm:w-auto px-5 py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition shadow-xs disabled:opacity-50 cursor-pointer text-center"
+                    className="w-full sm:w-auto px-5 py-2.5 text-xs font-bold text-white bg-zinc-900 hover:bg-zinc-900 rounded-xl transition shadow-xs disabled:opacity-50 cursor-pointer text-center"
                   >
                     {loading ? "Đang tạo liên kết..." : "Tạo Liên Kết Chia Sẻ"}
                   </button>
@@ -277,7 +277,7 @@ export default function ShareQuoteModal({
                   <button
                     type="button"
                     onClick={handleWebShare}
-                    className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+                    className="w-full py-3 px-4 bg-zinc-900 hover:bg-black text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                   >
                     <Share2 className="w-4 h-4" />
                     <span>Gửi qua Zalo / Ứng dụng điện thoại</span>
@@ -298,7 +298,7 @@ export default function ShareQuoteModal({
                     <button
                       type="button"
                       onClick={handleCopyLink}
-                      className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shrink-0 shadow-xs cursor-pointer"
+                      className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-900 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shrink-0 shadow-xs cursor-pointer"
                     >
                       {copied ? (
                         <>
@@ -315,9 +315,9 @@ export default function ShareQuoteModal({
                   </div>
                 </div>
 
-                <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl text-[11px] space-y-1">
+                <div className="p-3 bg-zinc-100 border border-zinc-200 text-zinc-900 rounded-xl text-[11px] space-y-1">
                   <strong className="font-bold flex items-center gap-1.5">
-                    <Check className="w-3.5 h-3.5 text-emerald-600" />
+                    <Check className="w-3.5 h-3.5 text-zinc-900" />
                     Liên kết bảo mật đã sẵn sàng!
                   </strong>
                   <p>

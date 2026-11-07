@@ -22,7 +22,7 @@ export default function RootError({
   return (
     <div className="min-h-screen bg-slate-50 bg-blueprint-grid flex items-center justify-center p-4 font-sans text-slate-900">
       <div className="bg-white border border-slate-200/90 rounded-2xl p-8 sm:p-10 max-w-lg w-full shadow-sm text-center space-y-6">
-        <div className="w-14 h-14 bg-amber-50 border border-amber-200 text-amber-600 rounded-2xl flex items-center justify-center mx-auto shadow-xs">
+        <div className="w-14 h-14 bg-zinc-100 border border-zinc-200 text-zinc-900 rounded-2xl flex items-center justify-center mx-auto shadow-xs">
           <AlertOctagon className="w-7 h-7" />
         </div>
 
@@ -44,7 +44,7 @@ export default function RootError({
           <button
             type="button"
             onClick={() => reset()}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow-xs"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-zinc-900 hover:bg-black text-white text-xs font-bold rounded-xl transition shadow-xs"
           >
             <RotateCcw className="w-4 h-4" />
             Thử lại thao tác

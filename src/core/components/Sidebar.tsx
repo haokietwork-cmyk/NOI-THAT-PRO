@@ -113,13 +113,13 @@ export default function Sidebar({ onCloseMobile }: SidebarProps = {}) {
           onClick={() => onCloseMobile?.()}
           className="flex items-center gap-3 group"
         >
-          <div className="w-8 h-8 rounded-lg bg-amber-600 flex items-center justify-center text-white transition">
+          <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center text-white transition">
             <Layers className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
               <span className="font-bold text-sm tracking-tight text-slate-900">
-                NỘI THẤT <span className="text-amber-700">PRO</span>
+                NỘI THẤT <span className="text-zinc-900">PRO</span>
               </span>
               <span className="text-[9px] font-mono font-semibold px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200">
                 PRO
@@ -167,7 +167,7 @@ export default function Sidebar({ onCloseMobile }: SidebarProps = {}) {
             </div>
             <div>
               <span className="text-slate-500 block text-[10px]">Độ tin cậy:</span>
-              <span className="font-medium text-emerald-700 font-mono">Sai số &lt; 1%</span>
+              <span className="font-medium text-zinc-900 font-mono">Sai số &lt; 1%</span>
             </div>
           </div>
         </div>
@@ -175,8 +175,8 @@ export default function Sidebar({ onCloseMobile }: SidebarProps = {}) {
         <div className="pt-1.5 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-500">
           <span>Trạng thái xưởng:</span>
           {isAuthenticated ? (
-            <span className="font-medium text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
-              <ShieldCheck className="w-3 h-3 text-emerald-700" />
+            <span className="font-medium text-zinc-900 bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200 flex items-center gap-1">
+              <ShieldCheck className="w-3 h-3 text-zinc-900" />
               Đã kích hoạt
             </span>
           ) : (
@@ -217,7 +217,7 @@ export default function Sidebar({ onCloseMobile }: SidebarProps = {}) {
                   <div className="flex items-center gap-2.5 min-w-0">
                     <Icon
                       className={`w-4 h-4 shrink-0 ${
-                        isActive ? "text-amber-700" : isLocked ? "text-slate-400" : "text-slate-500"
+                        isActive ? "text-zinc-900" : isLocked ? "text-slate-400" : "text-slate-500"
                       }`}
                     />
                     <div className="min-w-0">
@@ -266,7 +266,7 @@ export default function Sidebar({ onCloseMobile }: SidebarProps = {}) {
                   </div>
                 </div>
               </div>
-              <span className="text-[9px] font-semibold text-amber-800 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">
+              <span className="text-[9px] font-semibold text-zinc-900 bg-zinc-100 px-1.5 py-0.2 rounded border border-zinc-200">
                 PRO
               </span>
             </div>

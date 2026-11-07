@@ -131,7 +131,7 @@ export default function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
                     className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition text-left cursor-pointer group"
                   >
                     <div className="flex items-center gap-2.5">
-                      <Icon className="w-4 h-4 text-slate-400 group-hover:text-amber-700 transition" />
+                      <Icon className="w-4 h-4 text-slate-400 group-hover:text-zinc-900 transition" />
                       <span className="font-medium">{item.name}</span>
                     </div>
                     <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-600 group-hover:translate-x-0.5 transition" />
@@ -156,7 +156,7 @@ export default function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
                   className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition text-left cursor-pointer group"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <FolderOpen className="w-4 h-4 text-slate-400 group-hover:text-amber-700 shrink-0 transition" />
+                    <FolderOpen className="w-4 h-4 text-slate-400 group-hover:text-zinc-900 shrink-0 transition" />
                     <div className="min-w-0 truncate">
                       <div className="font-medium text-slate-900 truncate">{p.projectName}</div>
                       <div className="text-[10px] text-slate-400 truncate">

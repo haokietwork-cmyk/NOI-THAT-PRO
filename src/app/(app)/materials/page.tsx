@@ -310,8 +310,8 @@ export default function MaterialsPage() {
       
       {/* Toast thông báo */}
       {saveToast && (
-        <div className="fixed top-5 right-5 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 text-xs font-semibold animate-in fade-in slide-in-from-top-2 duration-200">
-          <CheckCircle2 className="w-4 h-4 text-amber-400" />
+        <div className="fixed top-5 right-5 z-50 bg-zinc-950 text-white px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 text-xs font-semibold border border-zinc-800 animate-in fade-in slide-in-from-top-2 duration-200">
+          <CheckCircle2 className="w-4 h-4 text-white" />
           <span>{saveToast}</span>
         </div>
       )}
@@ -319,7 +319,7 @@ export default function MaterialsPage() {
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">
+          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-900 uppercase tracking-wider mb-1">
             <Boxes className="w-3.5 h-3.5" />
             <span>Thư viện Vật tư & Đơn giá Xưởng</span>
           </div>
@@ -349,7 +349,7 @@ export default function MaterialsPage() {
 
           <button
             onClick={openCreateModal}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition shadow-sm shadow-amber-500/20"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-zinc-900 hover:bg-black rounded-xl transition shadow-xs"
           >
             <Plus className="w-4 h-4" />
             <span>Thêm vật tư mới</span>
@@ -358,37 +358,37 @@ export default function MaterialsPage() {
       </div>
 
       {/* Technical Standards Ribbon */}
-      <div className="bg-slate-900 text-slate-300 text-[11px] py-2 px-4 rounded-lg font-mono border border-slate-800 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+      <div className="bg-zinc-950 text-zinc-300 text-[11px] py-2 px-4 rounded-lg font-mono border border-zinc-800 flex flex-wrap items-center justify-between gap-3 shadow-xs">
         <div className="flex items-center gap-4 text-[10px]">
-          <span className="flex items-center gap-1.5 text-amber-400 font-bold">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="flex items-center gap-1.5 text-white font-bold">
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
             TIÊU CHUẨN ĐỊNH MỨC XƯỞNG
           </span>
-          <span className="text-slate-400">KHỔ PHÔI VÁN: <strong className="text-white">1220 × 2440 MM &amp; 1830 × 2440 JUMBO</strong></span>
-          <span className="text-slate-400">DUNG SAI ĐỘ DÀY: <strong className="text-white">±0.2 MM</strong></span>
-          <span className="text-slate-400">CHỈ DÁN CẠNH: <strong className="text-white">PVC 1×21MM &amp; 2×21MM (KEO PUR)</strong></span>
+          <span className="text-zinc-400">KHỔ PHÔI VÁN: <strong className="text-white">1220 × 2440 MM &amp; 1830 × 2440 JUMBO</strong></span>
+          <span className="text-zinc-400">DUNG SAI ĐỘ DÀY: <strong className="text-white">±0.2 MM</strong></span>
+          <span className="text-zinc-400">CHỈ DÁN CẠNH: <strong className="text-white">PVC 1×21MM &amp; 2×21MM (KEO PUR)</strong></span>
         </div>
-        <div className="flex items-center gap-3 text-[10px] text-slate-400">
-          <span className="text-emerald-400 flex items-center gap-1 font-sans font-medium">
-            <CheckCircle2 className="w-3.5 h-3.5" /> {WORKSHOP_TERMS.snapshotPricing.labelWithOriginal.toUpperCase()} BẢO TOÀN GIÁ VỐN
+        <div className="flex items-center gap-3 text-[10px] text-zinc-400">
+          <span className="text-white flex items-center gap-1 font-sans font-medium">
+            <CheckCircle2 className="w-3.5 h-3.5 text-zinc-300" /> {WORKSHOP_TERMS.snapshotPricing.labelWithOriginal.toUpperCase()} BẢO TOÀN GIÁ VỐN
           </span>
         </div>
       </div>
 
       {/* Thanh Sổ Tay Quy Chuẩn & Định Mức Kỹ Thuật Nội Bộ (0% Link ngoài) */}
-      <div className="bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-transparent border border-amber-500/20 rounded-lg p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div className="bg-zinc-100 border border-zinc-200 rounded-lg p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-amber-500" />
-          <span className="font-bold text-slate-800">Quy Chuẩn Định Mức &amp; Thông Số Kỹ Thuật Vật Tư:</span>
-          <span className="text-slate-500 hidden sm:inline">Khổ phôi 1220×2440 &amp; Jumbo 1830×2440, Cốt HMR V313, Ván Nhựa WPB Chống Nước, Nẹp PUR</span>
+          <span className="w-2 h-2 rounded-full bg-zinc-900" />
+          <span className="font-bold text-zinc-900">Quy Chuẩn Định Mức &amp; Thông Số Kỹ Thuật Vật Tư:</span>
+          <span className="text-zinc-600 hidden sm:inline">Khổ phôi 1220×2440 &amp; Jumbo 1830×2440, Cốt HMR V313, Ván Nhựa WPB Chống Nước, Nẹp PUR</span>
         </div>
         <div>
           <button
             type="button"
             onClick={() => setShowSpecHandbook(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1 bg-white hover:bg-amber-50 text-amber-900 text-[11px] font-bold rounded-md border border-amber-300 shadow-2xs transition"
+            className="inline-flex items-center gap-1.5 px-3 py-1 bg-white hover:bg-zinc-50 text-zinc-900 text-[11px] font-bold rounded-md border border-zinc-300 shadow-2xs transition"
           >
-            <BookOpen className="w-3.5 h-3.5 text-amber-700" />
+            <BookOpen className="w-3.5 h-3.5 text-zinc-900" />
             <span>Tra Cứu Sổ Tay Quy Cách Kỹ Thuật</span>
           </button>
         </div>
@@ -401,52 +401,52 @@ export default function MaterialsPage() {
         <div className="space-y-3">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
             
-            {/* 4 Tab lọc nhanh với màu nhận diện đặc trưng từng nhóm vật tư */}
-            <div className="flex flex-wrap items-center gap-1.5 bg-slate-100/80 p-1.5 rounded-md text-xs font-semibold text-slate-600">
+            {/* Tab lọc nhanh với thiết kế tối giản tinh tế */}
+            <div className="flex flex-wrap items-center gap-1.5 bg-zinc-100 p-1.5 rounded-lg text-xs font-semibold text-zinc-600">
               {[
                 { 
                   id: "all", 
                   label: "Tất cả", 
                   count: countByCategory.all,
-                  activeClass: "bg-slate-900 text-white shadow-xs",
-                  badgeClass: activeTab === "all" ? "bg-white/20 text-white" : "bg-slate-200 text-slate-600"
+                  activeClass: "bg-zinc-900 text-white shadow-xs",
+                  badgeClass: activeTab === "all" ? "bg-white/20 text-white" : "bg-zinc-200 text-zinc-700"
                 },
                 { 
                   id: "board", 
-                  label: "Ván công nghiệp (Board)", 
+                  label: "Ván gỗ tấm (Boards)", 
                   count: countByCategory.board,
-                  activeClass: "bg-amber-500 text-white shadow-xs shadow-amber-500/20",
-                  badgeClass: activeTab === "board" ? "bg-amber-600 text-white" : "bg-amber-100 text-amber-800"
+                  activeClass: "bg-zinc-900 text-white shadow-xs",
+                  badgeClass: activeTab === "board" ? "bg-white/20 text-white" : "bg-zinc-200 text-zinc-700"
                 },
                 { 
                   id: "edge", 
                   label: "Chỉ dán cạnh (Edge)", 
                   count: countByCategory.edge,
-                  activeClass: "bg-sky-600 text-white shadow-xs shadow-sky-600/20",
-                  badgeClass: activeTab === "edge" ? "bg-sky-700 text-white" : "bg-sky-100 text-sky-800"
+                  activeClass: "bg-zinc-900 text-white shadow-xs",
+                  badgeClass: activeTab === "edge" ? "bg-white/20 text-white" : "bg-zinc-200 text-zinc-700"
                 },
                 { 
                   id: "hardware", 
-                  label: "Phụ kiện (Hardware)", 
+                  label: "Phụ kiện kim khí (Hardware)", 
                   count: countByCategory.hardware,
-                  activeClass: "bg-emerald-600 text-white shadow-xs shadow-emerald-600/20",
-                  badgeClass: activeTab === "hardware" ? "bg-emerald-700 text-white" : "bg-emerald-100 text-emerald-800"
+                  activeClass: "bg-zinc-900 text-white shadow-xs",
+                  badgeClass: activeTab === "hardware" ? "bg-white/20 text-white" : "bg-zinc-200 text-zinc-700"
                 },
                 { 
                   id: "labor", 
-                  label: "Nhân công (Labor)", 
+                  label: "Nhân công & Gia công (Labor)", 
                   count: countByCategory.labor,
-                  activeClass: "bg-purple-600 text-white shadow-xs shadow-purple-600/20",
-                  badgeClass: activeTab === "labor" ? "bg-purple-700 text-white" : "bg-purple-100 text-purple-800"
+                  activeClass: "bg-zinc-900 text-white shadow-xs",
+                  badgeClass: activeTab === "labor" ? "bg-white/20 text-white" : "bg-zinc-200 text-zinc-700"
                 },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-md transition flex items-center gap-1.5 ${
                     activeTab === tab.id
                       ? `${tab.activeClass} font-bold`
-                      : "hover:text-slate-900 hover:bg-slate-200/60"
+                      : "hover:text-zinc-900 hover:bg-zinc-200/60"
                   }`}
                 >
                   <span>{tab.label}</span>
@@ -466,7 +466,7 @@ export default function MaterialsPage() {
                   placeholder="Tìm mã ván, tên, Melamine, HMR V313..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-7 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                  className="w-full pl-9 pr-7 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900"
                 />
                 {searchTerm && (
                   <button
@@ -485,16 +485,16 @@ export default function MaterialsPage() {
                 onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition shadow-xs cursor-pointer shrink-0 ${
                   activeAdvancedFilterCount > 0
-                    ? "bg-amber-500 text-white shadow-amber-500/20"
+                    ? "bg-zinc-900 text-white shadow-xs"
                     : showAdvancedFilter
-                    ? "bg-slate-900 text-white"
-                    : "bg-white hover:bg-slate-100 text-slate-700 border border-slate-200"
+                    ? "bg-zinc-900 text-white"
+                    : "bg-white hover:bg-zinc-100 text-zinc-700 border border-zinc-200"
                 }`}
               >
                 <Filter className="w-3.5 h-3.5" />
                 <span>Phễu Lọc</span>
                 {activeAdvancedFilterCount > 0 && (
-                  <span className="w-4 h-4 rounded-full bg-white text-amber-700 font-mono text-[10px] flex items-center justify-center font-black">
+                  <span className="w-4 h-4 rounded-full bg-white text-zinc-900 font-mono text-[10px] flex items-center justify-center font-black">
                     {activeAdvancedFilterCount}
                   </span>
                 )}
@@ -504,8 +504,8 @@ export default function MaterialsPage() {
 
           {/* Hàng bộ lọc phân nhóm kỹ thuật nhanh */}
           <div className="flex items-center gap-2 pt-1 border-t border-slate-100 text-[11px] flex-wrap">
-            <span className="text-slate-400 font-semibold flex items-center gap-1 shrink-0">
-              <Filter className="w-3 h-3 text-slate-400" />
+            <span className="text-zinc-500 font-semibold flex items-center gap-1 shrink-0">
+              <Filter className="w-3 h-3 text-zinc-400" />
               Phân nhóm kỹ thuật:
             </span>
             {[
@@ -519,8 +519,8 @@ export default function MaterialsPage() {
                 onClick={() => setBrandFilter(b.id)}
                 className={`px-2.5 py-1 rounded-lg font-medium transition cursor-pointer ${
                   brandFilter === b.id
-                    ? "bg-amber-100 text-amber-900 font-bold border border-amber-300"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200/60"
+                    ? "bg-zinc-900 text-white font-bold border border-zinc-900"
+                    : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
                 }`}
               >
                 {b.label}
@@ -530,15 +530,15 @@ export default function MaterialsPage() {
 
           {/* Khối Phễu Lọc Mở Rộng Đa Tiêu Chí */}
           {(showAdvancedFilter || activeAdvancedFilterCount > 0) && (
-            <div className="bg-slate-50/90 border border-slate-200 rounded-md p-3.5 space-y-3 animate-in fade-in duration-150">
+            <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3.5 space-y-3 animate-in fade-in duration-150">
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 text-xs">
                 {/* Lọc Độ dày phôi */}
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-600">Độ dày phôi:</label>
+                  <label className="text-[11px] font-bold text-zinc-700">Độ dày phôi:</label>
                   <select
                     value={filterThickness}
                     onChange={(e) => setFilterThickness(e.target.value)}
-                    className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium focus:border-amber-500 focus:outline-none"
+                    className="w-full p-1.5 bg-white border border-zinc-200 rounded-lg text-xs font-medium focus:border-zinc-900 focus:outline-none"
                   >
                     <option value="all">Tất cả độ dày</option>
                     <option value="6">6mm (Ván hậu)</option>
@@ -551,11 +551,11 @@ export default function MaterialsPage() {
 
                 {/* Lọc Khổ phôi */}
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-600">Quy cách khổ phôi:</label>
+                  <label className="text-[11px] font-bold text-zinc-700">Quy cách khổ phôi:</label>
                   <select
                     value={filterDimension}
                     onChange={(e) => setFilterDimension(e.target.value)}
-                    className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium focus:border-amber-500 focus:outline-none"
+                    className="w-full p-1.5 bg-white border border-zinc-200 rounded-lg text-xs font-medium focus:border-zinc-900 focus:outline-none"
                   >
                     <option value="all">Tất cả quy cách</option>
                     <option value="1220x2440">Khổ chuẩn 1220 × 2440 mm</option>
@@ -565,11 +565,11 @@ export default function MaterialsPage() {
 
                 {/* Lọc Thương hiệu / Hãng */}
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-600">Hãng / Xuất xứ:</label>
+                  <label className="text-[11px] font-bold text-zinc-700">Hãng / Xuất xứ:</label>
                   <select
                     value={filterBrandName}
                     onChange={(e) => setFilterBrandName(e.target.value)}
-                    className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium focus:border-amber-500 focus:outline-none"
+                    className="w-full p-1.5 bg-white border border-zinc-200 rounded-lg text-xs font-medium focus:border-zinc-900 focus:outline-none"
                   >
                     <option value="all">Tất cả thương hiệu</option>
                     {uniqueBrands.map((b) => (
@@ -580,11 +580,11 @@ export default function MaterialsPage() {
 
                 {/* Lọc Khoảng giá */}
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-600">Khoảng giá vốn:</label>
+                  <label className="text-[11px] font-bold text-zinc-700">Khoảng giá vốn:</label>
                   <select
                     value={filterPriceRange}
                     onChange={(e) => setFilterPriceRange(e.target.value)}
-                    className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium focus:border-amber-500 focus:outline-none"
+                    className="w-full p-1.5 bg-white border border-zinc-200 rounded-lg text-xs font-medium focus:border-zinc-900 focus:outline-none"
                   >
                     <option value="all">Tất cả mức giá</option>
                     <option value="under_200k">Dưới 200.000 đ</option>
@@ -596,11 +596,11 @@ export default function MaterialsPage() {
 
                 {/* Lọc Hao hụt */}
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-600">Định mức hao hụt:</label>
+                  <label className="text-[11px] font-bold text-zinc-700">Định mức hao hụt:</label>
                   <select
                     value={filterWaste}
                     onChange={(e) => setFilterWaste(e.target.value)}
-                    className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium focus:border-amber-500 focus:outline-none"
+                    className="w-full p-1.5 bg-white border border-zinc-200 rounded-lg text-xs font-medium focus:border-zinc-900 focus:outline-none"
                   >
                     <option value="all">Tất cả định mức</option>
                     <option value="has_waste">Có hao hụt (&gt; 0%)</option>
@@ -676,12 +676,12 @@ export default function MaterialsPage() {
         </div>
 
         {/* Hướng dẫn thao tác nhanh kiểu Excel */}
-        <div className="flex items-center justify-between text-[11px] text-slate-500 px-1 pt-1">
-          <span className="flex items-center gap-1.5 text-amber-700 font-medium">
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+        <div className="flex items-center justify-between text-[11px] text-zinc-500 px-1 pt-1">
+          <span className="flex items-center gap-1.5 text-zinc-700 font-medium">
+            <Sparkles className="w-3.5 h-3.5 text-zinc-900" />
             Bấm trực tiếp vào ô Đơn giá hoặc Hao hụt để sửa nhanh như Excel (Enter để lưu, Esc để hủy).
           </span>
-          <span className="font-mono text-slate-400">
+          <span className="font-mono text-zinc-400">
             Hiển thị {filteredMaterials.length} vật tư
           </span>
         </div>
@@ -718,7 +718,7 @@ export default function MaterialsPage() {
                   const thickMm = m.thicknessMm ?? m.thickness ?? 17;
 
                   return (
-                    <tr key={m.id} className="hover:bg-amber-50/30 transition">
+                    <tr key={m.id} className="hover:bg-zinc-50 transition">
                       {/* STT */}
                       <td className="p-3 text-center text-slate-400 font-mono text-[11px]">
                         {idx + 1}
@@ -736,12 +736,12 @@ export default function MaterialsPage() {
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <span className="font-semibold text-slate-900">{m.name}</span>
                           {m.brand && (
-                            <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-amber-50 text-amber-700 border border-amber-200">
+                            <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-zinc-100 text-zinc-800 border border-zinc-200">
                               {m.brand}
                             </span>
                           )}
                           {m.coreStandard && (
-                            <span className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <span className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-zinc-100 text-zinc-800 border border-zinc-200">
                               {m.coreStandard}
                             </span>
                           )}
@@ -759,17 +759,7 @@ export default function MaterialsPage() {
 
                       {/* Phân loại badge */}
                       <td className="p-3">
-                        <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                            m.category === "board"
-                              ? "bg-amber-50 text-amber-800 border-amber-200"
-                              : m.category === "edge"
-                              ? "bg-sky-50 text-sky-800 border-sky-200"
-                              : m.category === "hardware"
-                              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                              : "bg-purple-50 text-purple-800 border-purple-200"
-                          }`}
-                        >
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-zinc-100 text-zinc-800 border-zinc-200">
                           {m.category === "board"
                             ? "Ván tấm"
                             : m.category === "edge"
@@ -812,12 +802,12 @@ export default function MaterialsPage() {
                                 if (e.key === "Enter") saveInlineEdit(m.id);
                                 if (e.key === "Escape") cancelInlineEdit();
                               }}
-                              className="w-28 text-right font-mono text-xs px-2 py-1 bg-amber-50 border-2 border-amber-500 rounded-lg focus:outline-none font-bold text-slate-900 shadow-2xs"
+                              className="w-28 text-right font-mono text-xs px-2 py-1 bg-zinc-50 border-2 border-zinc-900 rounded-lg focus:outline-none font-bold text-slate-900 shadow-2xs"
                               autoFocus
                             />
                             <button
                               onClick={(e) => { e.stopPropagation(); saveInlineEdit(m.id); }}
-                              className="p-1 text-emerald-600 hover:bg-emerald-50 rounded"
+                              className="p-1 text-zinc-900 hover:bg-zinc-100 rounded"
                               title="Lưu (Enter)"
                             >
                               <Check className="w-3.5 h-3.5" />
@@ -831,11 +821,11 @@ export default function MaterialsPage() {
                             </button>
                           </div>
                         ) : (
-                          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-amber-50 border border-transparent hover:border-amber-200 transition">
+                          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-zinc-100 border border-transparent hover:border-zinc-200 transition">
                             <span className="font-mono font-bold text-slate-900">
                               {formatVND(m.unitPrice)}
                             </span>
-                            <Edit3 className="w-3 h-3 text-slate-300 group-hover:text-amber-600 transition" />
+                            <Edit3 className="w-3 h-3 text-slate-300 group-hover:text-zinc-900 transition" />
                           </div>
                         )}
                       </td>
@@ -856,16 +846,16 @@ export default function MaterialsPage() {
                               if (e.key === "Enter") saveInlineEdit(m.id);
                               if (e.key === "Escape") cancelInlineEdit();
                             }}
-                            className="w-16 text-right font-mono text-xs px-2 py-1 bg-amber-50 border-2 border-amber-500 rounded-lg focus:outline-none font-bold text-slate-900 shadow-2xs"
+                            className="w-16 text-right font-mono text-xs px-2 py-1 bg-zinc-50 border-2 border-zinc-900 rounded-lg focus:outline-none font-bold text-slate-900 shadow-2xs"
                           />
                         ) : (
-                          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-amber-50 border border-transparent hover:border-amber-200 transition">
+                          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-zinc-100 border border-transparent hover:border-zinc-200 transition">
                             <span className="font-mono text-slate-600 font-semibold">
                               {m.wasteFactor > 1
                                 ? `+${Math.round((m.wasteFactor - 1) * 100)}% (${m.wasteFactor})`
                                 : "1.00 (0%)"}
                             </span>
-                            <Edit3 className="w-3 h-3 text-slate-300 group-hover:text-amber-600 transition" />
+                            <Edit3 className="w-3 h-3 text-slate-300 group-hover:text-zinc-900 transition" />
                           </div>
                         )}
                       </td>
@@ -876,7 +866,7 @@ export default function MaterialsPage() {
                           <div className="flex items-center justify-center gap-1.5">
                             <button
                               onClick={() => saveInlineEdit(m.id)}
-                              className="p-1 text-emerald-600 hover:bg-emerald-50 rounded transition"
+                              className="p-1 text-zinc-900 hover:bg-zinc-100 rounded transition"
                               title="Lưu"
                             >
                               <Check className="w-4 h-4" />
@@ -893,7 +883,7 @@ export default function MaterialsPage() {
                           <div className="flex items-center justify-center gap-1.5">
                             <button
                               onClick={() => startInlineEdit(m)}
-                              className="p-1 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded transition"
+                              className="p-1 text-slate-400 hover:text-zinc-900 hover:bg-zinc-100 rounded transition"
                               title="Sửa nhanh giá & hao hụt"
                             >
                               <Edit3 className="w-3.5 h-3.5" />
@@ -924,8 +914,8 @@ export default function MaterialsPage() {
         </div>
 
         {/* Chú thích phía dưới */}
-        <div className="p-3 bg-amber-50/60 rounded-xl border border-amber-200/60 flex items-start gap-2 text-xs text-amber-900">
-          <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+        <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-200 flex items-start gap-2 text-xs text-zinc-800">
+          <AlertCircle className="w-4 h-4 text-zinc-600 shrink-0 mt-0.5" />
           <span>
             <strong>Lưu ý:</strong> Khi bạn thay đổi giá trong Thư viện này, giá của các dự án cũ đã lưu trong danh sách sẽ không bị thay đổi (Bảo toàn lịch sử giá vốn - {WORKSHOP_TERMS.snapshotPricing.labelWithOriginal}).
           </span>
@@ -940,7 +930,7 @@ export default function MaterialsPage() {
           <div className="bg-white rounded-lg max-w-lg w-full p-6 space-y-5 shadow-2xl border border-slate-200">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div className="flex items-center gap-2">
-                <Boxes className="w-4 h-4 text-amber-600" />
+                <Boxes className="w-4 h-4 text-zinc-900" />
                 <h3 className="font-black text-slate-900 text-base">
                   {modalMode === "create" ? "Thêm vật tư xưởng mới" : "Chỉnh sửa thông tin vật tư"}
                 </h3>
@@ -956,7 +946,7 @@ export default function MaterialsPage() {
             <form onSubmit={handleSubmitForm} className="space-y-4 text-xs">
               {/* Phân loại */}
               <div>
-                <label className="font-semibold text-slate-700 block mb-1">Phân loại vật tư</label>
+                <label className="font-semibold text-zinc-700 block mb-1">Phân loại vật tư</label>
                 <select
                   value={formCategory}
                   onChange={(e) => {
@@ -971,77 +961,87 @@ export default function MaterialsPage() {
                     } else if (cat === "hardware") {
                       setFormUnit("cái");
                       setFormWaste(1.0);
+                    } else if (cat === "face_material") {
+                      setFormUnit("m2");
+                      setFormWaste(1.1);
+                    } else if (cat === "labor") {
+                      setFormUnit("công");
+                      setFormWaste(1.0);
                     } else {
-                      setFormUnit("tấm");
+                      setFormUnit("cái");
                       setFormWaste(1.0);
                     }
                   }}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 font-medium"
+                  className="w-full p-2.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-900 font-medium"
                 >
-                  <option value="board">1. Ván công nghiệp (MDF, Plywood, Picomat, HDF...)</option>
-                  <option value="edge">2. Chỉ dán cạnh PVC đồng màu</option>
-                  <option value="hardware">3. Phụ kiện kim khí (Bản lề, ray âm, tay nắm...)</option>
-                  <option value="labor">4. Nhân công gia công xưởng & lắp đặt</option>
+                  <option value="board">1. Ván tấm công nghiệp (MDF, Plywood, HDF, WPB, Picomat...)</option>
+                  <option value="edge">2. Chỉ dán cạnh PVC / ABS / Veneer</option>
+                  <option value="hardware">3. Phụ kiện cơ khí & ray trượt bản lề (Hettich, Hafele, Blum...)</option>
+                  <option value="face_material">4. Mặt đá nhân tạo, kính cường lực, tấm ốp lam sóng</option>
+                  <option value="surface">5. Bề mặt phủ & sơn hoàn thiện (Melamine, Acrylic, Laminate, Sơn PU)</option>
+                  <option value="equipment">6. Thiết bị & đèn LED (Bếp, hút mùi, thanh ray LED nhôm)</option>
+                  <option value="labor">7. Nhân công & gia công công đoạn (Cắt CNC, dán cạnh, thợ sơn, lắp ráp)</option>
+                  <option value="supplies">8. Vật tư phụ & liên kết (Ốc cam chốt đợt, keo dán, vít)</option>
                 </select>
               </div>
 
               {/* Mã & Đơn vị tính */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-semibold text-slate-700 block mb-1">Mã vật tư (viết hoa)</label>
+                  <label className="font-semibold text-zinc-700 block mb-1">Mã vật tư (viết hoa)</label>
                   <input
                     type="text"
                     placeholder="VD: MDF_17_AN_CUONG"
                     value={formCode}
                     onChange={(e) => setFormCode(e.target.value.toUpperCase())}
                     required
-                    className="w-full p-2.5 font-mono uppercase bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 font-bold"
+                    className="w-full p-2.5 font-mono uppercase bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-900 font-bold"
                   />
                 </div>
                 <div>
-                  <label className="font-semibold text-slate-700 block mb-1">Đơn vị tính</label>
+                  <label className="font-semibold text-zinc-700 block mb-1">Đơn vị tính</label>
                   <input
                     type="text"
-                    placeholder="tấm / md / cái / bộ"
+                    placeholder="tấm / md / cái / bộ / m2 / m3"
                     value={formUnit}
                     onChange={(e) => setFormUnit(e.target.value)}
                     required
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 font-medium"
+                    className="w-full p-2.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-900 font-medium"
                   />
                 </div>
               </div>
 
               {/* Tên vật tư */}
               <div>
-                <label className="font-semibold text-slate-700 block mb-1">Tên vật tư chi tiết</label>
+                <label className="font-semibold text-zinc-700 block mb-1">Tên vật tư chi tiết</label>
                 <input
                   type="text"
                   placeholder="VD: Ván MDF Chống ẩm An Cường 17mm vân gỗ Melamine 330"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                   required
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 text-slate-900"
+                  className="w-full p-2.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-900 text-zinc-900"
                 />
               </div>
 
               {/* Thương hiệu & Tiêu chuẩn cốt */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-semibold text-slate-700 block mb-1">Thương hiệu / Xuất xứ</label>
+                  <label className="font-semibold text-zinc-700 block mb-1">Thương hiệu / Xuất xứ</label>
                   <input
                     type="text"
-                    placeholder="VD: An Cường, Hettich, Imundex..."
+                    placeholder="VD: An Cường, Hettich, Imundex, Vicostone..."
                     value={formBrand}
                     onChange={(e) => setFormBrand(e.target.value)}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 font-medium"
+                    className="w-full p-2.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-900 font-medium"
                   />
-                  <div className="flex gap-1 mt-1">
-                    {["An Cường", "Hettich", "Imundex"].map((b) => (
+                  <div className="flex gap-1 mt-1 flex-wrap">
+                    {["An Cường", "Hettich", "Imundex", "Vicostone"].map((b) => (
                       <button
                         type="button"
                         key={b}
                         onClick={() => setFormBrand(b)}
-                        className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 hover:bg-amber-100 text-slate-600 hover:text-amber-800 transition"
+                        className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-100 hover:bg-zinc-900 text-zinc-700 hover:text-white transition"
                       >
                         +{b}
                       </button>
@@ -1049,61 +1049,61 @@ export default function MaterialsPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="font-semibold text-slate-700 block mb-1">Tiêu chuẩn cốt gỗ / Vật liệu</label>
+                  <label className="font-semibold text-zinc-700 block mb-1">Tiêu chuẩn cốt / Vật liệu</label>
                   <input
                     type="text"
-                    placeholder="VD: HMR V313 E1, WPB Chịu nước 100%..."
+                    placeholder="VD: HMR V313 E1, WPB Chịu nước 100%, Inox 304..."
                     value={formCoreStandard}
                     onChange={(e) => setFormCoreStandard(e.target.value)}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 font-medium"
+                    className="w-full p-2.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-900 font-medium"
                   />
                 </div>
               </div>
 
               {/* Bề mặt phủ */}
               <div>
-                <label className="font-semibold text-slate-700 block mb-1">Quy cách bề mặt phủ</label>
+                <label className="font-semibold text-zinc-700 block mb-1">Quy cách bề mặt phủ</label>
                 <input
                   type="text"
                   placeholder="VD: Melamine 2 mặt MS 330, Acrylic Noline PARC 01, Laminate Kingdom..."
                   value={formSurface}
                   onChange={(e) => setFormSurface(e.target.value)}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500"
+                  className="w-full p-2.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-900"
                 />
               </div>
 
               {/* Kích thước khổ chuẩn (nếu là ván) */}
               {formCategory === "board" && (
-                <div className="p-3 bg-amber-50/50 rounded-xl border border-amber-200/60 space-y-2">
-                  <span className="font-bold text-amber-900 block text-[11px]">
+                <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-200 space-y-2">
+                  <span className="font-bold text-zinc-900 block text-[11px]">
                     Quy cách tấm ván tiêu chuẩn
                   </span>
                   <div className="grid grid-cols-3 gap-2 font-mono">
                     <div>
-                      <span className="text-[10px] text-slate-500 block">Dài (mm)</span>
+                      <span className="text-[10px] text-zinc-500 block">Dài (mm)</span>
                       <input
                         type="number"
                         value={formLength}
                         onChange={(e) => setFormLength(Number(e.target.value))}
-                        className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-center font-bold"
+                        className="w-full p-1.5 bg-white border border-zinc-200 rounded-lg text-center font-bold"
                       />
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-500 block">Rộng (mm)</span>
+                      <span className="text-[10px] text-zinc-500 block">Rộng (mm)</span>
                       <input
                         type="number"
                         value={formWidth}
                         onChange={(e) => setFormWidth(Number(e.target.value))}
-                        className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-center font-bold"
+                        className="w-full p-1.5 bg-white border border-zinc-200 rounded-lg text-center font-bold"
                       />
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-500 block">Độ dày (mm)</span>
+                      <span className="text-[10px] text-zinc-500 block">Độ dày (mm)</span>
                       <input
                         type="number"
                         value={formThickness}
                         onChange={(e) => setFormThickness(Number(e.target.value))}
-                        className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-center font-bold"
+                        className="w-full p-1.5 bg-white border border-zinc-200 rounded-lg text-center font-bold"
                       />
                     </div>
                   </div>
@@ -1113,17 +1113,17 @@ export default function MaterialsPage() {
               {/* Đơn giá vốn & Hao hụt */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-semibold text-slate-700 block mb-1">Đơn giá vốn (VNĐ)</label>
+                  <label className="font-semibold text-zinc-700 block mb-1">Đơn giá vốn (VNĐ)</label>
                   <input
                     type="number"
                     value={formPrice}
                     onChange={(e) => setFormPrice(Number(e.target.value))}
                     required
-                    className="w-full p-2.5 font-mono bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 font-bold text-slate-900"
+                    className="w-full p-2.5 font-mono bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-900 font-bold text-zinc-900"
                   />
                 </div>
                 <div>
-                  <label className="font-semibold text-slate-700 block mb-1">
+                  <label className="font-semibold text-zinc-700 block mb-1">
                     Hệ số hao hụt ({Math.round((formWaste - 1) * 100)}%)
                   </label>
                   <input
@@ -1132,35 +1132,35 @@ export default function MaterialsPage() {
                     value={formWaste}
                     onChange={(e) => setFormWaste(Number(e.target.value))}
                     required
-                    className="w-full p-2.5 font-mono bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 text-slate-700 font-bold"
+                    className="w-full p-2.5 font-mono bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-900 text-zinc-700 font-bold"
                   />
                 </div>
               </div>
 
               {/* Ghi chú */}
               <div>
-                <label className="font-semibold text-slate-700 block mb-1">Ghi chú tiêu chuẩn</label>
+                <label className="font-semibold text-zinc-700 block mb-1">Ghi chú tiêu chuẩn</label>
                 <input
                   type="text"
                   placeholder="VD: Tiêu chuẩn E1, keo PUR chống ẩm, lõi xanh..."
                   value={formNote}
                   onChange={(e) => setFormNote(e.target.value)}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500"
+                  className="w-full p-2.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-zinc-900"
                 />
               </div>
 
               {/* Buttons */}
-              <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+              <div className="pt-3 border-t border-zinc-100 flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
+                  className="px-4 py-2 font-semibold text-zinc-600 bg-zinc-100 hover:bg-zinc-200 rounded-xl transition"
                 >
                   Hủy bỏ
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition shadow-sm shadow-amber-500/20"
+                  className="px-5 py-2 font-bold text-white bg-zinc-900 hover:bg-black rounded-xl transition shadow-xs"
                 >
                   {modalMode === "create" ? "Thêm vào danh mục" : "Lưu thay đổi"}
                 </button>

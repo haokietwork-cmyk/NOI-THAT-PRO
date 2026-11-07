@@ -61,7 +61,7 @@ const SPEC_ITEMS: SpecItem[] = [
     ],
     workshopTip: "Hệ số hao hụt tối ưu máy CNC Nesting dao 6mm: 1.12 - 1.15 (+12% đến 15%).",
     badge: "Tiêu chuẩn quốc dân",
-    badgeColor: "bg-amber-100 text-amber-800 border-amber-300",
+    badgeColor: "bg-zinc-200 text-zinc-900 border-zinc-300",
   },
   {
     id: "spec-board-jumbo",
@@ -79,7 +79,7 @@ const SPEC_ITEMS: SpecItem[] = [
     ],
     workshopTip: "Yêu cầu bàn hút chân không máy CNC có công suất lớn (7.5kW trở lên) để giữ phôi chắc chắn.",
     badge: "Khổ lớn Jumbo",
-    badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
+    badgeColor: "bg-zinc-100 text-zinc-900 border-zinc-300",
   },
   {
     id: "spec-board-tall",
@@ -114,7 +114,7 @@ const SPEC_ITEMS: SpecItem[] = [
     ],
     workshopTip: "Phù hợp làm toàn bộ thùng và cánh khu vực khô ráo và tủ áo.",
     badge: "Cốt lõi xanh V313",
-    badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
+    badgeColor: "bg-zinc-100 text-zinc-900 border-zinc-300",
   },
   {
     id: "spec-core-wpb",
@@ -164,7 +164,7 @@ const SPEC_ITEMS: SpecItem[] = [
     ],
     workshopTip: "Chọn loại vân gỗ sần (Texture) để che vết trầy xước và bám vân tay tốt hơn bề mặt bóng mịn.",
     badge: "Vân gỗ thông dụng",
-    badgeColor: "bg-amber-100 text-amber-800 border-amber-300",
+    badgeColor: "bg-zinc-200 text-zinc-900 border-zinc-300",
   },
   {
     id: "spec-surface-acrylic",
@@ -244,7 +244,7 @@ const SPEC_ITEMS: SpecItem[] = [
     ],
     workshopTip: "Chiều sâu lọt lòng hộc tủ tối thiểu phải lớn hơn chiều dài ray 10mm (Ray 450mm cần lọt lòng sâu ≥ 460mm).",
     badge: "Ray âm cao cấp",
-    badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
+    badgeColor: "bg-zinc-100 text-zinc-900 border-zinc-300",
   },
 ];
 
@@ -372,7 +372,7 @@ export default function TechnicalHandbookModal({
         <div className="bg-slate-900 text-white p-5 sm:p-6 shrink-0 relative">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-2xl bg-zinc-900/20 border border-zinc-300 text-zinc-300 flex items-center justify-center">
                 <BookOpen className="w-5 h-5" />
               </div>
               <div>
@@ -380,7 +380,7 @@ export default function TechnicalHandbookModal({
                   <h3 className="font-extrabold text-base sm:text-lg text-white tracking-tight">
                     Sổ Tay Quy Cách Kỹ Thuật Gỗ Công Nghiệp 2026
                   </h3>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500 text-slate-950">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-900 text-slate-950">
                     Bản Linh Động v2.0
                   </span>
                 </div>
@@ -408,7 +408,7 @@ export default function TechnicalHandbookModal({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Tìm nhanh: Jumbo, HMR V313, WPB, Noline, PUR, Hệ 32mm, Bản lề..."
-                className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-800/90 border border-slate-700 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-amber-400"
+                className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-800/90 border border-slate-700 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-zinc-900"
               />
               {searchQuery && (
                 <button
@@ -438,10 +438,10 @@ export default function TechnicalHandbookModal({
                   className={`px-3 py-1.5 rounded-xl whitespace-nowrap transition cursor-pointer ${
                     activeTab === tab.id
                       ? tab.isSpecial
-                        ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
+                        ? "bg-zinc-900 text-slate-950 font-bold shadow-xs"
                         : "bg-white text-slate-950 font-bold shadow-xs"
                       : tab.isSpecial
-                      ? "bg-amber-500/20 text-amber-300 hover:bg-amber-500/30"
+                      ? "bg-zinc-900/20 text-zinc-200 hover:bg-zinc-900/30"
                       : "bg-slate-800 text-slate-300 hover:bg-slate-700"
                   }`}
                 >
@@ -462,10 +462,10 @@ export default function TechnicalHandbookModal({
             <div className="space-y-6 animate-in fade-in duration-200">
               
               {/* 1. Công cụ tính số tấm ván từ kích thước tủ */}
-              <div className="bg-white rounded-3xl border border-amber-200 p-5 sm:p-6 shadow-sm space-y-4">
+              <div className="bg-white rounded-3xl border border-zinc-200 p-5 sm:p-6 shadow-sm space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold">
+                    <div className="w-8 h-8 rounded-xl bg-zinc-900 text-white flex items-center justify-center font-bold">
                       <Calculator className="w-4 h-4" />
                     </div>
                     <div>
@@ -477,7 +477,7 @@ export default function TechnicalHandbookModal({
                       </p>
                     </div>
                   </div>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-200 text-zinc-900 font-bold">
                     Hao hụt chuẩn 15%
                   </span>
                 </div>
@@ -490,7 +490,7 @@ export default function TechnicalHandbookModal({
                       type="number"
                       value={cabinetHeight}
                       onChange={(e) => setCabinetHeight(Number(e.target.value))}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 font-mono font-bold text-slate-900 focus:border-amber-500 focus:outline-none"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 font-mono font-bold text-slate-900 focus:border-zinc-900 focus:outline-none"
                     />
                   </div>
                   <div>
@@ -499,7 +499,7 @@ export default function TechnicalHandbookModal({
                       type="number"
                       value={cabinetWidth}
                       onChange={(e) => setCabinetWidth(Number(e.target.value))}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 font-mono font-bold text-slate-900 focus:border-amber-500 focus:outline-none"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 font-mono font-bold text-slate-900 focus:border-zinc-900 focus:outline-none"
                     />
                   </div>
                   <div>
@@ -508,7 +508,7 @@ export default function TechnicalHandbookModal({
                       type="number"
                       value={cabinetDepth}
                       onChange={(e) => setCabinetDepth(Number(e.target.value))}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 font-mono font-bold text-slate-900 focus:border-amber-500 focus:outline-none"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 font-mono font-bold text-slate-900 focus:border-zinc-900 focus:outline-none"
                     />
                   </div>
                   <div>
@@ -517,7 +517,7 @@ export default function TechnicalHandbookModal({
                       type="number"
                       value={doorsCount}
                       onChange={(e) => setDoorsCount(Number(e.target.value))}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 font-mono font-bold text-slate-900 focus:border-amber-500 focus:outline-none"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 font-mono font-bold text-slate-900 focus:border-zinc-900 focus:outline-none"
                     />
                   </div>
                   <div>
@@ -526,16 +526,16 @@ export default function TechnicalHandbookModal({
                       type="number"
                       value={drawersCount}
                       onChange={(e) => setDrawersCount(Number(e.target.value))}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 font-mono font-bold text-slate-900 focus:border-amber-500 focus:outline-none"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 font-mono font-bold text-slate-900 focus:border-zinc-900 focus:outline-none"
                     />
                   </div>
                 </div>
 
                 {/* Kết quả dự toán nhanh */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-100">
-                  <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200/80">
-                    <span className="text-[10px] text-amber-800 font-bold block uppercase">Ván Thùng/Cánh (17mm)</span>
-                    <strong className="text-xl font-black text-amber-950 font-mono">
+                  <div className="p-3 rounded-2xl bg-zinc-100 border border-zinc-200/80">
+                    <span className="text-[10px] text-zinc-900 font-bold block uppercase">Ván Thùng/Cánh (17mm)</span>
+                    <strong className="text-xl font-black text-zinc-900 font-mono">
                       {cabinetCalc.sheets17} <span className="text-xs font-normal">tấm</span>
                     </strong>
                     <span className="text-[10px] text-slate-500 block mt-0.5 font-mono">
@@ -563,9 +563,9 @@ export default function TechnicalHandbookModal({
                     </span>
                   </div>
 
-                  <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200/80">
-                    <span className="text-[10px] text-emerald-800 font-bold block uppercase">Phụ kiện cơ bản</span>
-                    <strong className="text-sm font-black text-emerald-950 font-mono block mt-1">
+                  <div className="p-3 rounded-2xl bg-zinc-100 border border-zinc-200/80">
+                    <span className="text-[10px] text-zinc-900 font-bold block uppercase">Phụ kiện cơ bản</span>
+                    <strong className="text-sm font-black text-zinc-900 font-mono block mt-1">
                       {cabinetCalc.hingesEstimated} bản lề • {cabinetCalc.slidesEstimated} bộ ray
                     </strong>
                     <span className="text-[10px] text-slate-500 block mt-0.5">
@@ -629,7 +629,7 @@ export default function TechnicalHandbookModal({
                 <div className="p-3 rounded-2xl bg-slate-900 text-white flex items-center justify-between text-xs font-mono">
                   <div>
                     <span className="text-slate-400 text-[11px] block">Kết quả mét dài cần xén:</span>
-                    <span className="text-lg font-bold text-amber-400">
+                    <span className="text-lg font-bold text-zinc-300">
                       {edgeSingleCalc.grossMeters} md <span className="text-xs text-slate-400 font-normal">(đã gồm 8% hao hụt)</span>
                     </span>
                   </div>
@@ -653,7 +653,7 @@ export default function TechnicalHandbookModal({
                 filteredSpecs.map((item) => (
                   <div
                     key={item.id}
-                    className="p-5 rounded-3xl bg-white border border-slate-200/90 shadow-2xs hover:border-amber-300 transition space-y-3"
+                    className="p-5 rounded-3xl bg-white border border-slate-200/90 shadow-2xs hover:border-zinc-300 transition space-y-3"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5">
@@ -667,7 +667,7 @@ export default function TechnicalHandbookModal({
 
                       <div className="flex items-center gap-2">
                         {item.dimensions && (
-                          <span className="font-mono text-xs font-bold text-amber-900 px-2.5 py-1 rounded-xl bg-amber-50 border border-amber-200/80">
+                          <span className="font-mono text-xs font-bold text-zinc-900 px-2.5 py-1 rounded-xl bg-zinc-100 border border-zinc-200/80">
                             {item.dimensions} {item.areaM2 ? `(${item.areaM2} m²)` : ""}
                           </span>
                         )}
@@ -678,7 +678,7 @@ export default function TechnicalHandbookModal({
                           title="Sao chép quy cách này"
                         >
                           {copiedId === item.id ? (
-                            <Check className="w-3.5 h-3.5 text-emerald-600" />
+                            <Check className="w-3.5 h-3.5 text-zinc-900" />
                           ) : (
                             <Copy className="w-3.5 h-3.5" />
                           )}
@@ -686,7 +686,7 @@ export default function TechnicalHandbookModal({
                       </div>
                     </div>
 
-                    <p className="text-xs font-semibold text-amber-900">
+                    <p className="text-xs font-semibold text-zinc-900">
                       ⚡ {item.highlight}
                     </p>
 
@@ -698,15 +698,15 @@ export default function TechnicalHandbookModal({
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-[11px] text-slate-700">
                       {item.advantages.map((adv, idx) => (
                         <div key={idx} className="flex items-start gap-1.5">
-                          <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                          <Check className="w-3.5 h-3.5 text-zinc-900 shrink-0 mt-0.5" />
                           <span>{adv}</span>
                         </div>
                       ))}
                     </div>
 
                     {/* Mẹo xưởng mộc */}
-                    <div className="p-3 rounded-2xl bg-amber-50/70 border border-amber-200/60 text-[11px] text-amber-950 flex items-start gap-2">
-                      <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <div className="p-3 rounded-2xl bg-zinc-100/70 border border-zinc-200/60 text-[11px] text-zinc-900 flex items-start gap-2">
+                      <Info className="w-4 h-4 text-zinc-900 shrink-0 mt-0.5" />
                       <div>
                         <strong>Kinh nghiệm sản xuất:</strong> {item.workshopTip}
                       </div>
@@ -724,14 +724,14 @@ export default function TechnicalHandbookModal({
         {/* ================================================================ */}
         <div className="p-4 bg-white border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2 text-slate-500 text-[11px]">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="w-2 h-2 rounded-full bg-zinc-900" />
             <span>Tài liệu tiêu chuẩn kỹ thuật số hóa dùng cho xưởng gỗ nội thất & thợ thiết kế</span>
           </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => setActiveTab(activeTab === "calculator" ? "all" : "calculator")}
-              className="px-3.5 py-2 rounded-xl text-xs font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 transition cursor-pointer flex items-center gap-1.5"
+              className="px-3.5 py-2 rounded-xl text-xs font-bold text-zinc-900 bg-zinc-200 hover:bg-zinc-300 transition cursor-pointer flex items-center gap-1.5"
             >
               <Calculator className="w-3.5 h-3.5" />
               <span>{activeTab === "calculator" ? "Xem danh mục quy cách" : "Mở bộ tính nhanh"}</span>

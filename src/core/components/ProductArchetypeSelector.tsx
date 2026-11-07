@@ -108,7 +108,7 @@ export default function ProductArchetypeSelector({
               onCustomTextChange?.(e.target.value);
             }}
             placeholder="Tìm theo tên gọi thực tế: bàn phấn, chạn bát, bàn sofa đá, sofa chữ L, bàn ăn 8 ghế sồi, cửa slim..."
-            className="w-full pl-9 pr-8 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition shadow-2xs"
+            className="w-full pl-9 pr-8 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition shadow-2xs"
           />
           {searchQuery && (
             <button
@@ -124,13 +124,13 @@ export default function ProductArchetypeSelector({
 
       {/* Smart Keyword Detection Banner (When typing non-standard alias) */}
       {bestSmartMatch && searchQuery.trim().length >= 2 && (
-        <div className="p-2.5 bg-amber-50 border border-amber-200/80 rounded-lg flex items-center justify-between gap-3 text-xs animate-in fade-in duration-150">
+        <div className="p-2.5 bg-zinc-900 text-white border border-zinc-800 rounded-lg flex items-center justify-between gap-3 text-xs animate-in fade-in duration-150 shadow-xs">
           <div className="flex items-center gap-2 overflow-hidden">
-            <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
+            <Sparkles className="w-4 h-4 text-zinc-300 shrink-0" />
             <div className="truncate">
-              <span className="text-slate-600 font-sans">Nhận diện thông minh: </span>
-              <strong className="text-slate-900 font-semibold">{bestSmartMatch.name}</strong>
-              <span className="text-slate-400 text-[11px] ml-1.5 font-mono">
+              <span className="text-zinc-400 font-sans">Nhận diện thông minh: </span>
+              <strong className="text-white font-semibold">{bestSmartMatch.name}</strong>
+              <span className="text-zinc-400 text-[11px] ml-1.5 font-mono">
                 ({bestSmartMatch.defaultDimensions.widthMm} × {bestSmartMatch.defaultDimensions.depthMm} × {bestSmartMatch.defaultDimensions.heightMm} mm)
               </span>
             </div>
@@ -142,7 +142,7 @@ export default function ProductArchetypeSelector({
               handleSelect(bestSmartMatch);
               setSearchQuery("");
             }}
-            className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded text-[11px] transition shadow-2xs cursor-pointer"
+            className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-zinc-100 text-zinc-900 font-semibold rounded text-[11px] transition shadow-2xs cursor-pointer"
           >
             <span>Áp dụng mẫu này</span>
             <ArrowRight className="w-3 h-3" />
@@ -184,58 +184,64 @@ export default function ProductArchetypeSelector({
               onClick={() => handleSelect(item)}
               className={`p-3 rounded-lg border text-left transition-all cursor-pointer flex flex-col justify-between space-y-2 relative ${
                 isSelected
-                  ? "bg-amber-50/70 border-amber-500 shadow-xs ring-1 ring-amber-500"
-                  : "bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-2xs"
+                  ? "bg-zinc-900 text-white border-zinc-900 shadow-xs ring-1 ring-zinc-900"
+                  : "bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-2xs text-slate-900"
               }`}
             >
               {/* Header with Icon and Badge */}
               <div className="flex items-start justify-between gap-1.5 w-full">
                 <div className={`p-1.5 rounded-md ${
-                  isSelected ? "bg-amber-600 text-white" : "bg-slate-100 text-slate-700"
+                  isSelected ? "bg-zinc-800 text-white" : "bg-slate-100 text-slate-700"
                 }`}>
                   <Icon className="w-4 h-4" />
                 </div>
 
-                <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded border truncate max-w-[130px] ${item.badgeColor}`}>
+                <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded border truncate max-w-[130px] ${
+                  isSelected
+                    ? "bg-zinc-800 text-zinc-200 border-zinc-700"
+                    : item.badgeColor
+                }`}>
                   {item.badge}
                 </span>
               </div>
 
               {/* Title & Description */}
               <div className="space-y-0.5">
-                <h4 className="text-xs font-bold text-slate-900 truncate" title={item.name}>
+                <h4 className={`text-xs font-bold truncate ${isSelected ? "text-white" : "text-slate-900"}`} title={item.name}>
                   {item.name}
                 </h4>
-                <p className="text-[11px] text-slate-500 line-clamp-1" title={item.description}>
+                <p className={`text-[11px] line-clamp-1 ${isSelected ? "text-zinc-300" : "text-slate-500"}`} title={item.description}>
                   {item.description}
                 </p>
               </div>
 
               {/* Bottom Specs: Dimensions & Trade Badges */}
-              <div className="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[10px] font-mono text-slate-500 w-full">
+              <div className={`pt-1.5 border-t flex items-center justify-between text-[10px] font-mono w-full ${
+                isSelected ? "border-zinc-800 text-zinc-400" : "border-slate-100 text-slate-500"
+              }`}>
                 <span>
                   {item.defaultDimensions.widthMm}×{item.defaultDimensions.depthMm}×{item.defaultDimensions.heightMm}
                 </span>
 
                 <div className="flex items-center gap-1">
                   {item.defaultFlags.hasStone && (
-                    <span className="w-2 h-2 rounded-full bg-sky-500" title="Có mặt đá 0% OH" />
+                    <span className="w-2 h-2 rounded-full bg-zinc-400" title="Có mặt đá 0% OH" />
                   )}
                   {item.defaultFlags.hasGlass && (
-                    <span className="w-2 h-2 rounded-full bg-indigo-500" title="Có cánh kính" />
+                    <span className="w-2 h-2 rounded-full bg-zinc-400" title="Có cánh kính" />
                   )}
                   {item.defaultFlags.hasUpholstery && (
-                    <span className="w-2 h-2 rounded-full bg-amber-500" title="Có bọc nệm" />
+                    <span className="w-2 h-2 rounded-full bg-zinc-400" title="Có bọc nệm" />
                   )}
                   {item.defaultFlags.hasMetal && (
-                    <span className="w-2 h-2 rounded-full bg-slate-500" title="Có kim loại" />
+                    <span className="w-2 h-2 rounded-full bg-zinc-500" title="Có kim loại" />
                   )}
                 </div>
               </div>
 
               {/* Selected Check Indicator */}
               {isSelected && (
-                <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-amber-600 text-white flex items-center justify-center">
+                <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-white text-zinc-900 flex items-center justify-center shadow-xs">
                   <Check className="w-2.5 h-2.5" />
                 </div>
               )}

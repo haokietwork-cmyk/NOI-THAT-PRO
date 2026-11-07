@@ -88,7 +88,7 @@ export default function DataAndPrivacyPage() {
     <div className="space-y-8 font-sans max-w-4xl">
       {/* Title */}
       <div>
-        <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">
+        <div className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-900 uppercase tracking-wider mb-1">
           <Database className="w-3.5 h-3.5" />
           <span>Dữ Liệu &amp; Quyền Riêng Tư</span>
         </div>
@@ -116,7 +116,7 @@ export default function DataAndPrivacyPage() {
         </Link>
         <Link
           href="/settings/data"
-          className="px-4 py-2 bg-amber-500 text-white rounded-xl shadow-xs"
+          className="px-4 py-2 bg-zinc-900 text-white rounded-xl shadow-xs"
         >
           3. Dữ liệu &amp; Quyền riêng tư
         </Link>
@@ -125,7 +125,7 @@ export default function DataAndPrivacyPage() {
       {/* 1. KHU VỰC XUẤT DỮ LIỆU (DATA EXPORT) */}
       <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-2xs space-y-4">
         <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-          <Download className="w-4 h-4 text-emerald-600" />
+          <Download className="w-4 h-4 text-zinc-900" />
           <h2 className="text-sm font-bold text-slate-900">
             Xuất dữ liệu dự toán &amp; Vật tư (Data Portability)
           </h2>
@@ -139,14 +139,14 @@ export default function DataAndPrivacyPage() {
             type="button"
             onClick={handleExportJson}
             disabled={exporting}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-md transition shadow-xs disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-black text-white text-xs font-semibold rounded-md transition shadow-xs disabled:opacity-50"
           >
             <Download className="w-4 h-4" />
             {exporting ? "Đang trích xuất dữ liệu..." : "Tải xuống toàn bộ dữ liệu (JSON)"}
           </button>
 
           {exportSuccess && (
-            <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 font-medium">
+            <span className="inline-flex items-center gap-1.5 text-xs text-zinc-900 font-medium">
               <CheckCircle2 className="w-4 h-4" />
               Đã tải xuống thành công bản sao lưu!
             </span>

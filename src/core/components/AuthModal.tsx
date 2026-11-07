@@ -124,8 +124,8 @@ export default function AuthModal({
 
         {/* Header modal */}
         <div className="text-center pb-5 border-b border-slate-100">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-700 flex items-center justify-center mx-auto mb-3 shadow-xs">
-            <Lock className="w-6 h-6 text-amber-600" />
+          <div className="w-12 h-12 rounded-2xl bg-zinc-900/10 border border-zinc-300 text-zinc-900 flex items-center justify-center mx-auto mb-3 shadow-xs">
+            <Lock className="w-6 h-6 text-zinc-900" />
           </div>
           <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">{title}</h3>
           <p className="text-xs text-slate-500 mt-1.5 leading-relaxed max-w-md mx-auto">
@@ -147,7 +147,7 @@ export default function AuthModal({
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
-            <Phone className="w-3.5 h-3.5 text-amber-600" />
+            <Phone className="w-3.5 h-3.5 text-zinc-900" />
             <span>Số điện thoại</span>
           </button>
 
@@ -163,7 +163,7 @@ export default function AuthModal({
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
-            <Mail className="w-3.5 h-3.5 text-amber-600" />
+            <Mail className="w-3.5 h-3.5 text-zinc-900" />
             <span>Email</span>
           </button>
 
@@ -179,7 +179,7 @@ export default function AuthModal({
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
-            <Building2 className="w-3.5 h-3.5 text-amber-600" />
+            <Building2 className="w-3.5 h-3.5 text-zinc-900" />
             <span>Đăng ký mới</span>
           </button>
         </div>
@@ -193,8 +193,8 @@ export default function AuthModal({
         )}
 
         {successMsg && (
-          <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+          <div className="mb-4 p-3 rounded-xl bg-zinc-100 border border-zinc-200 text-zinc-900 text-xs flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-zinc-900" />
             <span>{successMsg}</span>
           </div>
         )}
@@ -214,7 +214,7 @@ export default function AuthModal({
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="0912 345 678"
-                  className="w-full text-sm pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                  className="w-full text-sm pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900"
                 />
               </div>
               <p className="text-[11px] text-slate-400 mt-1">Đăng nhập nhanh cho xưởng mộc & thợ thi công</p>
@@ -232,7 +232,7 @@ export default function AuthModal({
                   value={phonePassword}
                   onChange={(e) => setPhonePassword(e.target.value)}
                   placeholder="Nhập mật khẩu (tối thiểu 4 ký tự)"
-                  className="w-full text-sm pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                  className="w-full text-sm pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900"
                 />
               </div>
             </div>
@@ -240,7 +240,7 @@ export default function AuthModal({
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 px-4 rounded-xl text-sm font-semibold bg-amber-500 hover:bg-amber-600 text-white transition shadow-sm shadow-amber-500/20 flex items-center justify-center gap-2 mt-2 cursor-pointer disabled:opacity-50"
+              className="w-full py-2.5 px-4 rounded-xl text-sm font-semibold bg-zinc-900 hover:bg-zinc-900 text-white transition shadow-sm shadow-xs flex items-center justify-center gap-2 mt-2 cursor-pointer disabled:opacity-50"
             >
               {loading ? "Đang xác thực..." : "Đăng nhập bằng Số điện thoại"}
               <ArrowRight className="w-4 h-4" />
@@ -263,7 +263,7 @@ export default function AuthModal({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="xuonggo@example.com"
-                  className="w-full text-sm pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                  className="w-full text-sm pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900"
                 />
               </div>
             </div>
@@ -280,7 +280,7 @@ export default function AuthModal({
                   value={emailPassword}
                   onChange={(e) => setEmailPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full text-sm pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                  className="w-full text-sm pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900"
                 />
               </div>
             </div>
@@ -288,7 +288,7 @@ export default function AuthModal({
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 px-4 rounded-xl text-sm font-semibold bg-amber-500 hover:bg-amber-600 text-white transition shadow-sm shadow-amber-500/20 flex items-center justify-center gap-2 mt-2 cursor-pointer disabled:opacity-50"
+              className="w-full py-2.5 px-4 rounded-xl text-sm font-semibold bg-zinc-900 hover:bg-zinc-900 text-white transition shadow-sm shadow-xs flex items-center justify-center gap-2 mt-2 cursor-pointer disabled:opacity-50"
             >
               {loading ? "Đang xác thực..." : "Đăng nhập bằng Email"}
               <ArrowRight className="w-4 h-4" />
@@ -311,7 +311,7 @@ export default function AuthModal({
                   value={regName}
                   onChange={(e) => setRegName(e.target.value)}
                   placeholder="Anh Hưng / KTS Tuấn"
-                  className="w-full text-sm pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                  className="w-full text-sm pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900"
                 />
               </div>
             </div>
@@ -328,7 +328,7 @@ export default function AuthModal({
                   value={regCompany}
                   onChange={(e) => setRegCompany(e.target.value)}
                   placeholder="Xưởng Nội Thất Hưng Thịnh"
-                  className="w-full text-sm pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                  className="w-full text-sm pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900"
                 />
               </div>
             </div>
@@ -340,7 +340,7 @@ export default function AuthModal({
                   name="contactType"
                   checked={regContactType === "phone"}
                   onChange={() => setRegContactType("phone")}
-                  className="text-amber-600 focus:ring-amber-500"
+                  className="text-zinc-900 focus:ring-zinc-900"
                 />
                 <span>Đăng ký bằng SĐT</span>
               </label>
@@ -350,7 +350,7 @@ export default function AuthModal({
                   name="contactType"
                   checked={regContactType === "email"}
                   onChange={() => setRegContactType("email")}
-                  className="text-amber-600 focus:ring-amber-500"
+                  className="text-zinc-900 focus:ring-zinc-900"
                 />
                 <span>Đăng ký bằng Email</span>
               </label>
@@ -366,7 +366,7 @@ export default function AuthModal({
                     value={regPhone}
                     onChange={(e) => setRegPhone(e.target.value)}
                     placeholder="0912 345 678"
-                    className="w-full text-sm pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                    className="w-full text-sm pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900"
                   />
                 </div>
               </div>
@@ -380,7 +380,7 @@ export default function AuthModal({
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
                     placeholder="xuonggo@example.com"
-                    className="w-full text-sm pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                    className="w-full text-sm pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900"
                   />
                 </div>
               </div>
@@ -398,7 +398,7 @@ export default function AuthModal({
                   value={regPassword}
                   onChange={(e) => setRegPassword(e.target.value)}
                   placeholder="Tối thiểu 6 ký tự"
-                  className="w-full text-sm pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                  className="w-full text-sm pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900"
                 />
               </div>
             </div>
@@ -406,7 +406,7 @@ export default function AuthModal({
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 px-4 rounded-xl text-sm font-semibold bg-amber-500 hover:bg-amber-600 text-white transition shadow-sm shadow-amber-500/20 flex items-center justify-center gap-2 mt-2 cursor-pointer disabled:opacity-50"
+              className="w-full py-2.5 px-4 rounded-xl text-sm font-semibold bg-zinc-900 hover:bg-zinc-900 text-white transition shadow-sm shadow-xs flex items-center justify-center gap-2 mt-2 cursor-pointer disabled:opacity-50"
             >
               {loading ? "Đang tạo tài khoản..." : "Hoàn tất đăng ký xưởng"}
               <ArrowRight className="w-4 h-4" />
@@ -416,8 +416,8 @@ export default function AuthModal({
 
         {/* Chân modal bảo đảm bảo mật */}
         <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-          <span className="flex items-center gap-1 text-emerald-700 font-medium">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> Bí mật kinh doanh xưởng được bảo vệ
+          <span className="flex items-center gap-1 text-zinc-900 font-medium">
+            <ShieldCheck className="w-3.5 h-3.5 text-zinc-900" /> Bí mật kinh doanh xưởng được bảo vệ
           </span>
           <span>Bảo mật RLS Supabase</span>
         </div>

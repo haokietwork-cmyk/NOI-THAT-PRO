@@ -15,23 +15,23 @@ export default function TermsPage() {
         <div className="mb-8 flex items-center justify-between">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-amber-600 transition-colors"
+            className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-zinc-900 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Quay lại trang chủ
           </Link>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-amber-50 text-amber-700 border border-amber-200">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-zinc-100 text-zinc-900 border border-zinc-200">
             <Scale className="w-3.5 h-3.5" />
             Bản Dự Thảo Tham Khảo
           </span>
         </div>
 
         {/* Legal Advisory Warning Banner */}
-        <div className="p-4 mb-8 bg-amber-500/10 border-l-4 border-amber-500 rounded-r-lg text-amber-900 text-sm">
+        <div className="p-4 mb-8 bg-zinc-100 border-l-4 border-zinc-900 rounded-r-lg text-zinc-900 text-sm">
           <div className="flex items-start gap-3">
-            <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <ShieldAlert className="w-5 h-5 text-zinc-900 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-amber-950 mb-1">
+              <p className="font-semibold text-zinc-900 mb-1">
                 Lưu ý quan trọng dành cho Quản trị viên & Chủ xưởng:
               </p>
               <p className="leading-relaxed">
@@ -127,9 +127,9 @@ export default function TermsPage() {
 
         {/* Footer Navigation */}
         <div className="mt-8 text-center text-xs text-slate-500 font-mono space-x-4">
-          <Link href="/privacy" className="hover:text-amber-600 underline">Chính sách Quyền Riêng Tư</Link>
+          <Link href="/privacy" className="hover:text-zinc-900 underline">Chính sách Quyền Riêng Tư</Link>
           <span>•</span>
-          <Link href="/pricing" className="hover:text-amber-600 underline">Bảng Giá Gói Cước</Link>
+          <Link href="/pricing" className="hover:text-zinc-900 underline">Bảng Giá Gói Cước</Link>
         </div>
       </div>
     </div>

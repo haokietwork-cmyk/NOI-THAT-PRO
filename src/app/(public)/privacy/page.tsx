@@ -15,23 +15,23 @@ export default function PrivacyPage() {
         <div className="mb-8 flex items-center justify-between">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-amber-600 transition-colors"
+            className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-zinc-900 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Quay lại trang chủ
           </Link>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-zinc-100 text-zinc-900 border border-zinc-200">
             <ShieldCheck className="w-3.5 h-3.5" />
             Bảo Vệ Dữ Liệu RLS
           </span>
         </div>
 
         {/* Legal Advisory Warning Banner */}
-        <div className="p-4 mb-8 bg-amber-500/10 border-l-4 border-amber-500 rounded-r-lg text-amber-900 text-sm">
+        <div className="p-4 mb-8 bg-zinc-100 border-l-4 border-zinc-900 rounded-r-lg text-zinc-900 text-sm">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <AlertTriangle className="w-5 h-5 text-zinc-900 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-amber-950 mb-1">
+              <p className="font-semibold text-zinc-900 mb-1">
                 Lưu ý quan trọng dành cho Doanh nghiệp & Luật sư:
               </p>
               <p className="leading-relaxed">
@@ -135,7 +135,7 @@ export default function PrivacyPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
               <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
                 <div className="font-semibold text-slate-900 text-sm mb-1 flex items-center gap-1.5">
-                  <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                  <FileSpreadsheet className="w-4 h-4 text-zinc-900" />
                   Quyền xuất dữ liệu (Data Portability)
                 </div>
                 <p className="text-xs text-slate-600">
@@ -168,9 +168,9 @@ export default function PrivacyPage() {
 
         {/* Footer Navigation */}
         <div className="mt-8 text-center text-xs text-slate-500 font-mono space-x-4">
-          <Link href="/terms" className="hover:text-amber-600 underline">Điều Khoản Dịch Vụ</Link>
+          <Link href="/terms" className="hover:text-zinc-900 underline">Điều Khoản Dịch Vụ</Link>
           <span>•</span>
-          <Link href="/" className="hover:text-amber-600 underline">Trang Chủ AutoCutlist</Link>
+          <Link href="/" className="hover:text-zinc-900 underline">Trang Chủ AutoCutlist</Link>
         </div>
       </div>
     </div>

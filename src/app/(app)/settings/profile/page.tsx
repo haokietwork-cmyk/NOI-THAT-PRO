@@ -77,7 +77,7 @@ export default function WorkshopProfileSettingsPage() {
       {/* Top navigation */}
       <div className="flex items-center justify-between border-b border-slate-200 pb-4">
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-xs font-bold text-amber-600 uppercase tracking-wider">
+          <div className="flex items-center gap-2 text-xs font-bold text-zinc-900 uppercase tracking-wider">
             <Link href="/settings" className="hover:underline flex items-center gap-1">
               <span>Cài đặt</span>
             </Link>
@@ -96,7 +96,7 @@ export default function WorkshopProfileSettingsPage() {
           href="/quoting"
           className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition shadow-xs"
         >
-          <Printer className="w-3.5 h-3.5 text-amber-600" />
+          <Printer className="w-3.5 h-3.5 text-zinc-900" />
           <span>Xem trang Báo giá (/quoting)</span>
         </Link>
       </div>
@@ -122,7 +122,7 @@ export default function WorkshopProfileSettingsPage() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="VD: XƯỞNG NỘI THẤT HOÀNG GIA"
                   required
-                  className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 font-bold text-slate-900"
+                  className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 font-bold text-slate-900"
                 />
               </div>
             </div>
@@ -141,7 +141,7 @@ export default function WorkshopProfileSettingsPage() {
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="VD: 0912 345 678"
                     required
-                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 font-medium text-slate-900"
+                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 font-medium text-slate-900"
                   />
                 </div>
               </div>
@@ -157,7 +157,7 @@ export default function WorkshopProfileSettingsPage() {
                     value={logoUrl}
                     onChange={(e) => setLogoUrl(e.target.value)}
                     placeholder="https://domain.com/logo.png"
-                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-slate-900"
+                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 text-slate-900"
                   />
                 </div>
               </div>
@@ -176,7 +176,7 @@ export default function WorkshopProfileSettingsPage() {
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder="VD: Cụm Công Nghiệp Chàng Sơn, Thạch Thất, Hà Nội"
                   required
-                  className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 font-medium text-slate-900"
+                  className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 font-medium text-slate-900"
                 />
               </div>
             </div>
@@ -184,7 +184,7 @@ export default function WorkshopProfileSettingsPage() {
             {/* Thông tin tài khoản ngân hàng */}
             <div className="p-4 bg-slate-50 rounded-md border border-slate-200 space-y-3">
               <span className="font-bold text-slate-900 text-xs block flex items-center gap-1.5">
-                <CreditCard className="w-4 h-4 text-amber-600" />
+                <CreditCard className="w-4 h-4 text-zinc-900" />
                 <span>Thông tin tài khoản nhận đặt cọc (in lên Báo giá A4)</span>
               </span>
 
@@ -226,7 +226,7 @@ export default function WorkshopProfileSettingsPage() {
             <div className="p-4 bg-slate-50 border border-slate-200 rounded-md space-y-3">
               <div>
                 <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                  <Sliders className="w-4 h-4 text-amber-600" />
+                  <Sliders className="w-4 h-4 text-zinc-900" />
                   <span>Định mức chi phí sản xuất & Vật tư phụ xưởng</span>
                 </div>
                 <p className="text-[11px] text-slate-500 mt-0.5">
@@ -243,9 +243,9 @@ export default function WorkshopProfileSettingsPage() {
                     type="number"
                     value={suppliesRate}
                     onChange={(e) => setSuppliesRate(Number(e.target.value) || 0)}
-                    className="w-full p-2.5 font-mono font-bold bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 text-slate-900"
+                    className="w-full p-2.5 font-mono font-bold bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-zinc-900 text-slate-900"
                   />
-                  <span className="text-[10px] text-amber-700 font-medium block mt-1">
+                  <span className="text-[10px] text-zinc-900 font-medium block mt-1">
                     * Giá trị tạm, hãy nhập số thực tế của xưởng (gồm ốc cam, ke góc, vít, màng PE).
                   </span>
                 </div>
@@ -258,7 +258,7 @@ export default function WorkshopProfileSettingsPage() {
                     type="number"
                     value={laborRate}
                     onChange={(e) => setLaborRate(Number(e.target.value) || 0)}
-                    className="w-full p-2.5 font-mono font-bold bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 text-slate-900"
+                    className="w-full p-2.5 font-mono font-bold bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-zinc-900 text-slate-900"
                   />
                   <span className="text-[10px] text-slate-500 block mt-1">
                     Mặc định xưởng: 120.000 đ/tấm ván gia công.
@@ -274,7 +274,7 @@ export default function WorkshopProfileSettingsPage() {
                     step="0.1"
                     value={hingesPerSheet}
                     onChange={(e) => setHingesPerSheet(Number(e.target.value) || 0)}
-                    className="w-full p-2.5 font-mono font-bold bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 text-slate-900"
+                    className="w-full p-2.5 font-mono font-bold bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-zinc-900 text-slate-900"
                   />
                   <span className="text-[10px] text-slate-500 block mt-1">
                     Mặc định: 2.0 cái bản lề bật cho mỗi tấm ván tủ.
@@ -290,7 +290,7 @@ export default function WorkshopProfileSettingsPage() {
                     step="0.05"
                     value={slidesPerSheet}
                     onChange={(e) => setSlidesPerSheet(Number(e.target.value) || 0)}
-                    className="w-full p-2.5 font-mono font-bold bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 text-slate-900"
+                    className="w-full p-2.5 font-mono font-bold bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-zinc-900 text-slate-900"
                   />
                   <span className="text-[10px] text-slate-500 block mt-1">
                     Mặc định: 0.35 bộ ray trượt cho mỗi tấm ván tủ.
@@ -346,7 +346,7 @@ export default function WorkshopProfileSettingsPage() {
                 value={quoteTerms}
                 onChange={(e) => setQuoteTerms(e.target.value)}
                 placeholder="VD: Đơn giá đã bao gồm chi phí vận chuyển & lắp đặt hoàn thiện tại công trình trong phạm vi 30km. Bảo hành 24 tháng..."
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-slate-900 leading-relaxed"
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 text-slate-900 leading-relaxed"
               />
             </div>
 
@@ -357,7 +357,7 @@ export default function WorkshopProfileSettingsPage() {
                   <span>⚠️ {errorMessage}</span>
                 </div>
               ) : savedSuccess ? (
-                <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-bold">
+                <div className="flex items-center gap-1.5 text-xs text-zinc-900 font-bold">
                   <CheckCircle2 className="w-4 h-4" />
                   <span>Đã lưu thành công vào hệ thống!</span>
                 </div>
@@ -369,7 +369,7 @@ export default function WorkshopProfileSettingsPage() {
 
               <button
                 type="submit"
-                className="inline-flex items-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition shadow-sm shadow-amber-500/20"
+                className="inline-flex items-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-zinc-900 hover:bg-black rounded-xl transition shadow-xs"
               >
                 <Save className="w-4 h-4" />
                 <span>Lưu thông tin xưởng</span>
@@ -384,10 +384,10 @@ export default function WorkshopProfileSettingsPage() {
         <div className="lg:col-span-5 space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-              <FileText className="w-4 h-4 text-amber-600" />
+              <FileText className="w-4 h-4 text-zinc-900" />
               <span>Xem trước Header Báo giá A4</span>
             </span>
-            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+            <span className="text-[10px] font-bold text-zinc-900 bg-zinc-100 px-2 py-0.5 rounded-full border border-zinc-200">
               Cập nhật tức thì
             </span>
           </div>
@@ -401,7 +401,7 @@ export default function WorkshopProfileSettingsPage() {
                 {logoUrl ? (
                   <img src={logoUrl} alt="Logo" className="h-8 object-contain mb-1" />
                 ) : (
-                  <div className="inline-flex items-center gap-1 text-amber-600 font-black text-xs uppercase tracking-wider mb-1">
+                  <div className="inline-flex items-center gap-1 text-zinc-900 font-black text-xs uppercase tracking-wider mb-1">
                     <span>⚡ NỘI THẤT PRO</span>
                   </div>
                 )}
@@ -446,8 +446,8 @@ export default function WorkshopProfileSettingsPage() {
             </div>
 
             {/* Điều khoản in kèm */}
-            <div className="p-3 bg-amber-50/50 rounded-xl border border-dashed border-amber-200 text-[11px] space-y-1 text-amber-900">
-              <span className="font-bold text-amber-950 block text-[10px] uppercase">
+            <div className="p-3 bg-zinc-50 rounded-xl border border-dashed border-zinc-200 text-[11px] space-y-1 text-zinc-900">
+              <span className="font-bold text-zinc-900 block text-[10px] uppercase">
                 Điều khoản & Bảo hành in kèm:
               </span>
               <p className="italic leading-relaxed">
@@ -455,7 +455,7 @@ export default function WorkshopProfileSettingsPage() {
               </p>
             </div>
 
-            <div className="text-[10px] text-emerald-700 font-medium flex items-center gap-1.5 pt-1">
+            <div className="text-[10px] text-zinc-900 font-medium flex items-center gap-1.5 pt-1">
               <CheckCircle2 className="w-3.5 h-3.5" />
               <span>Khớp 100% với Header hiển thị khi xuất bản in PDF tại /quoting</span>
             </div>

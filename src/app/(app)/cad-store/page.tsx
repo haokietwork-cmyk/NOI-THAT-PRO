@@ -77,7 +77,7 @@ export default function CadStorePage() {
       priceNumber: 399_000,
       priceText: "399.000 đ",
       tag: "Bản cập nhật v2.2 Universal - Pass Oracle",
-      tagColor: "bg-emerald-50 text-emerald-800 border-emerald-200",
+      tagColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
       supportedCad: "AutoCAD 2014 - 2026+ (Universal)",
       features: [
         "Tương thích toàn diện AutoCAD 2014 đến 2026+ (Universal Build)",
@@ -121,7 +121,7 @@ export default function CadStorePage() {
       priceNumber: 699_000,
       priceText: "699.000 đ",
       tag: "Trọn Gói Tiết Kiệm 50% - VIP Trọn Đời",
-      tagColor: "bg-amber-50 text-amber-800 border-amber-200",
+      tagColor: "bg-zinc-50 text-zinc-900 border-zinc-200",
       supportedCad: "AutoCAD 2018 - 2026",
       features: [
         "Mở khóa 100% tất cả module hiện tại và tương lai của Flexible Tool",
@@ -382,7 +382,7 @@ end
       {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">
+          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-900 uppercase tracking-wider mb-1">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Kho Công Cụ CAD/3D Bổ Kỹ Thuật & Bóc Tách Xưởng</span>
           </div>
@@ -398,7 +398,7 @@ end
           onClick={() => setShowApploadGuide(true)}
           className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition shadow-xs cursor-pointer"
         >
-          <HelpCircle className="w-4 h-4 text-amber-600" />
+          <HelpCircle className="w-4 h-4 text-zinc-900" />
           <span>Hướng dẫn nạp Tool (AutoCAD / SketchUp)</span>
         </button>
       </div>
@@ -422,8 +422,8 @@ end
               onClick={() => setSelectedPlatform("autocad")}
               className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer ${
                 selectedPlatform === "autocad"
-                  ? "bg-amber-600 text-white shadow-xs"
-                  : "bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200"
+                  ? "bg-zinc-900 text-white shadow-xs"
+                  : "bg-zinc-50 text-zinc-900 hover:bg-zinc-100 border border-zinc-200"
               }`}
             >
               <span>AutoCAD Lisp / VLX</span>
@@ -455,7 +455,7 @@ end
                 placeholder="Tìm tên tool, lệnh QC, SC3D..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-7 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                className="w-full pl-8 pr-7 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900"
               />
               {searchQuery && (
                 <button
@@ -473,7 +473,7 @@ end
               onClick={() => setShowFilterFunnel(!showFilterFunnel)}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition shadow-xs cursor-pointer ${
                 activeCadFilterCount > 0
-                  ? "bg-amber-500 text-white shadow-amber-500/20"
+                  ? "bg-zinc-900 text-white shadow-xs"
                   : showFilterFunnel
                   ? "bg-slate-900 text-white"
                   : "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
@@ -482,7 +482,7 @@ end
               <Filter className="w-3.5 h-3.5" />
               <span>Phễu Lọc</span>
               {activeCadFilterCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-white text-amber-700 font-mono text-[10px] flex items-center justify-center font-black">
+                <span className="w-4 h-4 rounded-full bg-white text-zinc-900 font-mono text-[10px] flex items-center justify-center font-black">
                   {activeCadFilterCount}
                 </span>
               )}
@@ -499,7 +499,7 @@ end
                 <select
                   value={priceFilter}
                   onChange={(e) => setPriceFilter(e.target.value as any)}
-                  className="p-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:border-amber-500 focus:outline-none"
+                  className="p-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:border-zinc-900 focus:outline-none"
                 >
                   <option value="all">Tất cả (Miễn phí & Trả phí)</option>
                   <option value="free">🎁 Miễn phí cộng đồng</option>
@@ -512,7 +512,7 @@ end
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="p-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:border-amber-500 focus:outline-none"
+                  className="p-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:border-zinc-900 focus:outline-none"
                 >
                   <option value="all">Tất cả mục đích</option>
                   <option value="cutlist">Bóc tách danh sách tấm (Cutlist) sang Web</option>
@@ -571,7 +571,7 @@ end
                     className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wide ${
                       p.platform === "sketchup"
                         ? "bg-rose-100 text-rose-800 border border-rose-300"
-                        : "bg-amber-100 text-amber-900 border border-amber-300"
+                        : "bg-zinc-100 text-zinc-900 border border-zinc-300"
                     }`}
                   >
                     {p.platform === "sketchup" ? "SketchUp .RBZ" : "AutoCAD LISP"}
@@ -601,7 +601,7 @@ end
                 </span>
                 {p.features.map((f, idx) => (
                   <div key={idx} className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-zinc-400 shrink-0 mt-0.5" />
                     <span>{f}</span>
                   </div>
                 ))}
@@ -618,7 +618,7 @@ end
                     href={`/plugins/autocad/${p.id}/README.md`}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 hover:text-amber-800 underline underline-offset-2"
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-zinc-900 hover:text-zinc-900 underline underline-offset-2"
                   >
                     <FileCode className="w-3 h-3" />
                     <span>Xem README</span>
@@ -633,7 +633,7 @@ end
                 <span className="text-[10px] text-slate-400 block font-semibold">
                   {isVip ? "Đặc quyền Tài khoản VIP" : p.isFree ? "Bản quyền vĩnh viễn" : "Bản quyền trọn đời / máy"}
                 </span>
-                <span className="text-xl font-black text-emerald-600 font-mono">
+                <span className="text-xl font-black text-zinc-900 font-mono">
                   {isVip ? "0 đ (Miễn Phí VIP)" : p.priceText}
                 </span>
               </div>
@@ -641,14 +641,14 @@ end
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleDownloadFile(p)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition shadow-xs"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-white bg-zinc-900 hover:bg-black rounded-xl transition shadow-xs"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Tải Bộ Cài Đặt (745 KB)</span>
                 </button>
                 <Link
                   href={`/kich-hoat?tool=${p.cmd}&vip=true`}
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-slate-900 bg-amber-400 hover:bg-amber-500 rounded-xl transition shadow-xs"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-slate-900 bg-zinc-800 hover:bg-zinc-900 text-white rounded-xl transition shadow-xs"
                 >
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Kích Hoạt VIP (0đ)</span>
@@ -671,7 +671,7 @@ end
             {/* Header Modal */}
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <QrCode className="w-4 h-4 text-amber-600" />
+                <QrCode className="w-4 h-4 text-zinc-900" />
                 <h3 className="font-bold text-slate-900 text-sm">
                   Thanh Toán VietQR & Cấp License Key
                 </h3>
@@ -688,7 +688,7 @@ end
               /* MÀN HÌNH SAU KHI THANH TOÁN THÀNH CÔNG */
               <div className="py-4 space-y-4 animate-in fade-in zoom-in-95 duration-200">
                 <div className="text-center space-y-2">
-                  <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center shadow-xs">
+                  <div className="w-14 h-14 rounded-full bg-zinc-100 text-zinc-900 mx-auto flex items-center justify-center shadow-xs">
                     <CheckCircle2 className="w-8 h-8" />
                   </div>
                   <h3 className="text-base font-black text-slate-900">
@@ -700,18 +700,18 @@ end
                 </div>
 
                 {/* Khung License Key */}
-                <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200 space-y-2">
-                  <span className="font-bold text-emerald-900 block text-xs flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <div className="p-4 bg-zinc-100 rounded-xl border border-zinc-200 space-y-2">
+                  <span className="font-bold text-zinc-900 block text-xs flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-zinc-900" />
                     <span>MÃ LICENSE KEY CHO MÁY ({volumeId}):</span>
                   </span>
-                  <div className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-emerald-300 font-mono font-bold text-slate-900 text-sm">
+                  <div className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-zinc-300 font-mono font-bold text-slate-900 text-sm">
                     <span>{generatedLicense}</span>
                     <button
                       onClick={() => handleCopy(generatedLicense || "", "lic")}
-                      className="text-xs text-emerald-700 hover:text-emerald-900 flex items-center gap-1 font-sans font-semibold"
+                      className="text-xs text-zinc-900 hover:text-zinc-900 flex items-center gap-1 font-sans font-semibold"
                     >
-                      {copiedText === "lic" ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copiedText === "lic" ? <Check className="w-3.5 h-3.5 text-zinc-900" /> : <Copy className="w-3.5 h-3.5" />}
                       <span>{copiedText === "lic" ? "Đã sao chép" : "Sao chép"}</span>
                     </button>
                   </div>
@@ -719,7 +719,7 @@ end
 
                 {/* Nút tải file có giới hạn 60s */}
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center space-y-2">
-                  <div className="flex items-center justify-center gap-1.5 text-xs text-amber-700 font-bold">
+                  <div className="flex items-center justify-center gap-1.5 text-xs text-zinc-900 font-bold">
                     <Clock className="w-4 h-4" />
                     <span>Link tải file an toàn có hiệu lực trong: {downloadSecondsLeft}s</span>
                   </div>
@@ -727,7 +727,7 @@ end
                   {downloadSecondsLeft > 0 ? (
                     <button
                       onClick={() => handleDownloadFile(selectedPlugin, generatedLicense || undefined)}
-                      className="w-full py-3 px-4 font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs transition flex items-center justify-center gap-2"
+                      className="w-full py-3 px-4 font-bold text-white bg-zinc-900 hover:bg-black rounded-xl shadow-xs transition flex items-center justify-center gap-2"
                     >
                       <Download className="w-4 h-4" />
                       <span>Tải file cài đặt ({selectedPlugin.code})</span>
@@ -751,12 +751,12 @@ end
             ) : (
               /* MÀN HÌNH QUÉT MÃ QR & NHẬP VOLUME ID */
               <div className="space-y-4">
-                <div className="p-3 bg-amber-50 rounded-xl border border-amber-200/70 space-y-1">
+                <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-200 space-y-1">
                   <div className="flex justify-between items-center">
-                    <span className="font-bold text-amber-900">{selectedPlugin.title}</span>
-                    <span className="font-mono font-black text-amber-700 text-sm">{selectedPlugin.priceText}</span>
+                    <span className="font-bold text-zinc-900">{selectedPlugin.title}</span>
+                    <span className="font-mono font-black text-zinc-900 text-sm">{selectedPlugin.priceText}</span>
                   </div>
-                  <p className="text-[11px] text-amber-800">
+                  <p className="text-[11px] text-zinc-900">
                     Cấp bản quyền vĩnh viễn khóa theo Volume Serial Number ổ cứng máy tính.
                   </p>
                 </div>
@@ -776,7 +776,7 @@ end
                       placeholder="Mở cmd gõ 'vol c:' để lấy mã..."
                       value={volumeId}
                       onChange={(e) => setVolumeId(e.target.value.toUpperCase())}
-                      className="w-full pl-9 pr-3 py-2 font-mono uppercase bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 font-bold text-slate-900"
+                      className="w-full pl-9 pr-3 py-2 font-mono uppercase bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-zinc-900 font-bold text-slate-900"
                     />
                   </div>
                   <p className="text-[10px] text-slate-500">
@@ -810,14 +810,14 @@ end
                     <div className="flex justify-between items-center pt-1 border-t border-slate-200">
                       <span className="text-slate-400 font-semibold">Nội dung CK:</span>
                       <div className="flex items-center gap-1">
-                        <strong className="font-mono text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded text-xs">
+                        <strong className="font-mono text-zinc-900 bg-zinc-100 px-1.5 py-0.5 rounded text-xs">
                           {orderCode}
                         </strong>
                         <button
                           onClick={() => handleCopy(orderCode, "code")}
                           className="p-1 hover:bg-slate-200 rounded text-slate-500"
                         >
-                          {copiedText === "code" ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                          {copiedText === "code" ? <Check className="w-3.5 h-3.5 text-zinc-900" /> : <Copy className="w-3.5 h-3.5" />}
                         </button>
                       </div>
                     </div>
@@ -825,7 +825,7 @@ end
                 </div>
 
                 <div className="flex items-center justify-center gap-2 text-[11px] text-slate-500">
-                  <RefreshCw className="w-3 h-3 text-amber-600 animate-spin" />
+                  <RefreshCw className="w-3 h-3 text-zinc-900 animate-spin" />
                   <span>Đang chờ chuyển khoản... Tự động cấp License sau 5 giây</span>
                 </div>
 
@@ -842,7 +842,7 @@ end
                   <button
                     type="button"
                     onClick={handleSimulatePayment}
-                    className="px-4 py-2 font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition"
+                    className="px-4 py-2 font-bold text-zinc-900 bg-zinc-100 hover:bg-zinc-100 border border-zinc-200 rounded-xl transition"
                   >
                     Tôi đã chuyển khoản xong
                   </button>
@@ -862,7 +862,7 @@ end
           <div className="bg-white rounded-lg max-w-lg w-full p-6 space-y-5 shadow-2xl border border-slate-200 text-xs">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div className="flex items-center gap-2">
-                <Terminal className="w-4 h-4 text-amber-600" />
+                <Terminal className="w-4 h-4 text-zinc-900" />
                 <h3 className="font-bold text-slate-900 text-sm">Hướng dẫn nạp Lisp bằng lệnh APPLOAD</h3>
               </div>
               <button
@@ -894,7 +894,7 @@ end
               <a
                 href="/plugins/autocad/HDSD_CaiDat_Lisp_NoiThatPro.txt"
                 download="HDSD_CaiDat_Lisp_NoiThatPro.txt"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg transition"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-zinc-900 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 rounded-lg transition"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Tải Cẩm Nang HDSD (.txt)</span>

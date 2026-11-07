@@ -26,7 +26,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi" className={`scroll-smooth ${inter.variable} ${jetbrainsMono.variable}`}>
-      <body className="min-h-screen bg-slate-50 text-slate-800 font-sans antialiased selection:bg-amber-100 selection:text-amber-900">
+      <body className="min-h-screen bg-slate-50 text-slate-800 font-sans antialiased selection:bg-zinc-900 selection:text-white">
         {children}
       </body>
     </html>

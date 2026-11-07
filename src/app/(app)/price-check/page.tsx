@@ -22,7 +22,7 @@ export default function PriceCheckPage() {
           <Sparkles className="w-3.5 h-3.5" /> Tính Năng Thăm Dò & Dự Trữ
         </div>
         <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-          <CircleDollarSign className="w-7 h-7 text-amber-500" />
+          <CircleDollarSign className="w-7 h-7 text-zinc-900" />
           <span>Thẩm Định & Kiểm Tra Báo Giá Nội Thất</span>
         </h1>
         <p className="text-xs text-slate-500 mt-1">
@@ -31,7 +31,7 @@ export default function PriceCheckPage() {
       </div>
 
       <div className="p-8 rounded-lg bg-white border border-slate-200 space-y-6 shadow-2xs">
-        <div className="flex items-center gap-3 p-3.5 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-xs">
+        <div className="flex items-center gap-3 p-3.5 rounded-md bg-zinc-100 border border-zinc-200 text-zinc-900 text-xs">
           <span className="text-lg">⏳</span>
           <p className="leading-relaxed">
             <strong>Tính năng đang trong giai đoạn khảo sát nhu cầu xưởng:</strong> Chúng tôi đang hoàn thiện thuật toán phân tích dải giá thị trường dựa trên 5.000+ công trình thực tế. Đăng ký nhận thông báo để được dùng thử miễn phí bản Beta đầu tiên.
@@ -39,8 +39,8 @@ export default function PriceCheckPage() {
         </div>
 
         {submitted ? (
-          <div className="p-6 rounded-md bg-emerald-50 border border-emerald-200 text-center space-y-2">
-            <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
+          <div className="p-6 rounded-md bg-zinc-100 border border-zinc-200 text-center space-y-2">
+            <CheckCircle2 className="w-8 h-8 text-zinc-900 mx-auto" />
             <h3 className="font-bold text-slate-900 text-base">Đăng ký thành công!</h3>
             <p className="text-xs text-slate-600">
               Cảm ơn bạn. Khi tính năng Thẩm định giá mở phiên bản Beta, đội ngũ sẽ gửi thông báo đến Zalo/Email <strong>{phone || email}</strong> của bạn.
@@ -61,7 +61,7 @@ export default function PriceCheckPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 text-slate-900"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-zinc-900 text-slate-900"
                 />
               </div>
 
@@ -75,7 +75,7 @@ export default function PriceCheckPage() {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     required
-                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 text-slate-900"
+                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-zinc-900 text-slate-900"
                   />
                 </div>
               </div>
@@ -91,7 +91,7 @@ export default function PriceCheckPage() {
                     placeholder="contact@xưởng.vn"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 text-slate-900"
+                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-zinc-900 text-slate-900"
                   />
                 </div>
               </div>
@@ -101,7 +101,7 @@ export default function PriceCheckPage() {
                 <select
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500 text-slate-900"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-zinc-900 text-slate-900"
                 >
                   <option value="Hà Nội">Hà Nội & Miền Bắc</option>
                   <option value="TP.HCM">TP. Hồ Chí Minh & Bình Dương, Đồng Nai</option>

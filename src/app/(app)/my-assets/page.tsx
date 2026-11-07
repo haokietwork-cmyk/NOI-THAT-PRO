@@ -159,7 +159,7 @@ export default function MyAssetsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Key className="w-6 h-6 text-amber-600" />
+            <Key className="w-6 h-6 text-zinc-900" />
             Tiện Ích & Plugin CAD Đã Kích Hoạt
           </h1>
           <p className="text-xs text-slate-500 mt-1">
@@ -168,9 +168,9 @@ export default function MyAssetsPage() {
         </div>
         <Link
           href="/cad-store"
-          className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl transition shadow-2xs self-start"
+          className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-zinc-900 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded-xl transition shadow-2xs self-start"
         >
-          <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+          <Sparkles className="w-3.5 h-3.5 text-zinc-900" />
           Khám phá thêm Lisp tại Kho CAD
         </Link>
       </div>
@@ -184,7 +184,7 @@ export default function MyAssetsPage() {
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-900 border border-zinc-200">
                   {plugin.licenseCount || "1 máy tính"}
                 </span>
                 <span className="text-xs text-slate-400">Ngày cấp: {plugin.purchasedDate}</span>
@@ -194,7 +194,7 @@ export default function MyAssetsPage() {
                 <h3 className="font-bold text-base text-slate-900 leading-snug">{plugin.name}</h3>
                 <p className="text-xs text-slate-500 mt-1">
                   Lệnh trong CAD:{" "}
-                  <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono font-bold text-amber-700">
+                  <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono font-bold text-zinc-900">
                     {plugin.commandName}
                   </code>
                 </p>
@@ -209,11 +209,11 @@ export default function MyAssetsPage() {
                     </span>
                     <button
                       onClick={() => handleCopy(plugin.licenseKey!, plugin.id)}
-                      className="text-[11px] font-medium text-amber-600 hover:text-amber-700 flex items-center gap-1"
+                      className="text-[11px] font-medium text-zinc-900 hover:text-zinc-900 flex items-center gap-1"
                     >
                       {copiedKey === plugin.id ? (
                         <>
-                          <Check className="w-3 h-3 text-emerald-600" /> Đã chép
+                          <Check className="w-3 h-3 text-zinc-900" /> Đã chép
                         </>
                       ) : (
                         <>
@@ -240,7 +240,7 @@ export default function MyAssetsPage() {
                 onClick={() => handleDownloadFile(plugin)}
                 className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-lg transition"
               >
-                <Download className="w-3.5 h-3.5 text-amber-600" /> Tải file Lisp
+                <Download className="w-3.5 h-3.5 text-zinc-900" /> Tải file Lisp
               </button>
             </div>
           </div>
@@ -250,7 +250,7 @@ export default function MyAssetsPage() {
       {/* Trình Tạo License Key Theo Mã Máy */}
       <div className="bg-white rounded-lg border border-slate-200 p-6 sm:p-7 shadow-2xs space-y-4">
         <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-          <Laptop className="w-5 h-5 text-amber-600" />
+          <Laptop className="w-5 h-5 text-zinc-900" />
           Kích Hoạt Bản Quyền Cho Máy Tính Mới
         </h3>
         <p className="text-xs text-slate-500 leading-relaxed">
@@ -262,7 +262,7 @@ export default function MyAssetsPage() {
             <select
               value={selectedCmd}
               onChange={(e) => setSelectedCmd(e.target.value)}
-              className="w-full text-xs border border-slate-200 rounded-xl p-2.5 font-sans bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full text-xs border border-slate-200 rounded-xl p-2.5 font-sans bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900"
             >
               <option value="QC">AutoCutlist Pro (QC)</option>
               <option value="SD">SmartDim Furniture (SD)</option>
@@ -277,13 +277,13 @@ export default function MyAssetsPage() {
               value={machineId}
               onChange={(e) => setMachineId(e.target.value)}
               required
-              className="w-full text-xs border border-slate-200 rounded-xl p-2.5 font-mono focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full text-xs border border-slate-200 rounded-xl p-2.5 font-mono focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900"
             />
           </div>
           <div className="sm:col-span-3">
             <button
               type="submit"
-              className="w-full py-2.5 text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-xs transition"
+              className="w-full py-2.5 text-xs font-semibold text-white bg-zinc-900 hover:bg-black rounded-xl shadow-xs transition"
             >
               Tạo khóa bản quyền
             </button>
@@ -291,12 +291,12 @@ export default function MyAssetsPage() {
         </form>
 
         {generatedKey && (
-          <div className="p-4 rounded-xl bg-amber-50/60 border border-amber-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="p-4 rounded-xl bg-zinc-100 border border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <span className="text-[11px] text-amber-800 font-medium block">
+              <span className="text-[11px] text-zinc-900 font-medium block">
                 Khóa kích hoạt (License Key) cho máy của bạn:
               </span>
-              <span className="font-mono font-bold text-amber-700 text-sm tracking-wider">
+              <span className="font-mono font-bold text-zinc-900 text-sm tracking-wider">
                 {generatedKey}
               </span>
             </div>
@@ -306,7 +306,7 @@ export default function MyAssetsPage() {
             >
               {copiedKey === "new-gen" ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-emerald-600" /> Đã chép
+                  <Check className="w-3.5 h-3.5 text-zinc-900" /> Đã chép
                 </>
               ) : (
                 <>
@@ -321,7 +321,7 @@ export default function MyAssetsPage() {
       {/* Hướng Dẫn Cài Đặt Trong AutoCAD */}
       <div className="p-6 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-3">
         <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-          <HelpCircle className="w-4 h-4 text-amber-600" />
+          <HelpCircle className="w-4 h-4 text-zinc-900" />
           Hướng Dẫn Cài Đặt & Sử Dụng Trên AutoCAD:
         </h4>
         <ol className="list-decimal pl-4 space-y-1.5 leading-relaxed">
@@ -329,13 +329,13 @@ export default function MyAssetsPage() {
             Bấm nút <strong>Tải file Lisp</strong> ở trên về máy tính và lưu vào một thư mục cố định (VD: <code className="text-slate-800 font-mono">D:\CAD_Plugins</code>).
           </li>
           <li>
-            Mở AutoCAD, gõ lệnh <code className="text-amber-800 font-bold">APPLOAD</code> và nhấn Enter.
+            Mở AutoCAD, gõ lệnh <code className="text-zinc-900 font-bold">APPLOAD</code> và nhấn Enter.
           </li>
           <li>
             Chọn file vừa tải, bấm nút <strong>Load</strong> (hoặc kéo thả vào ô <strong>Startup Suite</strong> hình chiếc cặp để tự động nạp mỗi khi mở CAD).
           </li>
           <li>
-            Gõ lệnh tương ứng (VD: <code className="text-amber-800 font-bold">QC</code> hoặc <code className="text-amber-800 font-bold">SD</code>) và dán License Key khi được nhắc lần đầu tiên.
+            Gõ lệnh tương ứng (VD: <code className="text-zinc-900 font-bold">QC</code> hoặc <code className="text-zinc-900 font-bold">SD</code>) và dán License Key khi được nhắc lần đầu tiên.
           </li>
         </ol>
       </div>

@@ -147,7 +147,7 @@ export default function DashboardPage() {
             {formatVND(totalQuoteSum)}
           </div>
           <p className="text-[11px] text-slate-500 flex items-center gap-1 pt-0.5">
-            <span>Lợi nhuận gộp: <strong className="text-emerald-700 font-mono">+{formatVND(totalProfitSum)}</strong></span>
+            <span>Lợi nhuận gộp: <strong className="text-zinc-900 font-bold font-mono">+{formatVND(totalProfitSum)}</strong></span>
             {totalQuoteSum > 0 && (
               <span className="text-slate-400 font-mono">({formatPercentVi((totalProfitSum / totalQuoteSum) * 100)})</span>
             )}
@@ -172,7 +172,7 @@ export default function DashboardPage() {
         <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-2xs space-y-1">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-xs font-medium">Đã Duyệt &amp; Sản Xuất</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <CheckCircle2 className="w-4 h-4 text-zinc-900" />
           </div>
           <div className="text-xl font-bold font-mono tracking-tight text-slate-900">
             {statusCounts.approved + statusCounts.in_production}
@@ -375,20 +375,20 @@ export default function DashboardPage() {
                       </span>
                     )}
                     {prj.isLocked && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-900 text-amber-300 border border-slate-700 flex items-center gap-1 shadow-2xs">
-                        <Lock className="w-2.5 h-2.5 text-amber-400" />
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-900 text-white border border-zinc-700 flex items-center gap-1 shadow-2xs">
+                        <Lock className="w-2.5 h-2.5 text-zinc-300" />
                         Đã Khóa HĐ
                       </span>
                     )}
                     <span
                       className={`text-[10px] font-medium px-2 py-0.5 rounded-md border ${
                         prj.status === "in_production"
-                          ? "bg-amber-50 text-amber-800 border-amber-200"
+                          ? "bg-zinc-900 text-white border-zinc-800"
                           : prj.status === "approved" || prj.status === "ordered" || prj.status === "finalized"
-                          ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                          ? "bg-zinc-100 text-zinc-900 border-zinc-300 font-semibold"
                           : prj.status === "quoted"
-                          ? "bg-sky-50 text-sky-800 border-sky-200"
-                          : "bg-slate-100 text-slate-700 border-slate-200"
+                          ? "bg-zinc-50 text-zinc-700 border-zinc-200"
+                          : "bg-zinc-100 text-zinc-500 border-zinc-200"
                       }`}
                     >
                       {prj.status === "in_production"

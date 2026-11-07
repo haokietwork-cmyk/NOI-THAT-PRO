@@ -46,7 +46,7 @@ const STAGES: StageInfo[] = [
     title: "Đầu Vào Đa Dạng",
     subtitle: "2 Cổng nạp linh hoạt cho mọi nhu cầu",
     badge: "NHANH HOẶC CHI TIẾT",
-    badgeColor: "bg-amber-100 text-amber-800 border-amber-200",
+    badgeColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
     summary: "Người dùng không bị gò bó vào một cách nhập liệu duy nhất. Tùy thuộc vào giai đoạn thiết kế, xưởng có thể ước lượng nhanh bằng kích thước bao hoặc bóc tách chi tiết từng linh kiện.",
     pillars: [
       {
@@ -73,7 +73,7 @@ const STAGES: StageInfo[] = [
     title: "Động Cơ Tính Toán Kép & AI",
     subtitle: "Lõi toán học độc lập & Trợ lý Gemini AI",
     badge: "100% CÔNG THỨC TOÁN",
-    badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    badgeColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
     summary: "Hệ thống sở hữu hai mô hình tính toán độc lập, không gộp lẫn nhau, kết hợp cùng Trợ lý Gemini AI chỉ hoạt động như bước hỗ trợ khi dữ liệu bị thiếu.",
     pillars: [
       {
@@ -165,7 +165,7 @@ export default function OperationalWorkflowDiagram() {
       {/* Section Header */}
       <div className="text-center max-w-2xl mx-auto space-y-2">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-white border border-slate-200 text-slate-700 shadow-2xs">
-          <Layers className="w-3.5 h-3.5 text-amber-600" />
+          <Layers className="w-3.5 h-3.5 text-zinc-800" />
           <span className="font-mono text-[11px] text-slate-500">KIẾN TRÚC VẬN HÀNH TOÀN DIỆN</span>
           <span className="text-slate-300">|</span>
           <span className="font-semibold text-slate-800">4 Giai Đoạn Khép Kín</span>
@@ -189,34 +189,38 @@ export default function OperationalWorkflowDiagram() {
               onClick={() => setActiveStage(stage.key)}
               className={`p-3.5 sm:p-4 rounded-xl text-left transition-all cursor-pointer border flex flex-col justify-between space-y-3 relative ${
                 isActive
-                  ? "bg-white border-amber-500 shadow-md ring-2 ring-amber-500/10"
-                  : "bg-slate-50 hover:bg-white border-slate-200 hover:border-slate-300 shadow-2xs"
+                  ? "bg-zinc-900 text-white border-zinc-900 shadow-sm ring-1 ring-zinc-900"
+                  : "bg-slate-50 hover:bg-white border-slate-200 hover:border-slate-300 shadow-2xs text-slate-900"
               }`}
             >
               <div className="flex items-center justify-between">
                 <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded ${
-                  isActive ? "bg-amber-600 text-white" : "bg-slate-200 text-slate-700"
+                  isActive ? "bg-zinc-800 text-white" : "bg-slate-200 text-slate-700"
                 }`}>
                   GIAI ĐOẠN {stage.stepNumber}
                 </span>
-                <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded border hidden sm:inline ${stage.badgeColor}`}>
+                <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded border hidden sm:inline ${
+                  isActive ? "bg-zinc-800 text-zinc-200 border-zinc-700" : stage.badgeColor
+                }`}>
                   {stage.badge}
                 </span>
               </div>
 
               <div>
                 <h3 className={`text-sm font-bold tracking-tight ${
-                  isActive ? "text-slate-900" : "text-slate-700"
+                  isActive ? "text-white" : "text-slate-900"
                 }`}>
                   {stage.title}
                 </h3>
-                <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-1">
+                <p className={`text-[11px] mt-0.5 line-clamp-1 ${
+                  isActive ? "text-zinc-300" : "text-slate-500"
+                }`}>
                   {stage.subtitle}
                 </p>
               </div>
 
               {isActive && (
-                <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-r border-b border-amber-500 rotate-45" />
+                <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-zinc-900 border-r border-b border-zinc-900 rotate-45" />
               )}
             </button>
           );
@@ -261,7 +265,7 @@ export default function OperationalWorkflowDiagram() {
                   <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-white text-slate-700 border border-slate-200">
                     {pillar.badge}
                   </span>
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-zinc-900" />
                 </div>
                 <h4 className="text-xs font-bold text-slate-900">
                   {pillar.title}
@@ -275,14 +279,14 @@ export default function OperationalWorkflowDiagram() {
         </div>
 
         {/* Operational Flow Connector Note */}
-        <div className="p-3.5 rounded-lg bg-amber-50/60 border border-amber-200/80 flex items-center justify-between gap-3 text-xs text-amber-900">
+        <div className="p-3.5 rounded-lg bg-zinc-900 text-white border border-zinc-800 flex items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-700 shrink-0" />
-            <span className="font-medium">
-              Quy chuẩn chuyển tiếp: <span className="font-normal">{currentStage.flowNote}</span>
+            <Sparkles className="w-4 h-4 text-zinc-300 shrink-0" />
+            <span className="font-medium text-white">
+              Quy chuẩn chuyển tiếp: <span className="font-normal text-zinc-300">{currentStage.flowNote}</span>
             </span>
           </div>
-          <div className="hidden sm:flex items-center gap-1 font-mono text-[11px] text-amber-800">
+          <div className="hidden sm:flex items-center gap-1 font-mono text-[11px] text-zinc-400">
             <span>Tiếp tục</span>
             <ArrowRight className="w-3 h-3" />
           </div>

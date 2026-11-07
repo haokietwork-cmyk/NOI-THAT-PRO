@@ -23,7 +23,7 @@ export default function PluginDetailPage({
       <div className="bg-white rounded-lg border border-slate-200 p-6 sm:p-8 shadow-2xs space-y-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 uppercase tracking-wide">
+            <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-zinc-50 text-zinc-900 border border-zinc-200 uppercase tracking-wide">
               Plugin AutoCAD Chuyên Dụng
             </span>
             <h1 className="text-2xl font-bold text-slate-900 mt-2">
@@ -33,13 +33,13 @@ export default function PluginDetailPage({
           </div>
           <div className="text-right">
             <span className="text-xs text-slate-400 block">Giá bản quyền vĩnh viễn</span>
-            <span className="font-mono font-extrabold text-2xl text-amber-700">199.000 đ</span>
+            <span className="font-mono font-extrabold text-2xl text-zinc-900">199.000 đ</span>
           </div>
         </div>
 
         {/* Video / GIF Demo Mockup dạng Clean Light */}
         <div className="aspect-video bg-slate-50 rounded-lg flex flex-col items-center justify-center text-slate-600 text-xs border border-slate-200 p-6 text-center space-y-2">
-          <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700 text-base font-bold shadow-2xs">
+          <div className="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-900 text-base font-bold shadow-2xs">
             CAD
           </div>
           <p className="font-semibold text-slate-800 text-sm">Video Hướng Dẫn Thao Tác Bóc Tách Trong AutoCAD</p>
@@ -53,19 +53,19 @@ export default function PluginDetailPage({
           <h3 className="font-bold text-sm text-slate-900">Tính năng nổi bật:</h3>
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-slate-600">
             <li className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-zinc-900 shrink-0" />
               Tự động bóc Polyline, Solid 3D và Block
             </li>
             <li className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-zinc-900 shrink-0" />
               Khớp chuẩn 8 cột đưa thẳng lên Web bóc tách
             </li>
             <li className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-zinc-900 shrink-0" />
               Bảo toàn truy bắt điểm OSMODE khi bấm ESC
             </li>
             <li className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-zinc-900 shrink-0" />
               Hỗ trợ từ AutoCAD 2014 đến 2026
             </li>
           </ul>
@@ -79,7 +79,7 @@ export default function PluginDetailPage({
 
           <Link
             href="/settings/billing"
-            className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-xs transition"
+            className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-zinc-900 hover:bg-black rounded-xl shadow-xs transition"
           >
             <QrCode className="w-4 h-4" /> Mua Bằng Mã VietQR
           </Link>

@@ -76,7 +76,7 @@ export default function HelpTooltip({
         onFocus={() => setIsOpen(true)}
         onBlur={() => setIsOpen(false)}
         onKeyDown={handleKeyDown}
-        className="p-0.5 text-slate-400 hover:text-amber-600 focus:text-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500/30 rounded-full transition cursor-pointer"
+        className="p-0.5 text-slate-400 hover:text-zinc-900 focus:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 rounded-full transition cursor-pointer"
       >
         <HelpCircle className="w-3.5 h-3.5" aria-hidden="true" />
       </button>
@@ -88,7 +88,7 @@ export default function HelpTooltip({
           className={`absolute z-50 px-3 py-2 text-[11px] leading-relaxed font-normal text-white bg-slate-900 rounded-xl shadow-xl border border-slate-700/80 w-60 max-w-[85vw] text-left pointer-events-none animate-in fade-in zoom-in-95 duration-150 ${getPositionClasses()}`}
         >
           {content}
-          <span className="block text-[9px] text-amber-400/90 font-medium mt-1">
+          <span className="block text-[9px] text-zinc-300/90 font-medium mt-1">
             (Bấm hoặc di chuột để xem giải thích)
           </span>
         </span>

@@ -40,7 +40,7 @@ export default function SettingsPage() {
     <div className="space-y-8 font-sans max-w-4xl">
       {/* Title */}
       <div>
-        <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">
+        <div className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-900 uppercase tracking-wider mb-1">
           <Settings className="w-3.5 h-3.5" />
           <span>Hồ Sơ Xưởng & Thương Hiệu</span>
         </div>
@@ -56,7 +56,7 @@ export default function SettingsPage() {
       <div className="flex items-center gap-2 border-b border-slate-200 pb-3 text-xs font-bold">
         <Link
           href="/settings/profile"
-          className="px-4 py-2 bg-amber-500 text-white rounded-xl shadow-xs"
+          className="px-4 py-2 bg-zinc-900 text-white rounded-xl shadow-xs"
         >
           1. Hồ sơ xưởng & In ấn A4
         </Link>
@@ -91,7 +91,7 @@ export default function SettingsPage() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="VD: XƯỞNG NỘI THẤT HOÀNG GIA"
                   required
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 font-medium text-slate-900"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 font-medium text-slate-900"
                 />
               </div>
             </div>
@@ -109,7 +109,7 @@ export default function SettingsPage() {
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="VD: 0912 345 678"
                     required
-                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 font-medium text-slate-900"
+                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 font-medium text-slate-900"
                   />
                 </div>
               </div>
@@ -123,7 +123,7 @@ export default function SettingsPage() {
                   value={logoUrl}
                   onChange={(e) => setLogoUrl(e.target.value)}
                   placeholder="https://domain.com/logo.png"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-slate-900"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 text-slate-900"
                 />
               </div>
             </div>
@@ -140,7 +140,7 @@ export default function SettingsPage() {
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder="VD: Cụm Công Nghiệp Chàng Sơn, Thạch Thất, Hà Nội"
                   required
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 font-medium text-slate-900"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 font-medium text-slate-900"
                 />
               </div>
             </div>
@@ -154,13 +154,13 @@ export default function SettingsPage() {
                 value={quoteTerms}
                 onChange={(e) => setQuoteTerms(e.target.value)}
                 placeholder="VD: Đơn giá đã bao gồm chi phí lắp đặt hoàn thiện. Bảo hành 24 tháng..."
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-slate-900 leading-relaxed"
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 text-slate-900 leading-relaxed"
               />
             </div>
 
             <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
               {savedSuccess ? (
-                <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-semibold">
+                <div className="flex items-center gap-1.5 text-xs text-zinc-900 font-semibold">
                   <CheckCircle2 className="w-4 h-4" />
                   <span>Đã lưu thành công hồ sơ xưởng!</span>
                 </div>
@@ -172,7 +172,7 @@ export default function SettingsPage() {
 
               <button
                 type="submit"
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition shadow-sm shadow-amber-500/20"
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-zinc-900 hover:bg-black rounded-xl transition shadow-xs"
               >
                 <Save className="w-4 h-4" />
                 <span>Lưu thông tin xưởng</span>
@@ -184,7 +184,7 @@ export default function SettingsPage() {
         {/* Live Preview Header A4 */}
         <div className="space-y-4">
           <div className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-            <FileText className="w-4 h-4 text-amber-600" />
+            <FileText className="w-4 h-4 text-zinc-900" />
             <span>Xem trước Header Báo giá A4</span>
           </div>
 
@@ -209,7 +209,7 @@ export default function SettingsPage() {
               </p>
             </div>
 
-            <div className="text-[10px] text-emerald-700 font-medium flex items-center gap-1">
+            <div className="text-[10px] text-zinc-900 font-medium flex items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5" />
               <span>Khớp 100% khi bấm in tại /quoting</span>
             </div>

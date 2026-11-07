@@ -87,7 +87,7 @@ export default function PresetLibraryModal({
         {/* Header */}
         <div className="p-5 sm:p-6 bg-slate-900 text-white shrink-0 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-2xl bg-zinc-900/20 border border-zinc-300 text-zinc-300 flex items-center justify-center">
               <Box className="w-5 h-5" />
             </div>
             <div>
@@ -95,7 +95,7 @@ export default function PresetLibraryModal({
                 <h3 className="font-extrabold text-base sm:text-lg text-white">
                   Kho Hạng Mục Mẫu & Tự Sinh Chi Tiết Tủ
                 </h3>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500 text-slate-950">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-900 text-slate-950">
                   Chuẩn Xưởng CNC
                 </span>
               </div>
@@ -121,11 +121,11 @@ export default function PresetLibraryModal({
             onClick={() => setActiveTab("presets")}
             className={`px-4 py-2 rounded-t-xl transition cursor-pointer flex items-center gap-2 border-t-2 ${
               activeTab === "presets"
-                ? "bg-white text-slate-900 border-amber-500 shadow-2xs"
+                ? "bg-white text-slate-900 border-zinc-900 shadow-2xs"
                 : "text-slate-600 hover:text-slate-900 border-transparent"
             }`}
           >
-            <LayoutGrid className="w-3.5 h-3.5 text-amber-600" />
+            <LayoutGrid className="w-3.5 h-3.5 text-zinc-900" />
             <span>1. Hạng Mục Mẫu Chuẩn (1-Click Nạp)</span>
           </button>
 
@@ -134,11 +134,11 @@ export default function PresetLibraryModal({
             onClick={() => setActiveTab("generator")}
             className={`px-4 py-2 rounded-t-xl transition cursor-pointer flex items-center gap-2 border-t-2 ${
               activeTab === "generator"
-                ? "bg-white text-slate-900 border-amber-500 shadow-2xs"
+                ? "bg-white text-slate-900 border-zinc-900 shadow-2xs"
                 : "text-slate-600 hover:text-slate-900 border-transparent"
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <Sparkles className="w-3.5 h-3.5 text-zinc-900" />
             <span>2. Tự Sinh Tấm Theo Kích Thước Tủ (Cao × Rộng × Sâu)</span>
           </button>
         </div>
@@ -162,7 +162,7 @@ export default function PresetLibraryModal({
                     onClick={() => setSelectedPresetId(preset.id)}
                     className={`w-full text-left p-3.5 rounded-2xl border transition cursor-pointer flex items-start gap-3 ${
                       selectedPresetId === preset.id
-                        ? "bg-white border-amber-400 shadow-xs ring-1 ring-amber-400/30"
+                        ? "bg-white border-zinc-900 shadow-xs ring-1 ring-zinc-900/10"
                         : "bg-white/80 border-slate-200 hover:border-slate-300 hover:bg-white"
                     }`}
                   >
@@ -171,7 +171,7 @@ export default function PresetLibraryModal({
                       <h4 className="font-bold text-slate-900 text-xs truncate">
                         {preset.name}
                       </h4>
-                      <p className="font-mono text-[11px] text-amber-800 font-semibold mt-0.5">
+                      <p className="font-mono text-[11px] text-zinc-900 font-semibold mt-0.5">
                         {preset.dimensions}
                       </p>
                       <span className="text-[10px] text-slate-500">
@@ -191,7 +191,7 @@ export default function PresetLibraryModal({
                       <h4 className="font-extrabold text-slate-900 text-sm">
                         {currentPreset.name}
                       </h4>
-                      <span className="font-mono text-xs text-amber-900 font-bold bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                      <span className="font-mono text-xs text-zinc-900 font-bold bg-zinc-100 px-2 py-0.5 rounded border border-zinc-200">
                         Kích thước: {currentPreset.dimensions}
                       </span>
                     </div>
@@ -202,8 +202,8 @@ export default function PresetLibraryModal({
                   {currentPreset.description}
                 </p>
 
-                <div className="p-3 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-[11px] text-amber-950 flex items-start gap-2">
-                  <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div className="p-3 rounded-2xl bg-zinc-100/70 border border-zinc-200/80 text-[11px] text-zinc-900 flex items-start gap-2">
+                  <Info className="w-4 h-4 text-zinc-900 shrink-0 mt-0.5" />
                   <span><strong>Đặc tính kỹ thuật:</strong> {currentPreset.highlight}</span>
                 </div>
 
@@ -233,7 +233,7 @@ export default function PresetLibraryModal({
                       onSelectPreset(currentPreset.parts, "replace", currentPreset.name);
                       onClose();
                     }}
-                    className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition shadow-xs shadow-amber-500/20 text-center cursor-pointer"
+                    className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-900 text-white font-bold text-xs transition shadow-xs shadow-xs text-center cursor-pointer"
                   >
                     ⚡ Nạp mới (Thay thế toàn bộ bảng)
                   </button>
@@ -259,7 +259,7 @@ export default function PresetLibraryModal({
             <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-5 max-w-2xl mx-auto">
               <div>
                 <h4 className="font-extrabold text-slate-900 text-sm flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  <Sparkles className="w-4 h-4 text-zinc-900" />
                   <span>Bộ Tự Động Phân Rã Kích Thước Tủ Thành {WORKSHOP_TERMS.cutlist.labelWithOriginal} Chuẩn</span>
                 </h4>
                 <p className="text-xs text-slate-500 mt-1">
@@ -275,7 +275,7 @@ export default function PresetLibraryModal({
                     value={genName}
                     onChange={(e) => setGenName(e.target.value)}
                     placeholder="VD: Tủ áo phòng Master, Tủ bếp dưới, Tủ giày sảnh..."
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 font-medium text-slate-900 focus:border-amber-500 focus:outline-none"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 font-medium text-slate-900 focus:border-zinc-900 focus:outline-none"
                   />
                 </div>
 
@@ -285,7 +285,7 @@ export default function PresetLibraryModal({
                     type="number"
                     value={genHeight}
                     onChange={(e) => setGenHeight(Number(e.target.value))}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 font-mono font-bold text-slate-900 focus:border-amber-500 focus:outline-none"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 font-mono font-bold text-slate-900 focus:border-zinc-900 focus:outline-none"
                   />
                 </div>
 
@@ -295,7 +295,7 @@ export default function PresetLibraryModal({
                     type="number"
                     value={genWidth}
                     onChange={(e) => setGenWidth(Number(e.target.value))}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 font-mono font-bold text-slate-900 focus:border-amber-500 focus:outline-none"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 font-mono font-bold text-slate-900 focus:border-zinc-900 focus:outline-none"
                   />
                 </div>
 
@@ -305,7 +305,7 @@ export default function PresetLibraryModal({
                     type="number"
                     value={genDepth}
                     onChange={(e) => setGenDepth(Number(e.target.value))}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 font-mono font-bold text-slate-900 focus:border-amber-500 focus:outline-none"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 font-mono font-bold text-slate-900 focus:border-zinc-900 focus:outline-none"
                   />
                 </div>
 
@@ -315,7 +315,7 @@ export default function PresetLibraryModal({
                     type="number"
                     value={genDoors}
                     onChange={(e) => setGenDoors(Number(e.target.value))}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 font-mono font-bold text-slate-900 focus:border-amber-500 focus:outline-none"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 font-mono font-bold text-slate-900 focus:border-zinc-900 focus:outline-none"
                   />
                 </div>
               </div>
@@ -331,7 +331,7 @@ export default function PresetLibraryModal({
                 <button
                   type="button"
                   onClick={() => handleGenerateCabinet("replace")}
-                  className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition shadow-xs text-center cursor-pointer"
+                  className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-900 text-white font-bold text-xs transition shadow-xs text-center cursor-pointer"
                 >
                   ⚡ Sinh tấm mới (Thay thế bảng)
                 </button>

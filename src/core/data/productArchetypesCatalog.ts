@@ -53,7 +53,7 @@ export const PRODUCT_ARCHETYPES_CATALOG: ProductArchetypeItem[] = [
     category: "cabinet",
     categoryLabel: "Tủ Kệ & Ván",
     badge: "Ván MDF / Plywood",
-    badgeColor: "bg-amber-100 text-amber-800 border-amber-200",
+    badgeColor: "bg-zinc-100 text-zinc-800 border-zinc-200",
     iconName: "DoorClosed",
     description: "Thùng MDF chống ẩm 17mm, cánh Melamine kháng trầy, ray trượt & bản lề giảm chấn",
     aliases: [
@@ -73,7 +73,7 @@ export const PRODUCT_ARCHETYPES_CATALOG: ProductArchetypeItem[] = [
     category: "cabinet",
     categoryLabel: "Tủ Kệ & Ván",
     badge: "Cánh Kính Slim + LED",
-    badgeColor: "bg-indigo-100 text-indigo-800 border-indigo-200",
+    badgeColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
     iconName: "Maximize",
     description: "Khung nhôm anode slim màu đen/champagne, kính cường lực xám khói, ray âm và đèn led cảm ứng",
     aliases: [
@@ -93,7 +93,7 @@ export const PRODUCT_ARCHETYPES_CATALOG: ProductArchetypeItem[] = [
     category: "cabinet",
     categoryLabel: "Tủ Kệ & Ván",
     badge: "Chống Ẩm / WPB",
-    badgeColor: "bg-amber-100 text-amber-800 border-amber-200",
+    badgeColor: "bg-zinc-100 text-zinc-800 border-zinc-200",
     iconName: "CookingPot",
     description: "Thùng MDF chống ẩm hoặc khoang chậu nhựa WPB, mặt đá bếp chống ngấm 0% OH, ray hộp giảm chấn",
     aliases: [
@@ -113,7 +113,7 @@ export const PRODUCT_ARCHETYPES_CATALOG: ProductArchetypeItem[] = [
     category: "cabinet",
     categoryLabel: "Tủ Kệ & Ván",
     badge: "Treo Tường Kịch Trần",
-    badgeColor: "bg-amber-100 text-amber-800 border-amber-200",
+    badgeColor: "bg-zinc-100 text-zinc-800 border-zinc-200",
     iconName: "Layers",
     description: "Thùng MDF 17mm nhẹ, cánh phủ Melamine hoặc Acrylic bóng gương, tay nâng Blum",
     aliases: [
@@ -133,7 +133,7 @@ export const PRODUCT_ARCHETYPES_CATALOG: ProductArchetypeItem[] = [
     category: "cabinet",
     categoryLabel: "Tủ Kệ & Ván",
     badge: "Phụ Kiện Xoay",
-    badgeColor: "bg-amber-100 text-amber-800 border-amber-200",
+    badgeColor: "bg-zinc-100 text-zinc-800 border-zinc-200",
     iconName: "Archive",
     description: "Tủ để giày dép sảnh vào, kết hợp ngăn để mũ bảo hiểm và ghế ngồi mang giày",
     aliases: [
@@ -153,7 +153,7 @@ export const PRODUCT_ARCHETYPES_CATALOG: ProductArchetypeItem[] = [
     category: "cabinet",
     categoryLabel: "Tủ Kệ & Ván",
     badge: "Tủ Thấp Phòng Khách",
-    badgeColor: "bg-amber-100 text-amber-800 border-amber-200",
+    badgeColor: "bg-zinc-100 text-zinc-800 border-zinc-200",
     iconName: "Tv",
     description: "Kệ tivi phòng khách có ngăn kéo âm, hộc giấu dây điện và đường luồn ổ cắm",
     aliases: [
@@ -173,7 +173,7 @@ export const PRODUCT_ARCHETYPES_CATALOG: ProductArchetypeItem[] = [
     category: "cabinet",
     categoryLabel: "Tủ Kệ & Ván",
     badge: "Nhựa WPB Chống Nước 100%",
-    badgeColor: "bg-sky-100 text-sky-800 border-sky-200",
+    badgeColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
     iconName: "Bath",
     description: "Thùng nhựa đặc WPB chống nước 100%, mặt đá chống ố, gương soi led cảm ứng phôi bỉ",
     aliases: [
@@ -193,7 +193,7 @@ export const PRODUCT_ARCHETYPES_CATALOG: ProductArchetypeItem[] = [
     category: "cabinet",
     categoryLabel: "Tủ Kệ & Ván",
     badge: "Cánh Kính & Đèn LED",
-    badgeColor: "bg-indigo-100 text-indigo-800 border-indigo-200",
+    badgeColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
     iconName: "DoorClosed",
     description: "Tủ trưng bày rượu cánh kính, giá treo ly inox, kệ zic-zac chai vang và đèn led hắt sáng",
     aliases: [
@@ -217,7 +217,7 @@ export const PRODUCT_ARCHETYPES_CATALOG: ProductArchetypeItem[] = [
     category: "solid_wood",
     categoryLabel: "Bàn Ghế Gỗ Thịt",
     badge: "Gỗ Khối White Oak FAS",
-    badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    badgeColor: "bg-stone-100 text-stone-800 border-stone-200",
     iconName: "Table",
     description: "Gỗ Sồi trắng tự nhiên sấy chuẩn 10-12%, mộng mòi âm dương truyền thống, sơn PU kháng nước",
     aliases: [
@@ -237,7 +237,7 @@ export const PRODUCT_ARCHETYPES_CATALOG: ProductArchetypeItem[] = [
     category: "solid_wood",
     categoryLabel: "Bàn Ghế Gỗ Thịt",
     badge: "Mẫu QOT-24169 Benchmark",
-    badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    badgeColor: "bg-stone-100 text-stone-800 border-stone-200",
     iconName: "Table",
     description: "Bàn tròn chân trụ tiện tròn mộng âm, cốt chống lật cement board, mặt gỗ veneer kết hợp pát đồng",
     aliases: [
@@ -257,7 +257,7 @@ export const PRODUCT_ARCHETYPES_CATALOG: ProductArchetypeItem[] = [
     category: "solid_wood",
     categoryLabel: "Bàn Ghế Gỗ Thịt",
     badge: "Gỗ Tự Nhiên / Veneer",
-    badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    badgeColor: "bg-stone-100 text-stone-800 border-stone-200",
     iconName: "Table",
     description: "Bàn làm việc cao cấp có hộc tủ tài liệu di động, nắp luồn dây điện nhôm phay, hoàn thiện sơn PU mờ",
     aliases: [
@@ -277,7 +277,7 @@ export const PRODUCT_ARCHETYPES_CATALOG: ProductArchetypeItem[] = [
     category: "solid_wood",
     categoryLabel: "Bàn Ghế Gỗ Thịt",
     badge: "Gương Soi + Ngăn Kéo",
-    badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    badgeColor: "bg-stone-100 text-stone-800 border-stone-200",
     iconName: "Table",
     description: "Bàn trang điểm phòng ngủ kết hợp gương tròn viền led, ngăn kéo đựng mỹ phẩm chia ô",
     aliases: [
@@ -301,7 +301,7 @@ export const PRODUCT_ARCHETYPES_CATALOG: ProductArchetypeItem[] = [
     category: "stone_metal",
     categoryLabel: "Mặt Đá & Kim Loại",
     badge: "Đá 0% OH + Đồng PVD",
-    badgeColor: "bg-sky-100 text-sky-800 border-sky-200",
+    badgeColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
     iconName: "Shield",
     description: "Mặt đá Onyx tự nhiên xuyên sáng mài vát bo cạnh, chân đồng thau đặc phay xước mạ PVD chống oxy hóa",
     aliases: [
@@ -321,7 +321,7 @@ export const PRODUCT_ARCHETYPES_CATALOG: ProductArchetypeItem[] = [
     category: "stone_metal",
     categoryLabel: "Mặt Đá & Kim Loại",
     badge: "Đá Nguyên Khối No-OH",
-    badgeColor: "bg-sky-100 text-sky-800 border-sky-200",
+    badgeColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
     iconName: "CookingPot",
     description: "Đảo bếp kết hợp bàn bar, mặt đá Marble ghép mòi thác nước tràn 2 bên, tủ dưới để xoong nồi",
     aliases: [
@@ -345,7 +345,7 @@ export const PRODUCT_ARCHETYPES_CATALOG: ProductArchetypeItem[] = [
     category: "upholstery",
     categoryLabel: "Sofa, Nệm & Da",
     badge: "Da Thật Full-Grain",
-    badgeColor: "bg-amber-100 text-amber-900 border-amber-300",
+    badgeColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
     iconName: "Armchair",
     description: "Khung gỗ sấy kết hợp lò xo túi độc lập, foam D40 đàn hồi cao, da bò nhập khẩu nguyên tấm",
     aliases: [
@@ -365,7 +365,7 @@ export const PRODUCT_ARCHETYPES_CATALOG: ProductArchetypeItem[] = [
     category: "upholstery",
     categoryLabel: "Sofa, Nệm & Da",
     badge: "Khung Gỗ Sấy + Foam D40",
-    badgeColor: "bg-amber-100 text-amber-900 border-amber-300",
+    badgeColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
     iconName: "Armchair",
     description: "Khung xương gỗ tự nhiên đã qua xử lý mối mọt, hệ thống đai thun & lò xo, nệm mút D40 êm ái",
     aliases: [
@@ -385,7 +385,7 @@ export const PRODUCT_ARCHETYPES_CATALOG: ProductArchetypeItem[] = [
     category: "upholstery",
     categoryLabel: "Sofa, Nệm & Da",
     badge: "Bọc Nệm / Da Cao Cấp",
-    badgeColor: "bg-amber-100 text-amber-900 border-amber-300",
+    badgeColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
     iconName: "Bed",
     description: "Tựa đầu giường bọc mút tạo múi quả trám êm ái, khung dát giường chịu lực, có ngăn kéo gầm giường",
     aliases: [
@@ -409,7 +409,7 @@ export const PRODUCT_ARCHETYPES_CATALOG: ProductArchetypeItem[] = [
     category: "aluminum_glass",
     categoryLabel: "Cửa & Vách Nhôm Kính",
     badge: "Khung Slim 16mm Siêu Mỏng",
-    badgeColor: "bg-indigo-100 text-indigo-800 border-indigo-200",
+    badgeColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
     iconName: "Maximize",
     description: "Khung nhôm anode thanh mảnh 16mm, kính cường lực 8.38mm an toàn, ray treo âm sàn giảm chấn OPK",
     aliases: [
@@ -429,7 +429,7 @@ export const PRODUCT_ARCHETYPES_CATALOG: ProductArchetypeItem[] = [
     category: "aluminum_glass",
     categoryLabel: "Cửa & Vách Nhôm Kính",
     badge: "Kính 10-12mm Tempered",
-    badgeColor: "bg-indigo-100 text-indigo-800 border-indigo-200",
+    badgeColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
     iconName: "Maximize",
     description: "Vách ngăn văn phòng hoặc phòng ngủ kính cường lực 10mm nẹp nhôm giấu viền cách âm",
     aliases: [
@@ -453,7 +453,7 @@ export const PRODUCT_ARCHETYPES_CATALOG: ProductArchetypeItem[] = [
     category: "artistic_resin",
     categoryLabel: "Resin & Mỹ Thuật",
     badge: "Keo Resin Đúc Khuôn",
-    badgeColor: "bg-purple-100 text-purple-800 border-purple-200",
+    badgeColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
     iconName: "Sparkles",
     description: "Mặt bàn gỗ lũa me tây kết hợp keo epoxy resin trong suốt như dòng sông, mài bóng gương",
     aliases: [
@@ -473,7 +473,7 @@ export const PRODUCT_ARCHETYPES_CATALOG: ProductArchetypeItem[] = [
     category: "artistic_resin",
     categoryLabel: "Resin & Mỹ Thuật",
     badge: "Dát Lá Vàng & Sơn Giả Cổ",
-    badgeColor: "bg-purple-100 text-purple-800 border-purple-200",
+    badgeColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
     iconName: "Sparkles",
     description: "Khung gương điêu khắc hoa văn đúc sợi thủy tinh composite, dát lá kim loại vàng/bạc phủ giả cổ antique",
     aliases: [

@@ -63,7 +63,7 @@ function ActivationContent() {
       price: 0,
       priceText: "0 đ (VIP)",
       tag: "Đặc quyền VIP",
-      tagColor: "bg-emerald-50 text-emerald-800 border-emerald-200",
+      tagColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
     },
     {
       id: "AUTOVIEWBASE",
@@ -87,7 +87,7 @@ function ActivationContent() {
       price: 0,
       priceText: "0 đ (VIP)",
       tag: "Mở khóa toàn bộ",
-      tagColor: "bg-amber-50 text-amber-800 border-amber-200",
+      tagColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
     },
   ];
 
@@ -183,7 +183,7 @@ function ActivationContent() {
         <div className="max-w-5xl mx-auto px-4 py-8 relative">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-mono font-medium mb-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-300 text-xs font-mono font-medium mb-3">
                 <Sparkles className="w-3.5 h-3.5" />
                 HỆ SINH THÁI FLEXIBLE TOOL & AUTOPLOT v2.3 (UNIVERSAL 2014-2027)
               </div>
@@ -198,7 +198,7 @@ function ActivationContent() {
               <a
                 href="/downloads/AutoPlot_Flexible_v2.3_Setup.zip"
                 download
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold shadow-sm transition"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-900 hover:bg-black text-white text-sm font-semibold shadow-sm transition"
               >
                 <Download className="w-4 h-4" />
                 Tải Bộ Cài Đặt (v2.3)
@@ -236,7 +236,7 @@ function ActivationContent() {
                       onClick={handleCopyHwid}
                       className="absolute right-2 top-2 px-2.5 py-1 text-xs font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded shadow-xs flex items-center gap-1"
                     >
-                      {copiedHwid ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copiedHwid ? <Check className="w-3.5 h-3.5 text-zinc-900" /> : <Copy className="w-3.5 h-3.5" />}
                       {copiedHwid ? "Đã chép" : "Chép"}
                     </button>
                   </div>
@@ -277,7 +277,7 @@ function ActivationContent() {
                         onClick={() => setSelectedTool(tool.id)}
                         className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition ${
                           selectedTool === tool.id
-                            ? "bg-amber-50/60 border-amber-400 ring-1 ring-amber-400"
+                            ? "bg-zinc-100 border-zinc-900 ring-1 ring-zinc-900"
                             : "bg-white border-slate-200 hover:border-slate-300"
                         }`}
                       >
@@ -287,7 +287,7 @@ function ActivationContent() {
                             name="toolOption"
                             checked={selectedTool === tool.id}
                             onChange={() => setSelectedTool(tool.id)}
-                            className="text-amber-500 focus:ring-amber-400"
+                            className="text-zinc-900 focus:ring-zinc-900"
                           />
                           <div>
                             <div className="text-sm font-semibold text-slate-900">{tool.name}</div>
@@ -310,7 +310,7 @@ function ActivationContent() {
                     type="button"
                     onClick={() => handleGenerateLicense(false)}
                     disabled={isGenerating || !machineId.trim()}
-                    className="flex-1 min-w-[200px] py-2.5 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-semibold shadow-xs flex items-center justify-center gap-2 transition"
+                    className="flex-1 min-w-[200px] py-2.5 px-4 rounded-lg bg-zinc-900 hover:bg-black disabled:opacity-50 text-white text-sm font-semibold shadow-xs flex items-center justify-center gap-2 transition"
                   >
                     <ShieldCheck className="w-4 h-4" />
                     {isGenerating ? "Đang xử lý..." : "Kích Hoạt Bản Quyền VIP Vĩnh Viễn (0 VNĐ)"}
@@ -329,10 +329,10 @@ function ActivationContent() {
 
             {/* Khối hiển thị kết quả tạo bản quyền */}
             {licensePayload && (
-              <div className="bg-emerald-50/70 rounded-xl border border-emerald-300 p-6 shadow-sm animate-in fade-in duration-300">
+              <div className="bg-zinc-50 rounded-xl border border-zinc-200 p-6 shadow-sm animate-in fade-in duration-300">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-xs font-semibold">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-zinc-900 text-white text-xs font-semibold">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       Giấy Phép Bản Quyền Đã Sẵn Sàng
                     </span>
@@ -341,16 +341,16 @@ function ActivationContent() {
                     </h3>
                     <p className="text-xs text-slate-600 mt-0.5">
                       Đã cấp cho: <strong className="text-slate-900 font-medium">{licensePayload.CustomerName}</strong> | Mã máy:{" "}
-                      <code className="font-mono text-emerald-800 bg-emerald-100 px-1 py-0.5 rounded">{licensePayload.MachineId}</code>
+                      <code className="font-mono text-zinc-900 bg-zinc-100 px-1 py-0.5 rounded">{licensePayload.MachineId}</code>
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-emerald-200/80 flex flex-wrap gap-3">
+                <div className="mt-4 pt-4 border-t border-zinc-200 flex flex-wrap gap-3">
                   <button
                     type="button"
                     onClick={handleDownloadLicFile}
-                    className="flex-1 min-w-[220px] py-2.5 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-sm flex items-center justify-center gap-2 transition"
+                    className="flex-1 min-w-[220px] py-2.5 px-4 rounded-lg bg-zinc-900 hover:bg-black text-white text-sm font-bold shadow-sm flex items-center justify-center gap-2 transition"
                   >
                     <Download className="w-4 h-4" />
                     Tải Tệp FlexibleTools.lic
@@ -358,17 +358,17 @@ function ActivationContent() {
                   <button
                     type="button"
                     onClick={handleCopyLicenseJson}
-                    className="py-2.5 px-4 rounded-lg bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 text-sm font-medium flex items-center gap-1.5 shadow-xs transition"
+                    className="py-2.5 px-4 rounded-lg bg-white border border-zinc-300 text-zinc-900 hover:bg-zinc-100 text-sm font-medium flex items-center gap-1.5 shadow-xs transition"
                   >
-                    {copiedKey ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                    {copiedKey ? <Check className="w-4 h-4 text-zinc-900" /> : <Copy className="w-4 h-4" />}
                     {copiedKey ? "Đã chép mã" : "Chép Chuỗi Kích Hoạt"}
                   </button>
                 </div>
 
                 {/* Hướng dẫn nạp vào AutoCAD */}
-                <div className="mt-4 bg-white/90 rounded-lg p-3.5 border border-emerald-200 text-xs text-slate-700 space-y-1.5">
+                <div className="mt-4 bg-white/90 rounded-lg p-3.5 border border-zinc-200 text-xs text-slate-700 space-y-1.5">
                   <div className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <FileCheck className="w-4 h-4 text-emerald-600" />
+                    <FileCheck className="w-4 h-4 text-zinc-900" />
                     Cách nạp tệp vào AutoCAD (Chỉ mất 5 giây):
                   </div>
                   <ol className="list-decimal list-inside space-y-1 pl-1 text-slate-600">
@@ -383,30 +383,30 @@ function ActivationContent() {
 
           {/* Cột phụ: Đặc Quyền VIP & Thông tin hỗ trợ */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-6 text-white shadow-md space-y-4">
+            <div className="bg-zinc-900 rounded-xl p-6 text-white shadow-md space-y-4">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-amber-200" />
+                <Sparkles className="w-5 h-5 text-zinc-300" />
                 <h3 className="font-bold text-base">Đặc Quyền Tài Khoản VIP</h3>
               </div>
-              <p className="text-xs text-amber-100 leading-relaxed">
+              <p className="text-xs text-zinc-300 leading-relaxed">
                 Tài khoản <strong className="text-white">0367756036</strong> của bạn đã được kích hoạt chế độ VIP Trọn Đời. Miễn phí 100% tất cả các công cụ và giấy phép bản quyền AutoCAD mà không cần thanh toán bất kỳ khoản phí nào!
               </p>
               <div className="bg-white/10 rounded-lg p-3.5 text-xs space-y-2 backdrop-blur-xs border border-white/20">
                 <div className="flex justify-between items-center py-0.5 border-b border-white/10">
-                  <span className="text-amber-200">Hạng tài khoản:</span>
+                  <span className="text-zinc-300">Hạng tài khoản:</span>
                   <span className="font-bold">VIP Enterprise (Trọn Đời)</span>
                 </div>
                 <div className="flex justify-between items-center py-0.5 border-b border-white/10">
-                  <span className="text-amber-200">Đơn giá thanh toán:</span>
-                  <span className="font-mono font-bold text-emerald-300">0 VNĐ (Miễn Phí)</span>
+                  <span className="text-zinc-300">Đơn giá thanh toán:</span>
+                  <span className="font-mono font-bold text-zinc-200">0 VNĐ (Miễn Phí)</span>
                 </div>
                 <div className="flex justify-between items-center py-0.5">
-                  <span className="text-amber-200">Giấy phép cấp:</span>
+                  <span className="text-zinc-300">Giấy phép cấp:</span>
                   <span className="font-bold">Bản quyền thương mại vĩnh viễn</span>
                 </div>
               </div>
-              <div className="pt-1 text-[11px] text-amber-100/90 flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-300" />
+              <div className="pt-1 text-[11px] text-zinc-300/90 flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-zinc-200" />
                 <span>Không cần chuyển khoản VietQR, nạp thẳng file .lic vào máy xưởng!</span>
               </div>
             </div>
@@ -419,19 +419,19 @@ function ActivationContent() {
               </h3>
               <ul className="text-xs text-slate-600 space-y-2">
                 <li className="flex items-start gap-2">
-                  <Check className="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0" />
+                  <Check className="w-3.5 h-3.5 text-zinc-900 mt-0.5 shrink-0" />
                   <span><strong>Nhận diện khung Block động & Polyline:</strong> Quét tự động toàn bộ bản vẽ trên Model/Layout.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0" />
+                  <Check className="w-3.5 h-3.5 text-zinc-900 mt-0.5 shrink-0" />
                   <span><strong>Sắp xếp trang Natural Sort:</strong> Nhận diện chính xác thứ tự A-2 trước A-10 và quét lưới tọa độ.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0" />
+                  <Check className="w-3.5 h-3.5 text-zinc-900 mt-0.5 shrink-0" />
                   <span><strong>Gộp PDF tự động Bookmark:</strong> Xuất 1 file duy nhất có mục lục cây duyệt từng trang cực tiện lợi.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0" />
+                  <Check className="w-3.5 h-3.5 text-zinc-900 mt-0.5 shrink-0" />
                   <span><strong>Không giật lag AutoCAD:</strong> Cơ chế kiểm tra cập nhật ngầm không chặn luồng vẽ chính.</span>
                 </li>
               </ul>

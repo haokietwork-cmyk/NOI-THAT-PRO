@@ -60,7 +60,7 @@ const ARCHETYPES: Record<ProductArchetypeKey, ProductArchetype> = {
     name: "Tủ Áo Master Kịch Trần",
     category: "Gỗ Công Nghiệp",
     badge: "Ván MDF Chống Ẩm",
-    badgeColor: "bg-amber-100 text-amber-800 border-amber-200",
+    badgeColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
     description: "Thùng MDF chống ẩm 17mm, cánh phủ Melamine chống trầy, bản lề giảm chấn & ray âm",
     defaults: { w: 2200, d: 600, h: 2600, qty: 1 },
     limits: {
@@ -75,7 +75,7 @@ const ARCHETYPES: Record<ProductArchetypeKey, ProductArchetype> = {
     name: "Bàn Ăn Gỗ Sồi Bắc Mỹ (8 Chỗ)",
     category: "Gỗ Tự Nhiên Khối",
     badge: "White Oak FAS",
-    badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    badgeColor: "bg-stone-100 text-stone-900 border-stone-200",
     description: "Gỗ Sồi trắng tự nhiên sấy chuẩn 10-12%, mộng ghép mòi âm dương, sơn PU 4 lớp kháng ố",
     defaults: { w: 2000, d: 900, h: 750, qty: 1 },
     limits: {
@@ -90,7 +90,7 @@ const ARCHETYPES: Record<ProductArchetypeKey, ProductArchetype> = {
     name: "Bàn Trà Mặt Đá Onyx Khung Đồng",
     category: "Đá Tự Nhiên & Kim Loại",
     badge: "Đá 0% OH + Đồng PVD",
-    badgeColor: "bg-sky-100 text-sky-800 border-sky-200",
+    badgeColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
     description: "Mặt đá Onyx tự nhiên xuyên sáng mài vát bo R, khung đồng thau đặc xử lý bề mặt phay xước PVD",
     defaults: { w: 1200, d: 700, h: 450, qty: 1 },
     limits: {
@@ -105,7 +105,7 @@ const ARCHETYPES: Record<ProductArchetypeKey, ProductArchetype> = {
     name: "Cửa Lùa Slim Nhôm Kính Kịch Trần",
     category: "Nhôm Kính Kiến Trúc",
     badge: "Khung Slim 16mm",
-    badgeColor: "bg-indigo-100 text-indigo-800 border-indigo-200",
+    badgeColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
     description: "Khung nhôm anode thanh mảnh 16mm, kính cường lực an toàn 8.38mm, ray treo âm giảm chấn 2 chiều OPK",
     defaults: { w: 2400, d: 80, h: 2600, qty: 1 },
     limits: {
@@ -120,7 +120,7 @@ const ARCHETYPES: Record<ProductArchetypeKey, ProductArchetype> = {
     name: "Ghế Lounge Thư Giãn Da Bò Ý",
     category: "Bọc Nệm & Sofa",
     badge: "Da Thật Full-Grain",
-    badgeColor: "bg-amber-100 text-amber-900 border-amber-300",
+    badgeColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
     description: "Khung gỗ sấy kết hợp lò xo túi độc lập, foam D40 đàn hồi cao, da bò nhập khẩu nguyên tấm",
     defaults: { w: 900, d: 850, h: 850, qty: 1 },
     limits: {
@@ -386,7 +386,7 @@ export default function CostingSandboxWidget() {
       {/* Sandbox Window Header */}
       <div className="bg-slate-900 px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-300">
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+          <div className="w-2 h-2 rounded-full bg-zinc-400" />
           <span className="font-mono text-white font-semibold tracking-wide">
             LIVE COSTING SANDBOX V2.0
           </span>
@@ -397,7 +397,7 @@ export default function CostingSandboxWidget() {
         </div>
 
         <div className="flex items-center gap-2 text-[11px] font-mono">
-          <span className="text-amber-400">105.000 đ/giờ công</span>
+          <span className="text-zinc-300">105.000 đ/giờ công</span>
           <span className="text-slate-600">•</span>
           <span className="text-slate-400">Tỷ giá 25.000</span>
         </div>
@@ -473,7 +473,7 @@ export default function CostingSandboxWidget() {
                 step={archetype.limits.wStep}
                 value={w}
                 onChange={(e) => setW(Number(e.target.value))}
-                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-600"
+                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-zinc-900"
               />
               <div className="flex justify-between text-[10px] font-mono text-slate-400">
                 <span>{archetype.limits.wMin} mm</span>
@@ -496,7 +496,7 @@ export default function CostingSandboxWidget() {
                 step={archetype.limits.dStep}
                 value={d}
                 onChange={(e) => setD(Number(e.target.value))}
-                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-600"
+                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-zinc-900"
               />
               <div className="flex justify-between text-[10px] font-mono text-slate-400">
                 <span>{archetype.limits.dMin} mm</span>
@@ -519,7 +519,7 @@ export default function CostingSandboxWidget() {
                 step={archetype.limits.hStep}
                 value={h}
                 onChange={(e) => setH(Number(e.target.value))}
-                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-600"
+                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-zinc-900"
               />
               <div className="flex justify-between text-[10px] font-mono text-slate-400">
                 <span>{archetype.limits.hMin} mm</span>
@@ -570,7 +570,7 @@ export default function CostingSandboxWidget() {
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500 font-sans">Định mức nhân công:</span>
-              <span className="text-amber-800 font-semibold">{calculation.laborHours}</span>
+              <span className="text-slate-900 font-semibold">{calculation.laborHours}</span>
             </div>
           </div>
 
@@ -586,7 +586,7 @@ export default function CostingSandboxWidget() {
               <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500">
                 KẾT QUẢ DỰ TOÁN TỨC THÌ
               </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 text-zinc-900 border border-zinc-200 font-semibold">
                 Khớp 100% công thức
               </span>
             </div>
@@ -598,11 +598,11 @@ export default function CostingSandboxWidget() {
               <div className="p-3.5 bg-white rounded-lg border border-slate-200 shadow-2xs">
                 <div className="flex justify-between items-center text-xs text-slate-500 mb-1">
                   <span>Báo giá đề xuất gửi khách:</span>
-                  <span className="font-mono text-emerald-700 font-semibold text-[11px]">
+                  <span className="font-mono text-zinc-700 font-semibold text-[11px]">
                     Biên lãi ~{calculation.marginPercent}%
                   </span>
                 </div>
-                <div className="text-2xl sm:text-3xl font-extrabold text-amber-700 font-mono tracking-tight tabular-nums">
+                <div className="text-2xl sm:text-3xl font-extrabold text-zinc-900 font-mono tracking-tight tabular-nums">
                   {formatVND(calculation.totalSell)}
                 </div>
                 {qty > 1 && (
@@ -616,7 +616,7 @@ export default function CostingSandboxWidget() {
               <div className="p-3.5 bg-white rounded-lg border border-slate-200 shadow-2xs">
                 <div className="flex justify-between items-center text-xs text-slate-500 mb-1">
                   <span className="flex items-center gap-1">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                    <ShieldCheck className="w-3.5 h-3.5 text-zinc-700" />
                     <span>Giá vốn nội bộ xưởng (COGS):</span>
                   </span>
                   <span className="text-[10px] font-mono text-slate-400">Ẩn với khách</span>
@@ -626,7 +626,7 @@ export default function CostingSandboxWidget() {
                 </div>
                 <div className="flex justify-between text-[11px] text-slate-500 font-mono mt-0.5 pt-1.5 border-t border-slate-100">
                   <span>Lợi nhuận gộp ước tính:</span>
-                  <strong className="text-emerald-700 font-semibold">
+                  <strong className="text-zinc-900 font-semibold">
                     +{formatVND(calculation.profit)}
                   </strong>
                 </div>
@@ -676,7 +676,7 @@ export default function CostingSandboxWidget() {
           <div className="pt-2">
             <Link
               href={`/quoting?archetype=${selectedKey}&w=${w}&d=${d}&h=${h}&qty=${qty}`}
-              className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition shadow-xs group"
+              className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-zinc-900 hover:bg-black text-white font-semibold text-xs transition shadow-sm group border border-zinc-800"
             >
               <span>Lập báo giá đầy đủ từ mẫu này</span>
               <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />

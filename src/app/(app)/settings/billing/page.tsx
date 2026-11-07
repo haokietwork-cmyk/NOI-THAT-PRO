@@ -109,7 +109,7 @@ export default function BillingSettingsPage() {
   return (
     <div className="max-w-3xl space-y-6 font-sans">
       <div>
-        <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">
+        <div className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-900 uppercase tracking-wider mb-1">
           <Zap className="w-3.5 h-3.5" />
           <span>Gói Cước & Thanh Toán Tự Động</span>
         </div>
@@ -134,7 +134,7 @@ export default function BillingSettingsPage() {
             <span
               className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
                 isPro
-                  ? "bg-amber-50 text-amber-800 border-amber-200"
+                  ? "bg-zinc-100 text-zinc-900 border-zinc-200"
                   : "bg-slate-100 text-slate-700 border-slate-200"
               }`}
             >
@@ -151,13 +151,13 @@ export default function BillingSettingsPage() {
         {!isPro ? (
           <button
             onClick={() => openPaymentModal("monthly")}
-            className="px-5 py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm shadow-amber-500/20 transition flex items-center gap-1.5 shrink-0"
+            className="px-5 py-2.5 text-xs font-bold text-white bg-zinc-900 hover:bg-black rounded-xl shadow-xs transition flex items-center gap-1.5 shrink-0"
           >
             <Zap className="w-4 h-4" />
             <span>Nâng Cấp Gói Pro Ngay</span>
           </button>
         ) : (
-          <div className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
+          <div className="inline-flex items-center gap-1 text-xs font-bold text-zinc-900 bg-zinc-100 px-3 py-1.5 rounded-xl border border-zinc-200">
             <CheckCircle2 className="w-4 h-4" />
             <span>Tài khoản cao cấp đã kích hoạt</span>
           </div>
@@ -170,30 +170,30 @@ export default function BillingSettingsPage() {
           {/* Gói Tháng */}
           <div
             onClick={() => openPaymentModal("monthly")}
-            className={`p-6 rounded-lg border-2 transition cursor-pointer relative bg-white hover:border-amber-400 shadow-2xs ${
+            className={`p-6 rounded-lg border-2 transition cursor-pointer relative bg-white hover:border-zinc-400 shadow-2xs ${
               selectedPlan === "monthly" && showQR
-                ? "border-amber-500 bg-amber-50/20"
+                ? "border-zinc-900 bg-zinc-50"
                 : "border-slate-200"
             }`}
           >
             <div className="flex justify-between items-center mb-2">
               <span className="font-bold text-sm text-slate-900">Gói Tháng Linh Hoạt</span>
-              <span className="font-mono font-black text-amber-600 text-lg">149.000 đ</span>
+              <span className="font-mono font-black text-zinc-900 text-lg">149.000 đ</span>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed mb-4">
               Phù hợp với xưởng gia công thi công theo từng đợt công trình.
             </p>
             <ul className="text-xs text-slate-600 space-y-1.5 border-t border-slate-100 pt-3">
               <li className="flex items-center gap-2">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                <Check className="w-3.5 h-3.5 text-zinc-900" />
                 <span>Không giới hạn số lượng dự án bóc tách</span>
               </li>
               <li className="flex items-center gap-2">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                <Check className="w-3.5 h-3.5 text-zinc-900" />
                 <span>Xóa bỏ hoàn toàn nhãn chân trang PDF</span>
               </li>
               <li className="flex items-center gap-2">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                <Check className="w-3.5 h-3.5 text-zinc-900" />
                 <span>Xuất file Excel đặt ván gửi đại lý</span>
               </li>
             </ul>
@@ -202,33 +202,33 @@ export default function BillingSettingsPage() {
           {/* Gói Năm */}
           <div
             onClick={() => openPaymentModal("yearly")}
-            className={`p-6 rounded-lg border-2 transition cursor-pointer relative bg-white hover:border-amber-400 shadow-2xs ${
+            className={`p-6 rounded-lg border-2 transition cursor-pointer relative bg-white hover:border-zinc-400 shadow-2xs ${
               selectedPlan === "yearly" && showQR
-                ? "border-amber-500 bg-amber-50/20"
+                ? "border-zinc-900 bg-zinc-50"
                 : "border-slate-200"
             }`}
           >
-            <span className="absolute -top-3 right-4 text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-500 text-white shadow-xs">
+            <span className="absolute -top-3 right-4 text-[10px] font-black px-2.5 py-0.5 rounded-full bg-zinc-900 text-white shadow-xs">
               Tiết kiệm 33%
             </span>
             <div className="flex justify-between items-center mb-2">
               <span className="font-bold text-sm text-slate-900">Gói 1 Năm (Tiết Kiệm)</span>
-              <span className="font-mono font-black text-amber-600 text-lg">1.200.000 đ</span>
+              <span className="font-mono font-black text-zinc-900 text-lg">1.200.000 đ</span>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed mb-4">
               Giải pháp toàn diện nhất cho xưởng mộc vận hành lâu dài.
             </p>
             <ul className="text-xs text-slate-600 space-y-1.5 border-t border-slate-100 pt-3">
               <li className="flex items-center gap-2">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                <Check className="w-3.5 h-3.5 text-zinc-900" />
                 <span>Toàn bộ đặc quyền của gói Xưởng Pro</span>
               </li>
               <li className="flex items-center gap-2">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                <Check className="w-3.5 h-3.5 text-zinc-900" />
                 <span>Tặng kèm 1 Plugin AutoCAD Lisp bản quyền</span>
               </li>
               <li className="flex items-center gap-2">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                <Check className="w-3.5 h-3.5 text-zinc-900" />
                 <span>Ưu tiên hỗ trợ cập nhật định mức vật tư</span>
               </li>
             </ul>
@@ -246,7 +246,7 @@ export default function BillingSettingsPage() {
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <QrCode className="w-4 h-4 text-amber-600" />
+                <QrCode className="w-4 h-4 text-zinc-900" />
                 <h3 className="font-bold text-slate-900 text-sm">
                   Thanh Toán VietQR Tự Động
                 </h3>
@@ -262,21 +262,21 @@ export default function BillingSettingsPage() {
             {/* Trạng thái Thanh toán Thành công */}
             {paymentSuccess ? (
               <div className="py-8 space-y-3 animate-in fade-in zoom-in-95 duration-300">
-                <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center shadow-xs">
+                <div className="w-16 h-16 rounded-full bg-zinc-100 text-zinc-900 mx-auto flex items-center justify-center shadow-xs">
                   <CheckCircle2 className="w-9 h-9" />
                 </div>
                 <h3 className="text-lg font-black text-slate-900">
                   Thanh Toán Thành Công!
                 </h3>
                 <p className="text-xs text-slate-600 max-w-xs mx-auto">
-                  Hệ thống đã nhận được tiền và tự động nâng cấp tài khoản của bạn lên <strong className="text-amber-600">Gói Xưởng Pro</strong>.
+                  Hệ thống đã nhận được tiền và tự động nâng cấp tài khoản của bạn lên <strong className="text-zinc-900">Gói Xưởng Pro</strong>.
                 </p>
               </div>
             ) : (
               <>
                 <div>
                   <span className="text-xs text-slate-500 block">Số tiền thanh toán:</span>
-                  <span className="text-2xl font-black text-amber-600 font-mono">
+                  <span className="text-2xl font-black text-zinc-900 font-mono">
                     {amount.toLocaleString("vi-VN")} đ
                   </span>
                 </div>
@@ -303,7 +303,7 @@ export default function BillingSettingsPage() {
                   <div className="flex justify-between items-center pt-1 border-t border-slate-200">
                     <span className="text-slate-400 font-semibold">Nội dung CK:</span>
                     <div className="flex items-center gap-1">
-                      <strong className="font-mono text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded text-xs">
+                      <strong className="font-mono text-zinc-900 bg-zinc-200 px-1.5 py-0.5 rounded text-xs">
                         {orderCode}
                       </strong>
                       <button
@@ -311,7 +311,7 @@ export default function BillingSettingsPage() {
                         className="p-1 hover:bg-slate-200 rounded text-slate-500"
                         title="Sao chép"
                       >
-                        {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                        {copied ? <Check className="w-3.5 h-3.5 text-zinc-900" /> : <Copy className="w-3.5 h-3.5" />}
                       </button>
                     </div>
                   </div>
@@ -319,7 +319,7 @@ export default function BillingSettingsPage() {
 
                 {/* Trạng thái lắng nghe Polling */}
                 <div className="flex items-center justify-center gap-2 text-[11px] text-slate-500">
-                  <RefreshCw className="w-3 h-3 text-amber-600 animate-spin" />
+                  <RefreshCw className="w-3 h-3 text-zinc-900 animate-spin" />
                   <span>Đang chờ chuyển khoản... Tự động mở khóa sau 5 giây</span>
                 </div>
 
@@ -334,7 +334,7 @@ export default function BillingSettingsPage() {
 
                   <button
                     onClick={handleSimulatePayment}
-                    className="px-4 py-2 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition"
+                    className="px-4 py-2 text-xs font-bold text-zinc-900 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded-xl transition"
                     title="Bấm để kích hoạt thanh toán ngay trong Demo Mode"
                   >
                     Tôi đã chuyển khoản xong

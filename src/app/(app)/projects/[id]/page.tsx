@@ -93,7 +93,7 @@ export default function ProjectWorkspacePage() {
         <h2 className="text-lg font-bold text-slate-800">Không tìm thấy dự án yêu cầu</h2>
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-amber-500 rounded-xl"
+          className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-zinc-900 rounded-xl"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Về bàn điều khiển</span>
@@ -160,19 +160,19 @@ export default function ProjectWorkspacePage() {
     <div className="space-y-6 font-sans pb-16">
       {/* Banner cảnh báo công thức cũ */}
       {isLegacyCalculationProject(project) && (
-        <div className="no-print p-4 rounded-lg bg-amber-50 border border-amber-300 text-amber-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs">
+        <div className="no-print p-4 rounded-lg bg-zinc-100 border border-zinc-200 text-zinc-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs">
           <div className="flex items-center gap-2">
             <span className="text-base">⚠️</span>
             <div>
               <strong className="font-bold">Dự án dùng công thức cũ (thiếu định mức vật tư phụ)</strong>
-              <p className="text-[11px] text-amber-700 mt-0.5">
+              <p className="text-[11px] text-zinc-900 mt-0.5">
                 Bản nháp này chưa tính chi phí vật tư phụ (ốc cam, ke góc, vít, màng PE). Bạn có thể xem trước mức chênh và nâng cấp mà không đổi số âm thầm.
               </p>
             </div>
           </div>
           <button
             onClick={handleOpenUpgradeModal}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-md transition shadow-xs shrink-0 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-zinc-900 hover:bg-black rounded-md transition shadow-xs shrink-0 cursor-pointer"
           >
             <span>Xem Mức Chênh &amp; Nâng Cấp</span>
           </button>
@@ -192,12 +192,12 @@ export default function ProjectWorkspacePage() {
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold text-slate-900">{project.projectName}</h1>
               {isLocked ? (
-                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-900 text-amber-300 border border-slate-700 flex items-center gap-1 shadow-xs">
-                  <Lock className="w-3 h-3 text-amber-400" />
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-900 text-zinc-200 border border-slate-700 flex items-center gap-1 shadow-xs">
+                  <Lock className="w-3 h-3 text-zinc-300" />
                   ĐÃ KHÓA HỢP ĐỒNG {project.versionNo ? `(v${project.versionNo})` : ""}
                 </span>
               ) : (
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-900 border border-zinc-200">
                   Đã bóc tách
                 </span>
               )}
@@ -216,9 +216,9 @@ export default function ProjectWorkspacePage() {
             <button
               onClick={handleCreateRevision}
               disabled={isCreatingRevision}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-800 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-xl transition shadow-xs"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-800 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded-xl transition shadow-xs"
             >
-              <GitBranch className="w-3.5 h-3.5 text-amber-600" />
+              <GitBranch className="w-3.5 h-3.5 text-zinc-900" />
               <span>{isCreatingRevision ? "Đang tạo..." : `Tạo Bản Sửa Đổi v${(project.versionNo || 1) + 1}`}</span>
             </button>
           ) : (
@@ -231,9 +231,9 @@ export default function ProjectWorkspacePage() {
               </Link>
               <button
                 onClick={handleFreezeContract}
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-zinc-900 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded-xl transition"
               >
-                <Lock className="w-3.5 h-3.5 text-emerald-600" />
+                <Lock className="w-3.5 h-3.5 text-zinc-900" />
                 <span>Chốt Hợp Đồng</span>
               </button>
             </>
@@ -241,7 +241,7 @@ export default function ProjectWorkspacePage() {
 
           <button
             onClick={() => window.print()}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition shadow-sm shadow-amber-500/20"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-zinc-900 hover:bg-black rounded-xl transition shadow-sm shadow-xs"
           >
             <Printer className="w-3.5 h-3.5" />
             <span>In Báo Giá A4</span>
@@ -255,7 +255,7 @@ export default function ProjectWorkspacePage() {
           onClick={() => setActiveTab("bom")}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
             activeTab === "bom"
-              ? "bg-emerald-600 text-white shadow-sm"
+              ? "bg-zinc-900 text-white shadow-sm"
               : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
           }`}
         >
@@ -266,7 +266,7 @@ export default function ProjectWorkspacePage() {
           onClick={() => setActiveTab("quote")}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
             activeTab === "quote"
-              ? "bg-amber-500 text-white shadow-sm shadow-amber-500/20"
+              ? "bg-zinc-900 text-white shadow-sm shadow-xs"
               : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
           }`}
         >
@@ -308,7 +308,7 @@ export default function ProjectWorkspacePage() {
                   project.costConfigSnapshot
                 );
               }}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl transition shadow-sm"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-zinc-900 hover:bg-black rounded-xl transition shadow-sm"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Xuất file Excel đặt ván (.xlsx)</span>
@@ -322,7 +322,7 @@ export default function ProjectWorkspacePage() {
                   <th className="p-3">Mã vật liệu & Quy cách</th>
                   <th className="p-3 text-right">Net (m²)</th>
                   <th className="p-3 text-right">Hao hụt</th>
-                  <th className="p-3 text-right text-amber-700 font-bold">Số tấm đặt mua</th>
+                  <th className="p-3 text-right text-zinc-900 font-bold">Số tấm đặt mua</th>
                   <th className="p-3 text-right">Đơn giá vốn</th>
                   <th className="p-3 text-right">Thành tiền</th>
                 </tr>
@@ -333,7 +333,7 @@ export default function ProjectWorkspacePage() {
                     <td className="p-3 font-mono font-bold text-slate-900">{b.materialCode}</td>
                     <td className="p-3 text-right font-mono text-slate-500">{b.totalNetAreaM2} m²</td>
                     <td className="p-3 text-right font-mono text-slate-500">+15%</td>
-                    <td className="p-3 text-right font-mono font-extrabold text-amber-700 text-sm">
+                    <td className="p-3 text-right font-mono font-extrabold text-zinc-900 text-sm">
                       {b.sheetsNeeded} tấm
                     </td>
                     <td className="p-3 text-right font-mono">{formatVND(b.unitPrice)}</td>
@@ -346,7 +346,7 @@ export default function ProjectWorkspacePage() {
 
           <div className="p-4 rounded-xl bg-slate-900 text-white flex justify-between items-center text-xs">
             <span className="font-bold">TỔNG GIÁ VỐN VẬT TƯ & NHÂN CÔNG:</span>
-            <span className="text-2xl font-black text-amber-400 font-mono">
+            <span className="text-2xl font-black text-zinc-300 font-mono">
               {formatVND(calcResult.totalCost)}
             </span>
           </div>
@@ -364,7 +364,7 @@ export default function ProjectWorkspacePage() {
               </div>
               <div className="flex justify-between text-slate-600">
                 <span>Thành tiền chỉ dán:</span>
-                <span className="font-mono font-bold text-emerald-700">
+                <span className="font-mono font-bold text-zinc-900">
                   {formatVND(calcResult.edges.totalCost)}
                 </span>
               </div>
@@ -379,7 +379,7 @@ export default function ProjectWorkspacePage() {
                   label="Giải thích định mức phụ kiện"
                 />
               </div>
-              <div className="text-[11px] text-amber-800 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200 font-medium">
+              <div className="text-[11px] text-zinc-900 bg-zinc-100 px-2 py-1 rounded-lg border border-zinc-200 font-medium">
                 Ước tính theo cấu hình xưởng ({project.costConfigSnapshot?.hingesPerSheet ?? profile.costConfig?.hingesPerSheet ?? 2.0} bản lề/tấm, {project.costConfigSnapshot?.slidesPerSheet ?? profile.costConfig?.slidesPerSheet ?? 0.35} bộ ray/tấm)
               </div>
               <div className="flex justify-between text-slate-600">
@@ -473,7 +473,7 @@ export default function ProjectWorkspacePage() {
                 <span className="font-extrabold text-slate-900 text-sm block">TỔNG CỘNG THANH TOÁN:</span>
                 <span className="text-slate-500 text-[11px]">Đã bao gồm lắp đặt hoàn thiện tại công trình.</span>
               </div>
-              <span className="text-2xl font-black text-amber-600 font-mono">
+              <span className="text-2xl font-black text-zinc-900 font-mono">
                 {formatVND(calcResult.totalQuotePrice)}
               </span>
             </div>
@@ -536,7 +536,7 @@ export default function ProjectWorkspacePage() {
                         {log.details.old_status && log.details.new_status && (
                           <span>
                             Trạng thái: <strong>{log.details.old_status}</strong> ➔{" "}
-                            <strong className="text-emerald-700">{log.details.new_status}</strong>
+                            <strong className="text-zinc-900">{log.details.new_status}</strong>
                           </span>
                         )}
                         {log.details.new_total_quote && (
@@ -595,26 +595,26 @@ export default function ProjectWorkspacePage() {
                     {formatVND(upgradePreview.upgradedCost)}
                   </span>
                 </div>
-                <div className="flex justify-between items-center text-amber-700 font-bold border-t border-slate-200/60 pt-1.5">
+                <div className="flex justify-between items-center text-zinc-900 font-bold border-t border-slate-200/60 pt-1.5">
                   <span>Mức chênh giá vốn:</span>
                   <span className="font-mono">+{formatVND(upgradePreview.diffCost)}</span>
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200/80 space-y-2">
+              <div className="p-3.5 rounded-xl bg-zinc-100 border border-zinc-200 space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-emerald-800">Báo giá cũ (gửi khách):</span>
-                  <span className="font-mono font-bold text-emerald-900">
+                  <span className="text-zinc-900">Báo giá cũ (gửi khách):</span>
+                  <span className="font-mono font-bold text-zinc-900">
                     {formatVND(upgradePreview.currentQuote)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-emerald-800 font-bold">Báo giá mới (sau markup):</span>
-                  <span className="font-mono font-black text-emerald-950 text-sm">
+                  <span className="text-zinc-900 font-bold">Báo giá mới (sau markup):</span>
+                  <span className="font-mono font-black text-zinc-900 text-sm">
                     {formatVND(upgradePreview.upgradedQuote)}
                   </span>
                 </div>
-                <div className="flex justify-between items-center text-emerald-700 font-bold border-t border-emerald-200/60 pt-1.5">
+                <div className="flex justify-between items-center text-zinc-900 font-bold border-t border-zinc-200 pt-1.5">
                   <span>Mức chênh báo giá:</span>
                   <span className="font-mono">+{formatVND(upgradePreview.diffQuote)}</span>
                 </div>
@@ -637,7 +637,7 @@ export default function ProjectWorkspacePage() {
                 type="button"
                 disabled={isUpgrading}
                 onClick={handleConfirmUpgrade}
-                className="px-4 py-2 font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition shadow-xs"
+                className="px-4 py-2 font-bold text-white bg-zinc-900 hover:bg-black rounded-xl transition shadow-xs"
               >
                 {isUpgrading ? "Đang nâng cấp..." : "Xác Nhận Nâng Cấp"}
               </button>

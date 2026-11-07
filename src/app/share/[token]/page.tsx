@@ -58,7 +58,7 @@ export default async function ShareQuotePage({ params }: SharePageProps) {
       {/* ================================================================ */}
       <header className="no-print max-w-4xl mx-auto mb-6 bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black shadow-xs shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-zinc-900 text-white flex items-center justify-center font-black shadow-xs shrink-0">
             A4
           </div>
           <div>
@@ -105,10 +105,10 @@ export default async function ShareQuotePage({ params }: SharePageProps) {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="hidden sm:flex w-16 h-16 rounded-full border-2 border-emerald-600 border-dashed flex-col items-center justify-center text-center p-1 text-[7px] font-black text-emerald-800 rotate-[-8deg] shadow-xs bg-emerald-50/50">
+            <div className="hidden sm:flex w-16 h-16 rounded-full border-2 border-zinc-700 border-dashed flex-col items-center justify-center text-center p-1 text-[7px] font-black text-zinc-900 rotate-[-8deg] shadow-xs bg-zinc-100">
               <span className="uppercase tracking-tight leading-tight">ĐÃ KIỂM DUYỆT</span>
-              <span className="text-emerald-700 font-mono text-[8px] font-extrabold">ISO GỖ CNC</span>
-              <span className="text-[6px] text-emerald-500">2026-PASS</span>
+              <span className="text-zinc-900 font-mono text-[8px] font-extrabold">ISO GỖ CNC</span>
+              <span className="text-[6px] text-zinc-400">2026-PASS</span>
             </div>
 
             <div className="text-right space-y-1">
@@ -173,7 +173,7 @@ export default async function ShareQuotePage({ params }: SharePageProps) {
             <span className="font-black text-slate-900 text-sm block">TỔNG CỘNG THANH TOÁN:</span>
             <span className="text-slate-500 text-[11px]">Đã bao gồm chi phí gia công, vận chuyển và lắp đặt hoàn thiện.</span>
           </div>
-          <span className="text-2xl font-black text-amber-600 font-mono">
+          <span className="text-2xl font-black text-zinc-900 font-mono">
             {formatVND(quote.totalQuotePrice)}
           </span>
         </div>
@@ -182,7 +182,7 @@ export default async function ShareQuotePage({ params }: SharePageProps) {
         <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 space-y-1.5">
           <div className="flex items-center justify-between">
             <strong className="text-slate-900 font-bold uppercase text-[10px] flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-zinc-900" />
               ĐIỀU KHOẢN & TIÊU CHUẨN KỸ THUẬT BẢO HÀNH:
             </strong>
             <span className="font-mono text-[10px] text-slate-400">TIÊU CHUẨN XƯỞNG CNC</span>
@@ -215,7 +215,7 @@ export default async function ShareQuotePage({ params }: SharePageProps) {
       {/* Footer bản quyền no-print */}
       <footer className="no-print max-w-4xl mx-auto mt-8 text-center text-xs text-slate-400 space-y-1">
         <p>Báo giá được tạo tự động bởi nền tảng quản lý xưởng nội thất.</p>
-        <Link href="/" className="text-slate-500 hover:text-amber-600 font-semibold underline">
+        <Link href="/" className="text-slate-500 hover:text-zinc-900 font-semibold underline">
           Về trang chủ AutoCutlist
         </Link>
       </footer>

@@ -55,10 +55,10 @@ export default function ShareQuotePrintButton() {
         <button
           type="button"
           onClick={handleShare}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-zinc-900 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded-xl transition cursor-pointer"
           title="Chia sẻ báo giá qua Zalo hoặc ứng dụng điện thoại"
         >
-          <Share2 className="w-3.5 h-3.5 text-emerald-600" />
+          <Share2 className="w-3.5 h-3.5 text-zinc-900" />
           <span>Gửi Zalo</span>
         </button>
       )}
@@ -71,8 +71,8 @@ export default function ShareQuotePrintButton() {
       >
         {copied ? (
           <>
-            <Check className="w-3.5 h-3.5 text-emerald-600" />
-            <span className="text-emerald-700 font-bold">Đã chép link!</span>
+            <Check className="w-3.5 h-3.5 text-zinc-900" />
+            <span className="text-zinc-900 font-bold">Đã chép link!</span>
           </>
         ) : (
           <>
@@ -85,7 +85,7 @@ export default function ShareQuotePrintButton() {
       <button
         type="button"
         onClick={handlePrint}
-        className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition shadow-xs shadow-amber-500/20 cursor-pointer"
+        className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-zinc-900 hover:bg-black rounded-xl transition shadow-xs shadow-xs cursor-pointer"
       >
         <Printer className="w-3.5 h-3.5" />
         <span>In / Lưu PDF</span>
