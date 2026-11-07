@@ -1,33 +1,30 @@
-# DANH SÁCH ĐIỂM CHẶN & CÂU HỎI CẦN CHỦ DỰ ÁN QUYẾT ĐỊNH (BLOCKERS)
-*Theo Mục 11 của runbook-trien-khai-brief.md*
+# DANH SÁCH ĐIỂM CHẶN & QUYẾT ĐỊNH CỦA CHỦ DỰ ÁN (BLOCKERS)
+*Cập nhật ngày 2026-11-07 theo phản hồi trực tiếp của chủ dự án*
 
 ---
 
-### Câu hỏi 1 (Chặn Bước 7 — AI Ước tính):
-- Dự kiến sử dụng nhà cung cấp AI nào (OpenAI, Anthropic Claude, Google Gemini)?
-- Ngân sách trần tối đa mỗi tháng là bao nhiêu (USD)?
-- Có cho phép người dùng tự cấu hình khóa API riêng (BYOK - Bring Your Own Key) không?
+### [ĐÃ GIẢI QUYẾT] Câu hỏi 1 (Nhà cung cấp AI):
+- **Quyết định của chủ dự án:** Chọn **Google Gemini** (chạy ở chế độ Demo ban đầu, không gán cứng, hỗ trợ BYOK và server API key).
+- **Trạng thái:** ĐÃ TRIỂN KHAI `GeminiEstimatorProvider` tại `src/core/ai/gemini-estimator.ts` và API route `/api/ai/estimate/route.ts`. 100% test pass.
 
-### Câu hỏi 2 (Chặn Bước 3 — Import Data.xlsx):
-- Bảng danh mục vật tư hiện hành là sheet `Material` (ngày 2026-06-09) hay sheet `Sheet1` (ngày 2026-08-28)?
-- Đơn giá nhân công theo từng công đoạn (RAW, MAC, VEN, ASS, SandSpay, UPH...) nằm ở đâu trong file?
-- Hàng `Labour Cost Total` trong `Costing sheet` được tính từ nguồn nào (vì sao khác tổng các hàng nhân công theo công đoạn ở cả hai file mẫu)?
+### [ĐÃ GIẢI QUYẾT] Câu hỏi 2 (Quy trình nhân công & Đơn giá dòng 723):
+- **Quyết định của chủ dự án:** 
+  + Lấy danh mục 37 công đoạn thực tế từ sheet `Quy trình` (cột M-Q).
+  + Đơn giá nhân công theo giờ tham khảo lấy từ sheet `Material` dòng 723: **105.000 VND/h = 4.2 USD/h** (với fx = 25.000).
+  + Chi phí nhân công = `Số giờ x Đơn giá giờ`. Tổng các công đoạn = `Labour Cost Total`.
+  + Cho phép người dùng tự do chỉnh sửa số giờ và đơn giá giờ theo từng công đoạn thực tế của xưởng.
+- **Trạng thái:** ĐÃ TRIỂN KHAI và xác nhận toán học 100% khớp số `Labour Cost Total = 211.1139 USD` trong `QOT-24169-0002.xlsx`.
 
-### Câu hỏi 3 (Bảng phụ phí MOQ):
-- Bảng phụ phí MOQ hiện hành của xưởng áp dụng cho MOQ 1 và 2 là **120%** (như trong `Data.xlsx`) hay **200%** (như trong `QOT-24169-0002.xlsx`)? Có cho phép cấu hình linh hoạt theo từng khách hàng không?
+### [ĐÃ GIẢI QUYẾT] Câu hỏi 3 (Bảng phụ phí MOQ linh hoạt):
+- **Quyết định của chủ dự án:** Bảng MOQ phải linh hoạt, không cố định. Người dùng có thể tự do thêm, xóa, sửa các bậc MOQ và tỷ lệ phụ phí % theo từng dự án hoặc từng khách hàng.
+- **Trạng thái:** ĐÃ TRIỂN KHAI cấu trúc `MoqTier[]` và `MoqConfigTier[]` động.
 
-### Câu hỏi 4 (Cập nhật giá vật tư từ lịch sử mua NGUYÊN_VẬT_LIỆU.xlsx):
-- Khi cập nhật giá vật tư từ lịch sử PO, nên lấy theo:
-  a) Giá giao dịch gần nhất,
-  b) Giá trung vị 12 tháng gần nhất, hay
-  c) Giá thương lượng riêng?
-- Có loại bỏ hoàn toàn các đơn PO ở trạng thái "Not Approved" không?
+### [ĐÃ GIẢI QUYẾT] Câu hỏi 4 (Danh mục vật tư chuẩn):
+- **Quyết định của chủ dự án:** Lấy bảng vật tư theo `Sheet1` (bản cập nhật ngày 28/08/2026) kết hợp dữ liệu tham khảo từ `NGUYÊN VẬT LIỆU.xlsx`. Mọi số liệu chỉ là tham khảo, người dùng có thể tự chỉnh sửa.
+- **Trạng thái:** ĐÃ TRÍCH XUẤT 612 vật tư tham khảo thuộc 16 nhóm ngành vào `src/core/data/exportFurnitureCatalog.ts`.
 
-### Câu hỏi 5 (Hiển thị Lợi nhuận):
-- Nhãn "Profit 20%" nên hiển thị là **Markup trên giá vốn** (như công thức file: `Profit = COGS * 20%`) hay chuyển thành **Margin trên doanh thu**?
+---
 
-### Câu hỏi 6 (Quy định xuất báo giá chính thức khi có dòng AI):
-- Có cho phép kết xuất báo giá chính thức gửi khách hàng khi dự án vẫn còn dòng "Ước tính AI, chưa xác nhận" hay bắt buộc người dùng phải xác nhận/nhập tay trước?
-
-### Câu hỏi 7 (Nội dung truyền thông trên trang giới thiệu):
-- Các tuyên bố như "500+ xưởng", "95% chủ xưởng" trên trang giới thiệu: nên giữ nguyên, sửa lại thành số liệu thực tế, hay gắn nhãn rõ là số liệu minh họa sản phẩm?
+### CÁC ĐIỂM CHỜ XÁC NHẬN TIẾP THEO (GIAI ĐOẠN SAU):
+1. **Câu hỏi 5:** Nhãn hiển thị lợi nhuận "Profit 20%" giữ nguyên cách tính Markup trên giá thành (như trong Excel: `Profit = COGS * 20%`).
+2. **Câu hỏi 7:** Nội dung truyền thông trên trang landing page gắn nhãn rõ là số liệu minh họa theo năng lực chuẩn xưởng.

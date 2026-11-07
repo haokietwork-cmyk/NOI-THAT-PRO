@@ -44,6 +44,19 @@ export interface ComputedCostLine extends ExportCostLine {
   amountUSD: number;       // Thành tiền = usingQty * unitPriceUSD
 }
 
+export interface LaborProcessLine {
+  id?: string;
+  processCode: string;     // Mã công đoạn thực tế (từ sheet Quy trình cột M-Q, vd: RAW, MAC, CNC-MDF, VEN, ASS, SAND, CMF...)
+  name?: string;            // Tên công đoạn (vd: Gia công cơ khí, Phủ veneer, Lắp ráp...)
+  hours: number;           // Số giờ công thực tế
+  hourlyRateUSD?: number;  // Đơn giá USD/giờ (mặc định 4.2 USD/h từ dòng 723 Sheet Material, xưởng tự sửa được)
+}
+
+export interface ComputedLaborProcessLine extends LaborProcessLine {
+  hourlyRateUSD: number;
+  amountUSD: number;       // Thành tiền = hours * hourlyRateUSD
+}
+
 export interface GroupSubtotal {
   group: CostGroup;
   amountUSD: number;
@@ -59,6 +72,7 @@ export interface MoqResult {
 export interface ExportFurnitureOutput {
   modelId: "export_furniture";
   computedLines: ComputedCostLine[];
+  computedLaborLines: ComputedLaborProcessLine[];
   groupSubtotals: Record<CostGroup, number>;
   lmUSD: number;           // Tổng chi phí vật tư và nhân công (L&M)
   ohUSD: number;           // Overhead tổng
@@ -77,6 +91,7 @@ export interface ExportFurnitureOutput {
 
 export interface ExportFurnitureInput {
   lines?: ExportCostLine[];
+  laborLines?: LaborProcessLine[];
   overrideGroupTotals?: Partial<Record<CostGroup, number>>;
   antMarbLaborUSD?: number;
 }
@@ -150,7 +165,7 @@ export const exportFurnitureModel: CostingModel<ExportFurnitureInput, ExportFurn
       "Labour Cost Total": 0,
     };
 
-    // 1. Tính toán từng dòng chi tiết
+    // 1. Tính toán từng dòng chi tiết vật tư
     for (const line of lines) {
       const computed = computeLineUsing(line);
       computedLines.push({
@@ -160,6 +175,24 @@ export const exportFurnitureModel: CostingModel<ExportFurnitureInput, ExportFurn
         amountUSD: computed.amountUSD,
       });
       groupSubtotals[line.group] = (groupSubtotals[line.group] || 0) + computed.amountUSD;
+    }
+
+    // 1b. Tính toán nhân công theo các công đoạn thực tế (sheet Quy trình cột M-Q & đơn giá dòng 723 Material: 4.2 USD/hr)
+    const computedLaborLines: ComputedLaborProcessLine[] = [];
+    if (input.laborLines && input.laborLines.length > 0) {
+      let totalLaborAmount = 0;
+      const defaultRate = ctx.constants.laborRateUSD ?? 4.2;
+      for (const lb of input.laborLines) {
+        const rate = lb.hourlyRateUSD !== undefined && lb.hourlyRateUSD !== null ? lb.hourlyRateUSD : defaultRate;
+        const amountUSD = lb.hours * rate;
+        totalLaborAmount += amountUSD;
+        computedLaborLines.push({
+          ...lb,
+          hourlyRateUSD: rate,
+          amountUSD,
+        });
+      }
+      groupSubtotals["Labour Cost Total"] = totalLaborAmount;
     }
 
     // Ghi đè tổng nhóm nếu input có overrideGroupTotals (hỗ trợ nhập nhanh theo sheet Costing)
@@ -216,6 +249,7 @@ export const exportFurnitureModel: CostingModel<ExportFurnitureInput, ExportFurn
     return {
       modelId: "export_furniture",
       computedLines,
+      computedLaborLines,
       groupSubtotals,
       lmUSD,
       ohUSD,

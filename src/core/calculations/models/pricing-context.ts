@@ -14,6 +14,7 @@ export interface PricingConstants {
   ohSubcon: number;       // Tỷ lệ Overhead thầu phụ/kim loại/nệm (VD: 0.10 tức 10%)
   ohMarble: number;       // Tỷ lệ Overhead đá (VD: 0)
   markup: number;         // Tỷ lệ lãi trên giá vốn COGS (VD: 0.20 tức 20% hoặc 0.65 tức 65%)
+  laborRateUSD?: number;  // Đơn giá nhân công theo giờ (mặc định tham khảo 4.2 USD/h = 105.000 đ/h, dòng 723 Material)
   moqTiers: MoqTier[];    // Bảng phụ phí MOQ linh hoạt theo cấu hình
 }
 

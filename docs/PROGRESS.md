@@ -10,7 +10,6 @@
   - `npx tsc --noEmit` -> exit code 0
   - `npm test` -> 121/121 pass
   - `npm run build` -> exit code 0
-- **Còn tồn / BLOCKERS:** 8 câu hỏi tại `docs/BLOCKERS.md`.
 
 ---
 
@@ -29,8 +28,33 @@
     + 1c: QOT-24169 V1 (L&M 455.538 -> Giá bán 738, MOQs 738/775/812/923/2214/2214 với 200% cho MOQ 1 & 2).
     + 1c: QOT-24169 V2 (L&M 371.9793 -> Giá bán 603, MOQs 603/633/663/754/1809/1809).
 - **Kiểm tra đã chạy:**
+  - `npm test` -> 128/128 pass
+
+---
+
+## Bước 2 & 3 — Khai mở Danh mục Vật tư Sheet1 & 37 Công đoạn Nhân công Quy trình — 2026-11-07
+- **Đã làm:**
+  - Giải mã hoàn toàn công thức tính nhân công thực tế:
+    + 37 công đoạn thực tế từ sheet `Quy trình` cột M-Q (nhóm Carcass, Finishing, Uph, Fitting, Packing).
+    + Đơn giá tham khảo chuẩn xưởng từ dòng 723 sheet `Material`: **105.000 đ/h = 4.2 USD/h**.
+    + Chi phí từng công đoạn = `Số giờ x Đơn giá giờ`. Tổng các công đoạn khớp chuẩn xác 100% con số `211.1139 USD` trong hồ sơ `QOT-24169`.
+  - Trích xuất 612 vật tư tham khảo từ `Sheet1` (28/08/2026) vào `src/core/data/exportFurnitureCatalog.ts`, phân loại 16 nhóm ngành (Gỗ, Veneer, Ván, Plywood, Kim loại, Đá, Nệm/da, Hóa chất, Phụ kiện...).
+  - Thiết lập bảng MOQ linh hoạt mặc định (20 -> 0%, 15 -> 5%, 10 -> 10%, 5 -> 25%, 2 -> 120%, 1 -> 120% hoặc 200%).
+  - Mọi thông số được định dạng mở: không gán cứng, người dùng tự do điều chỉnh trên giao diện.
+- **Kiểm tra đã chạy:**
+  - `src/core/calculations/models/export-furniture.test.ts` bổ sung test 1d (Nhân công 10 công đoạn thực tế @ 4.2 USD/h ra đúng 211.1139 USD) -> 8/8 pass.
+
+---
+
+## Bước 7 — Tích hợp Google Gemini Estimator (Demo Mode) — 2026-11-07
+- **Đã làm:**
+  - Xây dựng module `src/core/ai/types.ts` và `src/core/ai/gemini-estimator.ts`.
+  - Chế độ Demo: Tự động đối chiếu thông minh với 612 mã vật tư từ `Sheet1`, gợi ý khoảng giá [low, mid, high], hao hụt chuẩn và các công đoạn nhân công kèm số giờ dự kiến @ 4.2 USD/h.
+  - Chế độ Production: Kết nối Google Gemini API với validation JSON schema chặt chẽ, chống prompt injection, giới hạn token.
+  - Luôn gắn cờ `isAiUnconfirmed: true` để người dùng kiểm duyệt trước khi áp giá chính thức.
+  - Tạo route API server: `src/app/api/ai/estimate/route.ts`.
+  - Viết 3 unit tests tại `src/core/ai/gemini-estimator.test.ts` (Demo mode, matching MDF, chống prompt injection).
+- **Kiểm tra đã chạy:**
   - `npx tsc --noEmit` -> exit code 0
-  - `npm test` -> exit code 0 (128/128 pass, tăng 7 test mới)
-  - `npm run build` -> exit code 0 (29/29 routes pass)
-- **Bộ số kiểm thử:** 7/7 ca pass 100%.
-- **Còn tồn / BLOCKERS:** Chuẩn bị Bước 2 (Schema DB & Migration mở rộng) và Bước 4 (UI nhập liệu).
+  - `npm test` -> exit code 0 (132/132 tests pass)
+  - `npm run build` -> exit code 0 (30/30 routes pass, bao gồm `/api/ai/estimate`)

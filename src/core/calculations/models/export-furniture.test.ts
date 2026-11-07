@@ -264,3 +264,40 @@ test("1c. QOT-24169 V2: L&M 371.9793 -> Giá bán 603, MOQ 603/633/663/754/1809/
   assert.strictEqual(moqMap[2], 1809);
   assert.strictEqual(moqMap[1], 1809);
 });
+
+test("1d. Nhân công công đoạn thực tế (Quy trình cột M-Q & Đơn giá dòng 723 Material: 4.2 USD/hr)", () => {
+  // Bộ 10 công đoạn thực tế theo file QOT-24169
+  const laborLines = [
+    { processCode: "RAW", name: "Nguyên vật liệu đầu vào", hours: 2.75, hourlyRateUSD: 4.2 },
+    { processCode: "MAC", name: "Gia công cơ khí", hours: 9.5, hourlyRateUSD: 4.2 },
+    { processCode: "CNC-MDF", name: "Gia công CNC trên ván MDF", hours: 4.67, hourlyRateUSD: 4.2 },
+    { processCode: "VEN", name: "Phủ veneer", hours: 10.66, hourlyRateUSD: 4.2 },
+    { processCode: "ASS", name: "Lắp ráp", hours: 6.0, hourlyRateUSD: 4.2 },
+    { processCode: "SandSpay", name: "Chà nhám và phun", hours: 2.5, hourlyRateUSD: 4.2 },
+    { processCode: "Antique", name: "Hoàn thiện giả cổ", hours: 7.93522512, hourlyRateUSD: 4.2 },
+    { processCode: "FIT", name: "Gắn phụ kiện", hours: 1.25, hourlyRateUSD: 4.2 },
+    { processCode: "FitWas", name: "Gắn vòng đệm", hours: 1.0, hourlyRateUSD: 4.2 },
+    { processCode: "Packing", name: "Đóng gói", hours: 4.0, hourlyRateUSD: 4.2 },
+  ];
+
+  const res = exportFurnitureModel.compute(
+    {
+      laborLines,
+      overrideGroupTotals: {
+        Wood: 97.0055,
+        Chemical: 26.0129,
+        Hardware: 6.517,
+        Consumables: 2.33,
+        Packing: 29.0,
+      },
+    },
+    defaultContext
+  );
+
+  // Tổng giờ: 2.75 + 9.5 + 4.67 + 10.66 + 6 + 2.5 + 7.93522512 + 1.25 + 1 + 4 = 50.26522512 giờ
+  // Tổng tiền nhân công: 50.26522512 * 4.2 = 211.113945504 USD
+  const laborTotal = res.groupSubtotals["Labour Cost Total"];
+  assert.ok(Math.abs(laborTotal - 211.1139) < 0.001, "Tổng nhân công phải khớp ~211.1139 USD");
+  assert.strictEqual(res.computedLaborLines.length, 10);
+  assert.strictEqual(res.computedLaborLines[0].amountUSD, 2.75 * 4.2); // 11.55
+});
