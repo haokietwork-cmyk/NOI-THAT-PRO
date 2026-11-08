@@ -114,6 +114,10 @@ import {
   type MoqConfigTier,
 } from "@/core/data/exportFurnitureCatalog";
 
+function formatVND(val: number): string {
+  return (val || 0).toLocaleString("vi-VN") + " đ";
+}
+
 function QuotingWorkspace() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -1527,8 +1531,6 @@ function QuotingWorkspace() {
       setTimeout(() => setSaveSuccess(false), 3000);
     }
   };
-
-  const formatVND = (val: number) => (val || 0).toLocaleString("vi-VN") + " đ";
 
   if (!mounted) {
     return (
