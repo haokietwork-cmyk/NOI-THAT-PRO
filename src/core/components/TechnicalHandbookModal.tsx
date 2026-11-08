@@ -381,7 +381,7 @@ export default function TechnicalHandbookModal({
                     Sổ Tay Quy Cách Kỹ Thuật Gỗ Công Nghiệp 2026
                   </h3>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-900 text-slate-950">
-                    Bản Linh Động v2.0
+                    Cẩm Nang Xưởng Mộc
                   </span>
                 </div>
                 <p className="text-xs text-slate-400 mt-0.5">

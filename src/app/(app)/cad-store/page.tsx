@@ -76,7 +76,7 @@ export default function CadStorePage() {
       desc: "Công cụ in & gộp PDF hàng loạt chuẩn kỹ thuật (.NET C# Universal tương thích từ AutoCAD 2014 đến 2026+). Tự động nhận diện khung Block động, Polyline kín, trích xuất chính xác tên & số hiệu bản vẽ, chuẩn hóa tỉ lệ phóng to X:1, in qua Named View chống lệch lề và gộp PDF kèm Bookmark.",
       priceNumber: 399_000,
       priceText: "399.000 đ",
-      tag: "Bản cập nhật v2.2 Universal - Pass Oracle",
+      tag: "Tương thích AutoCAD 2014 - 2026+",
       tagColor: "bg-zinc-100 text-zinc-900 border-zinc-200",
       supportedCad: "AutoCAD 2014 - 2026+ (Universal)",
       features: [

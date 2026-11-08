@@ -415,7 +415,7 @@ function ActivationContent() {
             <div className="bg-white rounded-xl border border-slate-200/90 shadow-sm p-6 space-y-3">
               <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <Layers className="w-4 h-4 text-slate-700" />
-                Tính Năng Nổi Bật v2.0
+                Tính Năng Nổi Bật
               </h3>
               <ul className="text-xs text-slate-600 space-y-2">
                 <li className="flex items-start gap-2">

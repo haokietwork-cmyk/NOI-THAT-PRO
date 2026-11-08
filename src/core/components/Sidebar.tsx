@@ -142,49 +142,19 @@ export default function Sidebar({ onCloseMobile }: SidebarProps = {}) {
         )}
       </div>
 
-      {/* Thông số & Năng lực báo giá xưởng */}
-      <div className="m-3 p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs space-y-2">
-        <div className="flex items-center justify-between pb-1.5 border-b border-slate-200">
-          <span className="font-semibold text-slate-700 text-[11px]">
-            Hệ Báo Giá Đa Ngành
+      {/* Trạng thái tài khoản xưởng */}
+      <div className="mx-3 my-2 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs flex items-center justify-between">
+        <span className="text-[11px] text-slate-500">Trạng thái:</span>
+        {isAuthenticated ? (
+          <span className="text-[11px] font-semibold text-zinc-900 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            Đã kích hoạt
           </span>
-          <span className="text-[10px] text-slate-500 font-mono">
-            V2.0
+        ) : (
+          <span className="text-[11px] font-medium text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
+            Chế độ dùng thử
           </span>
-        </div>
-
-        <div className="space-y-1.5 text-[11px]">
-          <div>
-            <span className="text-slate-500 block text-[10px]">Dòng hàng hỗ trợ:</span>
-            <span className="font-medium text-slate-900 block truncate">
-              Gỗ CN • Cánh Kính • Nhựa • Gỗ TN • Nệm
-            </span>
-          </div>
-          <div className="grid grid-cols-2 gap-2 pt-0.5">
-            <div>
-              <span className="text-slate-500 block text-[10px]">Phương pháp:</span>
-              <span className="font-medium text-slate-900 font-mono">W×D×H phủ bì</span>
-            </div>
-            <div>
-              <span className="text-slate-500 block text-[10px]">Độ tin cậy:</span>
-              <span className="font-medium text-zinc-900 font-mono">Sai số &lt; 1%</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="pt-1.5 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-500">
-          <span>Trạng thái xưởng:</span>
-          {isAuthenticated ? (
-            <span className="font-medium text-zinc-900 bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200 flex items-center gap-1">
-              <ShieldCheck className="w-3 h-3 text-zinc-900" />
-              Đã kích hoạt
-            </span>
-          ) : (
-            <span className="font-medium text-slate-600 bg-white px-1.5 py-0.5 rounded border border-slate-200">
-              Chế độ trải nghiệm
-            </span>
-          )}
-        </div>
+        )}
       </div>
 
       {/* Navigation Links */}

@@ -1435,8 +1435,8 @@ function QuotingWorkspace() {
   // Tạo phiên bản báo giá mới (Revision v2, v3...)
   const handleCreateRevision = () => {
     if (!isAuthenticated) {
-      setAuthModalTitle("Yêu cầu Đăng nhập để Tạo Bản v2");
-      setAuthModalDesc("Vui lòng đăng nhập qua Email hoặc Số điện thoại để tạo và lưu trữ độc lập các phiên bản đàm phán hợp đồng (v1, v2, v3...).");
+      setAuthModalTitle("Yêu cầu Đăng nhập để Nhân bản Báo giá");
+      setAuthModalDesc("Vui lòng đăng nhập qua Email hoặc Số điện thoại để lưu trữ các lần đàm phán báo giá độc lập.");
       setShowAuthModal(true);
       return;
     }
@@ -1533,25 +1533,20 @@ function QuotingWorkspace() {
       )}
 
       {/* ================================================================== */}
-      {/* TECHNICAL TELEMETRY RIBBON (DẢI ĐỊNH MỨC KỸ THUẬT XƯỞNG)           */}
-      {/* Chỉ xuất hiện khi người dùng đã đăng nhập và đang mở một dự án cụ thể đã lưu */}
+      {/* THANH THÔNG TIN DỰ ÁN ĐÃ LƯU                                       */}
       {/* ================================================================== */}
       {isAuthenticated && editId && (
-        <div className="no-print bg-slate-900 text-slate-300 text-[11px] py-2 px-4 rounded-lg font-mono border border-slate-800 flex flex-wrap items-center justify-between gap-3 shadow-xs">
-          <div className="flex items-center gap-4 text-[10px]">
-            <span className="flex items-center gap-1.5 text-zinc-200 font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
-              MÃ DỰ ÁN: {`PRJ-${editId.slice(0, 8).toUpperCase()}`}
+        <div className="no-print bg-slate-900 text-slate-300 text-xs py-2 px-4 rounded-lg border border-slate-800 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1.5 text-white font-mono font-semibold">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              Mã dự án: {`PRJ-${editId.slice(0, 8).toUpperCase()}`}
             </span>
-            <span className="text-slate-400">ĐỊNH MỨC: <strong className="text-white">ĐA DÒNG HÀNG &amp; VẬT TƯ MỞ</strong></span>
-            <span className="text-slate-400">PHƯƠNG PHÁP: <strong className="text-white">CHIẾT TÍNH ĐA TẦNG W×D×H</strong></span>
-            <span className="text-slate-400">KIỂM ĐỊNH: <strong className="text-zinc-200">SAI SỐ &lt; 1%</strong></span>
+            <span className="text-slate-400">•</span>
+            <span className="text-slate-300">Dự án đã được lưu trên hệ thống quản lý xưởng</span>
           </div>
-          <div className="flex items-center gap-3 text-[10px] text-slate-400">
-            <span className="text-zinc-200 flex items-center gap-1 font-sans font-medium">
-              <ShieldCheck className="w-3.5 h-3.5 text-zinc-300" /> BẢO MẬT RLS XƯỞNG ĐỘC LẬP
-            </span>
-            <span className="font-mono">DUNG SAI: ±0.2MM</span>
+          <div className="text-[11px] text-slate-400 font-medium">
+            Dữ liệu được bảo mật theo tài khoản xưởng
           </div>
         </div>
       )}
@@ -1692,11 +1687,11 @@ function QuotingWorkspace() {
               <button
                 type="button"
                 onClick={handleCreateRevision}
-                title="Nhân bản để tạo bản báo giá v2 sau đàm phán"
+                title="Nhân bản để tạo bản báo giá mới sau đàm phán"
                 className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition cursor-pointer"
               >
                 <Copy className="w-3.5 h-3.5 text-slate-500" />
-                <span>Tạo bản v2</span>
+                <span>Nhân bản báo giá</span>
               </button>
             )}
 
@@ -1825,12 +1820,12 @@ function QuotingWorkspace() {
             {isRevision && (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-800 border border-slate-200">
                 <Copy className="w-3.5 h-3.5 text-slate-600" />
-                <span>Phiên bản v{projectVersionNo}</span>
+                <span>Bản báo giá #{projectVersionNo}</span>
               </span>
             )}
           </div>
 
-          {/* Nút bật/tắt Chế độ nâng cao (mặc định tắt, ghi nhớ trong localStorage) */}
+          {/* Nút bật/tắt Chế độ chi tiết chuyên sâu (mặc định tắt, ghi nhớ trong localStorage) */}
           <button
             type="button"
             onClick={toggleAdvancedMode}
@@ -1839,10 +1834,10 @@ function QuotingWorkspace() {
                 ? "bg-zinc-900 text-white border-zinc-800 shadow-xs"
                 : "bg-white text-zinc-700 hover:bg-zinc-50 border-zinc-200"
             }`}
-            title="Bật để mở khóa 37 công đoạn nhân công và phân tầng Overhead chuyên sâu"
+            title="Mở rộng chi tiết định mức công đoạn nhân công và phân bổ chi phí xưởng"
           >
             <Sliders className="w-3.5 h-3.5" />
-            <span>Chế độ nâng cao (Advanced Mode): <strong className={advancedMode ? "text-white" : "text-zinc-900"}>{advancedMode ? "BẬT" : "TẮT"}</strong></span>
+            <span>Chế độ chi tiết chuyên sâu: <strong className={advancedMode ? "text-white" : "text-zinc-900"}>{advancedMode ? "BẬT" : "TẮT"}</strong></span>
           </button>
         </div>
 
@@ -1973,9 +1968,9 @@ function QuotingWorkspace() {
 
             <div className="text-xs text-slate-500 hidden md:flex items-center gap-1.5 font-normal">
               {inputTab === "questionnaire" ? (
-                <span>Tự động chiết tính giá vốn đa tầng từ kích thước phủ bì W × D × H</span>
+                <span>Dự toán chi phí theo quy cách và kích thước phủ bì</span>
               ) : (
-                <span>Nhập danh sách phôi tấm hoặc dán trực tiếp từ bảng tính Excel</span>
+                <span>Nhập danh sách phôi tấm hoặc nạp trực tiếp từ file Excel</span>
               )}
             </div>
           </div>
@@ -1986,25 +1981,20 @@ function QuotingWorkspace() {
             /* ============================================================ */
             <div className="space-y-6">
               
-              {/* THANG ĐO 4 MỨC ĐỘ BÁO GIÁ (4-TIER ESTIMATION RESOLUTION LADDER) */}
+              {/* CHỌN MỨC ĐỘ CHI TIẾT KHI TÍNH GIÁ */}
               <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs space-y-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-zinc-900 text-white">
-                        THANG ĐỘ PHÂN GIẢI
-                      </span>
-                      <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
-                        4 Mức Độ Chiết Tính &amp; Bảo Vệ Lợi Nhuận
-                      </h3>
-                    </div>
+                    <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
+                      Mức độ chi tiết khi tính giá
+                    </h3>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Không ép nhập từng chi tiết khi chỉ có ảnh chụp. Dừng ở mức nào tùy nhu cầu độ chính xác.
+                      Linh hoạt lựa chọn từ dự toán sơ bộ ban đầu đến bảng bóc tách chi tiết phục vụ sản xuất.
                     </p>
                   </div>
 
                   <div className="flex items-center gap-2 text-[11px] font-mono text-slate-500">
-                    <span>Đang áp dụng:</span>
+                    <span>Đang chọn:</span>
                     <strong className="text-zinc-900 font-bold bg-zinc-100 px-2.5 py-0.5 rounded border border-zinc-200">
                       Mức {questionnaire.estimationLevel || 2}
                     </strong>
@@ -2015,31 +2005,31 @@ function QuotingWorkspace() {
                   {[
                     {
                       level: 1,
-                      title: "Mức 1: Giá khoảng KT bao",
-                      badge: "±15% dao động",
-                      contingency: "+10% Dự phòng rủi ro",
-                      desc: "Báo nhanh trong 30s khi khách gửi ảnh Zalo. Chỉ cần W×D×H.",
+                      title: "Mức 1: Ước tính nhanh W×D×H",
+                      badge: "Dự toán sơ bộ",
+                      contingency: "+10% Dự phòng",
+                      desc: "Tính nhanh khoảng giá từ kích thước phủ bì khi cần tư vấn ngay cho khách.",
                     },
                     {
                       level: 2,
-                      title: "Mức 2: Sinh BOM giả định",
+                      title: "Mức 2: Theo quy cách kết cấu",
                       badge: "Khuyến nghị xưởng",
-                      contingency: "+5% Dự phòng rủi ro",
-                      desc: "Tự dựng danh sách chi tiết & hiện giả định kỹ thuật sát bên giá.",
+                      contingency: "+5% Dự phòng",
+                      desc: "Tự động phân bổ vật tư, phụ kiện và định mức nhân công theo quy cách.",
                     },
                     {
                       level: 3,
-                      title: "Mức 3: Lấy từ mẫu cũ tương tự",
-                      badge: "Kho lịch sử",
-                      contingency: "+5% Dự phòng rủi ro",
-                      desc: "Scale co giãn kích thước & định mức từ dự án xưởng từng làm.",
+                      title: "Mức 3: Theo mẫu xưởng đã làm",
+                      badge: "Kho dữ liệu mẫu",
+                      contingency: "+5% Dự phòng",
+                      desc: "Kế thừa và co giãn kích thước từ sản phẩm tương tự xưởng từng thi công.",
                     },
                     {
                       level: 4,
-                      title: "Mức 4: BOM chi tiết CAD",
-                      badge: "Chốt đơn 100%",
-                      contingency: "0% Dự phòng (Chuẩn CNC)",
-                      desc: "Bóc tách đầy đủ từng tấm từ AutoCAD/SketchUp hoặc bảng phôi.",
+                      title: "Mức 4: Bóc tách chi tiết đầy đủ",
+                      badge: "Chuẩn sản xuất",
+                      contingency: "0% Dự phòng",
+                      desc: "Danh sách phôi tấm chi tiết chính xác từ bản vẽ kỹ thuật.",
                     },
                   ].map((tier) => {
                     const isSelected = (questionnaire.estimationLevel || 2) === tier.level;
@@ -2241,7 +2231,7 @@ function QuotingWorkspace() {
                         Vật liệu &amp; Kết cấu chủ lực (* Bắt buộc)
                       </h3>
                     </div>
-                    <span className="text-[11px] text-slate-500">Đa dạng dòng hàng &amp; vật liệu mở</span>
+                    <span className="text-[11px] text-slate-500">Vật liệu chính cấu thành sản phẩm</span>
                   </div>
 
                   {/* Cốt ván & Bề mặt */}
@@ -2251,7 +2241,6 @@ function QuotingWorkspace() {
                         <label className="text-xs font-semibold text-slate-700 block">
                           Cốt vật liệu thùng &amp; đợt:
                         </label>
-                        <span className="text-[10px] text-slate-500 font-mono">Đa ngành</span>
                       </div>
                       <select
                         value={isCustomCore ? "CUSTOM" : questionnaire.materials.coreCode}
@@ -3112,7 +3101,7 @@ function QuotingWorkspace() {
                           {formatVND(activeCosting.priceRange?.min || 0)} <span className="text-slate-500 font-normal text-sm">~</span> {formatVND(activeCosting.priceRange?.max || 0)}
                         </div>
                         <p className="text-[10px] text-slate-400 font-mono">
-                          Phản hồi nhanh trong 30s khi khách gửi ảnh Zalo
+                          Dự toán sơ bộ theo kích thước bao phủ bì
                         </p>
                       </div>
                     ) : (
@@ -4083,7 +4072,7 @@ function QuotingWorkspace() {
               }`}
             >
               <Calculator className="w-3.5 h-3.5" />
-              <span>Costing Sheet V2 (Chiết Tính Giá Vốn)</span>
+              <span>Bảng Chiết Tính Giá Vốn</span>
             </button>
 
             <button
@@ -4156,13 +4145,13 @@ function QuotingWorkspace() {
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-slate-500">GIÁ VỐN TOÀN DIỆN (COGS)</span>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
-                    12 NHÓM CHI PHÍ
+                    GIÁ VỐN XƯỞNG
                   </span>
                 </div>
                 <div className="text-2xl font-bold text-slate-900 font-mono">
                   {formatVND(activeCosting.summary.cogs)}
                 </div>
-                <p className="text-xs text-slate-500">Vật tư + 37 công đoạn nhân công + Quản lý xưởng OH &amp; thầu phụ</p>
+                <p className="text-xs text-slate-500">Tổng hợp chi phí vật tư, nhân công gia công và quản lý xưởng</p>
               </div>
 
               <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-2xs space-y-2">
@@ -5142,12 +5131,6 @@ function QuotingWorkspace() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <div className="hidden sm:flex w-16 h-16 rounded-full border-2 border-zinc-700 border-dashed flex-col items-center justify-center text-center p-1 text-[7px] font-black text-zinc-900 rotate-[-8deg] shadow-xs bg-zinc-100">
-                    <span className="uppercase tracking-tight leading-tight">ĐÃ KIỂM DUYỆT</span>
-                    <span className="text-zinc-900 font-mono text-[8px] font-extrabold">ISO GỖ CNC</span>
-                    <span className="text-[6px] text-zinc-400">2026-PASS</span>
-                  </div>
-
                   <div className="text-right space-y-1">
                     <span className="inline-block text-xs font-black px-3.5 py-1 rounded-md bg-slate-900 text-white tracking-widest uppercase">
                       BÁO GIÁ THI CÔNG
@@ -5427,9 +5410,9 @@ function QuotingWorkspace() {
                 <Calculator className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-xs font-bold text-slate-900">Costing Sheet V2 (.xlsx)</h3>
+                <h3 className="text-xs font-bold text-slate-900">Bảng Chiết Tính Dự Toán (.xlsx)</h3>
                 <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-                  Bảng tổng hợp chi phí 12 danh mục, phân bổ OH đa tầng (Đá 0%, Xưởng 25-35%, Thầu phụ 10%), 37 công đoạn nhân công và bậc thang MOQ.
+                  Bảng Excel chiết tính chi tiết vật tư, phụ kiện, nhân công và chi phí quản lý xưởng.
                 </p>
               </div>
             </div>
@@ -5439,7 +5422,7 @@ function QuotingWorkspace() {
               className="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer"
             >
               <Download className="w-4 h-4" />
-              <span>Tải Excel Costing Sheet</span>
+              <span>Tải Excel Bảng Dự Toán</span>
             </button>
           </div>
 
@@ -5591,12 +5574,6 @@ function QuotingWorkspace() {
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="hidden sm:flex w-16 h-16 rounded-full border-2 border-zinc-700 border-dashed flex-col items-center justify-center text-center p-1 text-[7px] font-black text-zinc-900 rotate-[-8deg] shadow-xs bg-zinc-100">
-                <span className="uppercase tracking-tight leading-tight">ĐÃ KIỂM DUYỆT</span>
-                <span className="text-zinc-900 font-mono text-[8px] font-extrabold">ISO GỖ CNC</span>
-                <span className="text-[6px] text-zinc-400">2026-PASS</span>
-              </div>
-
               <div className="text-right space-y-1">
                 <span className="inline-block text-xs font-black px-3.5 py-1 rounded-md bg-slate-900 text-white tracking-widest uppercase">
                   BÁO GIÁ THI CÔNG

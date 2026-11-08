@@ -394,11 +394,11 @@ export default function CostingSandboxWidget() {
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-zinc-400" />
           <span className="font-mono text-white font-semibold tracking-wide">
-            LIVE COSTING SANDBOX V2.0
+            BẢNG DỰ TOÁN TRỰC TIẾP
           </span>
           <span className="text-slate-600">|</span>
           <span className="text-slate-400 hidden sm:inline">
-            Thử nghiệm chiết tính giá vốn đa ngành theo thời gian thực
+            Tính toán giá vốn và giá bán theo thời gian thực
           </span>
         </div>
 

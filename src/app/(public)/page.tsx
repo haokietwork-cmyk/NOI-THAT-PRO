@@ -359,9 +359,9 @@ export default function LandingPage() {
           {/* Badge kỹ thuật định danh */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-medium bg-white border border-slate-200 text-slate-700 shadow-2xs">
             <span className="w-2 h-2 rounded-full bg-zinc-900" />
-            <span className="font-mono text-slate-500 text-[11px]">HỆ BÁO GIÁ ĐA DÒNG HÀNG V2.0</span>
+            <span className="font-mono text-slate-500 text-[11px]">DỰ TOÁN &amp; BÁO GIÁ NỘI THẤT</span>
             <span className="text-slate-300">|</span>
-            <span className="text-slate-800 font-semibold">Ván Gỗ • Gỗ Sồi • Mặt Đá • Nhôm Kính • Sofa Da</span>
+            <span className="text-slate-800 font-semibold">Ván Gỗ • Gỗ Tự Nhiên • Mặt Đá • Nhôm Kính • Sofa Da</span>
           </div>
 
           {/* H1 Headline: Đạt chuẩn 2 dòng, tự tin, không câu từ AI sáo rỗng */}
@@ -484,22 +484,22 @@ export default function LandingPage() {
                     <TrendingUp className="w-5 h-5 text-white" />
                   </div>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white text-zinc-900 font-bold border border-zinc-200">
-                    TRỤ CỘT 1: FINANCIAL SUITE
+                    GIÁ VỐN &amp; ĐỊNH MỨC
                   </span>
                 </div>
                 <h3 className="text-lg font-bold text-slate-900">
-                  Chiết Tính Giá Vốn Đa Ngành &amp; 37 Công Đoạn
+                  Chiết Tính Giá Vốn Chi Tiết &amp; Định Mức Sản Xuất
                 </h3>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Không ép buộc mọi sản phẩm phải là ván hộp công nghiệp. Hệ thống phân rã chi phí thành 15 nhóm (L&amp;M, Wood, Stone, Upholstery, Metal, Glass, Packing...) cùng 37 công đoạn thực tế (RAW, CNC, Veneer, Antique, Sơn PU, Bọc đệm) kèm đơn giá 105.000 đ/giờ công có thể tinh chỉnh linh hoạt.
+                  Hỗ trợ toàn diện từ ván gỗ công nghiệp, gỗ tự nhiên khối, đá tự nhiên, kim loại đến bọc nệm. Tự động bóc tách vật tư, phụ kiện và định mức giờ công sản xuất thực tế với đơn giá giờ công có thể tùy chỉnh linh hoạt theo từng xưởng.
                 </p>
               </div>
 
               <div className="pt-3 border-t border-slate-200/80 flex flex-wrap gap-2 text-[11px] font-mono text-slate-600">
-                <span className="px-2 py-0.5 bg-white rounded border border-slate-200">Đá 0% OH nhạy cảm</span>
-                <span className="px-2 py-0.5 bg-white rounded border border-slate-200">Thầu phụ 10% OH</span>
-                <span className="px-2 py-0.5 bg-white rounded border border-slate-200">Xưởng 35% OH</span>
-                <span className="px-2 py-0.5 bg-white rounded border border-slate-200">Phụ phí MOQ lô nhỏ</span>
+                <span className="px-2 py-0.5 bg-white rounded border border-slate-200">Bóc tách vật tư chuẩn xác</span>
+                <span className="px-2 py-0.5 bg-white rounded border border-slate-200">Định mức nhân công thực tế</span>
+                <span className="px-2 py-0.5 bg-white rounded border border-slate-200">Phân bổ chi phí xưởng hợp lý</span>
+                <span className="px-2 py-0.5 bg-white rounded border border-slate-200">Chiết khấu theo số lượng đặt</span>
               </div>
             </div>
 

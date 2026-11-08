@@ -16,7 +16,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "NỘI THẤT PRO - Dự Toán & Báo Giá Xưởng Tự Động",
-  description: "Nền tảng chiết tính giá vốn đa tầng, báo giá nhanh thông số Costing V2, xuất bảng vật tư xưởng và báo giá khách hàng A4 chuyên nghiệp.",
+  description: "Nền tảng dự toán chi phí, bóc tách vật tư và lập báo giá nội thất chuyên nghiệp cho xưởng sản xuất và kiến trúc sư.",
 };
 
 export default function RootLayout({
