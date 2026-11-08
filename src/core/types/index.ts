@@ -205,6 +205,8 @@ export interface ProjectCalculationResult {
 
 export type ProjectStatus = 'draft' | 'quoted' | 'ordered' | 'approved' | 'in_production' | 'finalized';
 
+export type QuoteScopeMode = 'single_item' | 'order_list' | 'collection' | 'room_package';
+
 export interface FrozenProjectTotals {
   frozenAt: string;
   totalCost: number;
@@ -246,6 +248,7 @@ export interface SavedProject {
   snapshotTotals?: FrozenProjectTotals; // Snapshot tổng tiền và BOM đóng băng
   projectProducts?: any[];              // Danh sách sản phẩm trong dự án / bộ sưu tập đa sản phẩm
   collectionType?: "project" | "collection"; // Loại hình: Dự án thi công hoặc Bộ sưu tập sản phẩm
+  quoteScope?: QuoteScopeMode;          // Quy mô báo giá: single_item | order_list | collection | room_package
 }
 
 export interface FeatureLead {

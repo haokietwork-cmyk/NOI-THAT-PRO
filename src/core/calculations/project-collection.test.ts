@@ -2,9 +2,11 @@ import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import {
   createProjectProduct,
+  createBlankProduct,
   duplicateProjectProduct,
   calculateProjectCollectionTotals,
   generateProjectRolledUpBOM,
+  computeSingleProductCosting,
   DEFAULT_SAMPLE_PROJECT_PRODUCTS,
   type ProjectProductItem,
 } from "./project-collection.ts";
@@ -215,5 +217,37 @@ describe("project-collection: Mô hình Dự Án & Bộ Sưu Tập Đa Sản Ph�
     // 2 tủ * 5 tấm + 1 tủ * 3 tấm = 13 tấm
     assert.equal(rolledUp[0].qty, 13);
     assert.equal(rolledUp[0].totalAmount, 3910000 * 2 + 2346000 * 1);
+  });
+
+  test("createBlankProduct: Khởi tạo sản phẩm mới không gò bó mẫu có sẵn", () => {
+    const blank = createBlankProduct({
+      name: "Bàn Ăn 6 Ghế",
+      tag: "Bàn ăn",
+      widthMm: 1600,
+      depthMm: 800,
+      heightMm: 750,
+      qty: 1,
+    });
+
+    assert.equal(blank.name, "Bàn Ăn 6 Ghế");
+    assert.equal(blank.tag, "Bàn ăn");
+    assert.equal(blank.questionnaire.dimensions.widthMm, 1600);
+    assert.equal(blank.questionnaire.dimensions.depthMm, 800);
+    assert.equal(blank.questionnaire.dimensions.heightMm, 750);
+    assert.equal(blank.archetypeId, "custom");
+  });
+
+  test("computeSingleProductCosting: Tôn trọng customProfitMargin riêng của sản phẩm trong BST", () => {
+    const prod = createBlankProduct({
+      name: "Ghế Đôn Da Cao Cấp",
+      tag: "Ghế & Đôn",
+      customProfitMargin: 1.85, // 85% markup riêng cho sản phẩm này
+    });
+
+    const costingWithCustomMargin = computeSingleProductCosting(prod, [], 1.5, 0.5);
+    // Giá bán đề xuất phải phản ánh markup 1.85 chứ không phải 1.5 chung
+    const cogs = costingWithCustomMargin.summary.cogs;
+    const expectedProfit = Math.round(cogs * 0.85);
+    assert.equal(costingWithCustomMargin.summary.profitAmount, expectedProfit);
   });
 });

@@ -23,6 +23,8 @@ export interface ProjectProductItem {
   id: string;
   name: string;
   room: string;
+  tag?: string;
+  customProfitMargin?: number;
   qty: number;
   unit: string;
   archetypeId: string;
@@ -93,6 +95,8 @@ export function createProjectProduct(params: {
   id?: string;
   name: string;
   room?: string;
+  tag?: string;
+  customProfitMargin?: number;
   archetypeId?: string;
   qty?: number;
   unit?: string;
@@ -123,6 +127,8 @@ export function createProjectProduct(params: {
     id,
     name: params.name,
     room: params.room || "Không gian chung",
+    tag: params.tag,
+    customProfitMargin: params.customProfitMargin,
     qty: Math.max(1, params.qty || 1),
     unit: params.unit || "Cái",
     archetypeId: params.archetypeId || "custom",
@@ -185,6 +191,38 @@ export function duplicateProjectProduct(
     name: newName || `${source.name} (Bản sao)`,
     room: newRoom || source.room,
   };
+}
+
+/**
+ * Tạo một sản phẩm mới hoàn toàn trống, không gò bó mẫu có sẵn
+ */
+export function createBlankProduct(params?: {
+  id?: string;
+  name?: string;
+  tag?: string;
+  room?: string;
+  qty?: number;
+  unit?: string;
+  widthMm?: number;
+  depthMm?: number;
+  heightMm?: number;
+  customProfitMargin?: number;
+}): ProjectProductItem {
+  return createProjectProduct({
+    id: params?.id,
+    name: params?.name || "Sản phẩm mới",
+    room: params?.room || "Không gian chung",
+    tag: params?.tag || "Sản phẩm",
+    qty: params?.qty || 1,
+    unit: params?.unit || "Cái",
+    dimensions: {
+      widthMm: params?.widthMm || 1200,
+      depthMm: params?.depthMm || 600,
+      heightMm: params?.heightMm || 750,
+    },
+    archetypeId: "custom",
+    customProfitMargin: params?.customProfitMargin,
+  });
 }
 
 /**
@@ -481,7 +519,11 @@ export function computeSingleProductCosting(
 
   const totalOH = ohWorkshopAmount + ohSubcontractAmount;
   const cogs = totalDirectLM + totalOH;
-  const effectiveProfitRate = profitMargin >= 1 ? profitMargin - 1 : profitMargin;
+  const effectiveMargin =
+    prod.customProfitMargin !== undefined && prod.customProfitMargin > 0
+      ? prod.customProfitMargin
+      : profitMargin;
+  const effectiveProfitRate = effectiveMargin >= 1 ? effectiveMargin - 1 : effectiveMargin;
   const profitAmount = Math.round(cogs * effectiveProfitRate);
   const calculateSalesPrice = cogs + profitAmount;
 

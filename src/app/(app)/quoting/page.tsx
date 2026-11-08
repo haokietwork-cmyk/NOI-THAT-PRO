@@ -61,7 +61,7 @@ import AuthModal from "@/core/components/AuthModal";
 import TechnicalHandbookModal from "@/core/components/TechnicalHandbookModal";
 import PresetLibraryModal from "@/core/components/PresetLibraryModal";
 import ShareQuoteModal from "@/core/components/ShareQuoteModal";
-import { CutlistPart, MaterialItem, SavedProject, ProjectStatus, DEFAULT_WORKSHOP_COST_CONFIG } from "@/core/types";
+import { CutlistPart, MaterialItem, SavedProject, ProjectStatus, DEFAULT_WORKSHOP_COST_CONFIG, QuoteScopeMode } from "@/core/types";
 import { calculateProject, LEGAL_DISCLAIMER } from "@/core/calculations/engine";
 import {
   calculateMarkupPercent,
@@ -107,6 +107,7 @@ import MaterialCatalogDrawer from "@/core/components/MaterialCatalogDrawer";
 import ProjectProductsCollectionBar from "@/core/components/ProjectProductsCollectionBar";
 import {
   createProjectProduct,
+  createBlankProduct,
   duplicateProjectProduct,
   calculateProjectCollectionTotals,
   generateProjectRolledUpBOM,
@@ -171,14 +172,20 @@ function QuotingWorkspace() {
     }
   };
 
-  const [projectName, setProjectName] = useState("Dự án căn hộ 2PN Vinhomes");
-  const [clientName, setClientName] = useState("Anh Tuấn");
-  const [clientPhone, setClientPhone] = useState("0988 123 456");
+  // Quy mô báo giá: single_item (1 món lẻ) | order_list (đơn hàng) | collection (bộ sưu tập) | room_package (dự án công trình)
+  const isDemoMode = isDemoParam;
+  const [quoteScope, setQuoteScope] = useState<QuoteScopeMode>(isDemoMode ? "room_package" : "single_item");
+  const [collectionType, setCollectionType] = useState<"project" | "collection">(isDemoMode ? "project" : "project");
+
+  const [projectName, setProjectName] = useState(isDemoMode ? "Dự án Căn hộ Mẫu Vinhomes" : "");
+  const [clientName, setClientName] = useState(isDemoMode ? "Anh Tuấn" : "");
+  const [clientPhone, setClientPhone] = useState(isDemoMode ? "0988 123 456" : "");
   const [projectStatus, setProjectStatus] = useState<ProjectStatus>("draft");
   const [parts, setParts] = useState<CutlistPart[]>(SEED_PARTS);
   const [profitMargin, setProfitMargin] = useState<number>(DEFAULT_NEW_PROFIT_MARGIN);
   const [roundingStep, setRoundingStep] = useState<0.5 | 1>(0.5);
   const [activeOutputTab, setActiveOutputTab] = useState<"costing_sheet" | "bom" | "quote">("costing_sheet");
+  const [a4ViewMode, setA4ViewMode] = useState<"order_summary" | "catalog_matrix">("order_summary");
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [showPresetModal, setShowPresetModal] = useState(false);
@@ -188,9 +195,20 @@ function QuotingWorkspace() {
   // ==========================================================================
   // DỰ ÁN & BỘ SƯU TẬP ĐA SẢN PHẨM (MULTI-PRODUCT PROJECT & COLLECTION)
   // ==========================================================================
-  const [collectionType, setCollectionType] = useState<"project" | "collection">("project");
-  const [projectProducts, setProjectProducts] = useState<ProjectProductItem[]>(DEFAULT_SAMPLE_PROJECT_PRODUCTS);
-  const [activeProductId, setActiveProductId] = useState<string>("prod-vinhomes-01");
+  const [projectProducts, setProjectProducts] = useState<ProjectProductItem[]>(() => {
+    if (isDemoMode) return DEFAULT_SAMPLE_PROJECT_PRODUCTS;
+    return [
+      createBlankProduct({
+        id: "prod-01",
+        name: "Sản phẩm 1",
+        room: "Không gian chung",
+        tag: "Bàn / Ghế / Tủ",
+      }),
+    ];
+  });
+  const [activeProductId, setActiveProductId] = useState<string>(
+    isDemoMode ? "prod-vinhomes-01" : "prod-01"
+  );
 
   const activeProduct = useMemo(() => {
     return (
@@ -566,25 +584,35 @@ function QuotingWorkspace() {
     setActiveProductId(productId);
   };
 
-  const handleAddProduct = (archetype?: ProductArchetypeItem, room?: string) => {
-    const newProd = createProjectProduct({
-      name: archetype?.name || "Hạng mục sản phẩm mới",
-      room: room || "Không gian chung",
-      archetypeId: archetype?.id || "custom",
-      dimensions: archetype?.defaultDimensions,
-      materials: archetype
-        ? {
-            coreCode: archetype.defaultCoreCode,
-            surfaceCode: archetype.defaultSurfaceCode,
-            hasStone: archetype.defaultFlags.hasStone,
-            stoneType: archetype.defaultFlags.stoneType,
-            hasGlass: archetype.defaultFlags.hasGlass,
-            hasMetal: archetype.defaultFlags.hasMetal,
-            hasUpholstery: archetype.defaultFlags.hasUpholstery,
-            hasLed: archetype.defaultFlags.hasLed,
-          }
-        : undefined,
-    });
+  const handleAddProduct = (archetype?: ProductArchetypeItem, room?: string, customName?: string) => {
+    let newProd: ProjectProductItem;
+    if (archetype) {
+      newProd = createProjectProduct({
+        name: customName || archetype.name,
+        room: room || (quoteScope === "collection" ? "Dòng SP" : "Không gian chung"),
+        tag: archetype.categoryLabel || "Sản phẩm",
+        archetypeId: archetype.id,
+        dimensions: archetype.defaultDimensions,
+        materials: {
+          coreCode: archetype.defaultCoreCode,
+          surfaceCode: archetype.defaultSurfaceCode,
+          hasStone: archetype.defaultFlags.hasStone,
+          stoneType: archetype.defaultFlags.stoneType,
+          hasGlass: archetype.defaultFlags.hasGlass,
+          hasMetal: archetype.defaultFlags.hasMetal,
+          hasUpholstery: archetype.defaultFlags.hasUpholstery,
+          hasLed: archetype.defaultFlags.hasLed,
+        },
+      });
+    } else {
+      const idx = projectProducts.length + 1;
+      newProd = createBlankProduct({
+        name: customName || `Sản phẩm ${idx}`,
+        room: room || (quoteScope === "collection" ? "Dòng SP" : "Không gian chung"),
+        tag: quoteScope === "collection" ? "Bàn / Ghế / Tủ" : "Sản phẩm",
+      });
+    }
+
     setProjectProducts((prev) => [...prev, newProd]);
     setActiveProductId(newProd.id);
     showToast(`Đã thêm sản phẩm: ${newProd.name}!`, "success");
@@ -602,7 +630,7 @@ function QuotingWorkspace() {
 
   const handleDeleteProduct = (productId: string) => {
     if (projectProducts.length <= 1) {
-      showToast("Dự án cần có ít nhất 1 sản phẩm!", "error");
+      showToast("Báo giá cần có ít nhất 1 sản phẩm!", "error");
       return;
     }
     const remaining = projectProducts.filter((p) => p.id !== productId);
@@ -610,7 +638,7 @@ function QuotingWorkspace() {
     if (activeProductId === productId) {
       setActiveProductId(remaining[0].id);
     }
-    showToast("Đã xóa sản phẩm khỏi dự án!", "info");
+    showToast("Đã xóa sản phẩm khỏi danh sách!", "info");
   };
 
   const handleUpdateProductQty = (productId: string, newQty: number) => {
@@ -623,6 +651,30 @@ function QuotingWorkspace() {
     setProjectProducts((prev) =>
       prev.map((p) => (p.id === productId ? { ...p, room: newRoom } : p))
     );
+  };
+
+  const handleUpdateProductTag = (productId: string, newTag: string) => {
+    setProjectProducts((prev) =>
+      prev.map((p) => (p.id === productId ? { ...p, tag: newTag } : p))
+    );
+  };
+
+  const handleUpdateProductMarkup = (productId: string, newMarkup?: number) => {
+    setProjectProducts((prev) =>
+      prev.map((p) => (p.id === productId ? { ...p, customProfitMargin: newMarkup } : p))
+    );
+    showToast(newMarkup ? `Đã đặt tỷ lệ lãi riêng: x${newMarkup.toFixed(2)}` : "Đã đặt tỷ lệ lãi theo mức chung", "info");
+  };
+
+  const handleLoadDemoData = () => {
+    setQuoteScope("room_package");
+    setCollectionType("project");
+    setProjectName("Dự án Căn hộ Mẫu Vinhomes");
+    setClientName("Anh Tuấn");
+    setClientPhone("0988 123 456");
+    setProjectProducts(DEFAULT_SAMPLE_PROJECT_PRODUCTS);
+    setActiveProductId("prod-vinhomes-01");
+    showToast("Đã nạp 3 sản phẩm mẫu căn hộ để trải nghiệm báo giá đa sản phẩm!", "success");
   };
 
   // Handlers for BOM Smart Grid
@@ -1072,6 +1124,11 @@ function QuotingWorkspace() {
           setProjectProducts(found.projectProducts);
           setActiveProductId(found.projectProducts[0].id);
         }
+        if (found.quoteScope) {
+          setQuoteScope(found.quoteScope);
+        } else if (found.collectionType) {
+          setQuoteScope(found.collectionType === "collection" ? "collection" : "room_package");
+        }
         if (found.collectionType) {
           setCollectionType(found.collectionType);
         }
@@ -1470,7 +1527,8 @@ function QuotingWorkspace() {
       status: projectStatus,
       items: parts,
       projectProducts: projectProducts,
-      collectionType: collectionType,
+      quoteScope: quoteScope,
+      collectionType: quoteScope === "collection" ? "collection" : "project",
       materialsSnapshot: materials,
       materialSnapshots: materials,
       profitMargin,
@@ -1590,57 +1648,97 @@ function QuotingWorkspace() {
       )}
 
       {/* ================================================================== */}
-      {/* THANH ĐIỀU KHIỂN DỰ ÁN & TIÊU ĐỀ (no-print)                         */}
+      {/* THANH ĐIỀU KHIỂN BÁO GIÁ & TIÊU ĐỀ (no-print)                       */}
       {/* ================================================================== */}
       <div className="no-print bg-white rounded-lg border border-slate-200 p-5 shadow-xs space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              <FileSpreadsheet className="w-3.5 h-3.5 text-zinc-900" />
-              <span>Không gian Báo Giá &amp; Dự Toán Chi Phí</span>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <input
-                type="text"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                placeholder="Nhập tên công trình / dự án..."
-                className="text-xl sm:text-2xl font-bold text-slate-900 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-slate-900 focus:outline-none transition"
-              />
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <FileSpreadsheet className="w-3.5 h-3.5 text-zinc-900" />
+                <span>Báo Giá &amp; Dự Toán Chi Phí</span>
+              </div>
 
-              {/* Chế độ: Dự Án Công Trình vs Bộ Sưu Tập */}
-              <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs">
+              {/* 4 Chế độ quy mô báo giá: 1 SP lẻ | Đơn hàng | Bộ sưu tập | Dự án */}
+              <div className="flex flex-wrap items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs">
                 <button
                   type="button"
                   onClick={() => {
+                    setQuoteScope("single_item");
                     setCollectionType("project");
-                    showToast("Đã chuyển sang chế độ Dự Án Công Trình (nhiều phòng/khu vực)", "info");
+                    showToast("Đã chọn chế độ: 1 Sản phẩm lẻ (SKU)", "info");
                   }}
-                  className={`px-2.5 py-1 rounded-md font-semibold text-xs transition cursor-pointer ${
-                    collectionType === "project"
+                  className={`px-2.5 py-1 rounded-md font-semibold text-xs transition cursor-pointer flex items-center gap-1 ${
+                    quoteScope === "single_item"
                       ? "bg-white text-zinc-900 shadow-2xs"
-                      : "text-slate-500 hover:text-slate-900"
+                      : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
-                  Dự án công trình
+                  <Box className="w-3 h-3" />
+                  <span>1 SP lẻ (SKU)</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => {
-                    setCollectionType("collection");
-                    showToast("Đã chuyển sang chế độ Bộ Sưu Tập Sản Phẩm (dòng hàng mẫu)", "info");
+                    setQuoteScope("order_list");
+                    setCollectionType("project");
+                    showToast("Đã chọn chế độ: Đơn hàng mua sắm nhiều món", "info");
                   }}
-                  className={`px-2.5 py-1 rounded-md font-semibold text-xs transition cursor-pointer ${
-                    collectionType === "collection"
+                  className={`px-2.5 py-1 rounded-md font-semibold text-xs transition cursor-pointer flex items-center gap-1 ${
+                    quoteScope === "order_list"
                       ? "bg-white text-zinc-900 shadow-2xs"
-                      : "text-slate-500 hover:text-slate-900"
+                      : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
-                  Bộ sưu tập sản phẩm
+                  <Layers className="w-3 h-3" />
+                  <span>Đơn hàng</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQuoteScope("collection");
+                    setCollectionType("collection");
+                    showToast("Đã chọn chế độ: Bộ sưu tập sản phẩm (Catalog Matrix)", "info");
+                  }}
+                  className={`px-2.5 py-1 rounded-md font-semibold text-xs transition cursor-pointer flex items-center gap-1 ${
+                    quoteScope === "collection"
+                      ? "bg-white text-zinc-900 shadow-2xs"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  <Sparkles className="w-3 h-3" />
+                  <span>Bộ sưu tập (Catalog)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQuoteScope("room_package");
+                    setCollectionType("project");
+                    showToast("Đã chọn chế độ: Dự án công trình (theo phòng / khu vực)", "info");
+                  }}
+                  className={`px-2.5 py-1 rounded-md font-semibold text-xs transition cursor-pointer flex items-center gap-1 ${
+                    quoteScope === "room_package"
+                      ? "bg-white text-zinc-900 shadow-2xs"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  <Building2 className="w-3 h-3" />
+                  <span>Dự án công trình</span>
                 </button>
               </div>
 
-              {/* Trạng thái dự án & Lệnh xưởng */}
+              {/* Nút nạp nhanh dữ liệu mẫu Demo */}
+              <button
+                type="button"
+                onClick={handleLoadDemoData}
+                title="Nạp nhanh 3 sản phẩm mẫu căn hộ để xem trước quy trình tính giá"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-md transition cursor-pointer"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Nạp mẫu Demo</span>
+              </button>
+
+              {/* Trạng thái dự án */}
               <div className="flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-md text-xs">
                 <span className="text-slate-500 text-[10px] uppercase font-semibold">Trạng thái:</span>
                 <select
@@ -1648,7 +1746,7 @@ function QuotingWorkspace() {
                   onChange={(e) => {
                     const st = e.target.value as ProjectStatus;
                     setProjectStatus(st);
-                    showToast(`Đã chuyển trạng thái dự án sang: "${st === "approved" ? "Khách duyệt chốt" : st === "in_production" ? "Lệnh sản xuất xưởng" : st === "quoted" ? "Đã gửi khách" : "Báo giá Nháp"}"`, "info");
+                    showToast(`Đã chuyển trạng thái sang: "${st === "approved" ? "Khách duyệt chốt" : st === "in_production" ? "Lệnh sản xuất xưởng" : st === "quoted" ? "Đã gửi khách" : "Bản nháp"}"`, "info");
                   }}
                   className="bg-transparent font-medium text-slate-800 focus:outline-none cursor-pointer text-xs"
                 >
@@ -1658,6 +1756,24 @@ function QuotingWorkspace() {
                   <option value="in_production">Lệnh sản xuất xưởng</option>
                 </select>
               </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <input
+                type="text"
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                placeholder={
+                  quoteScope === "single_item"
+                    ? "Nhập tên sản phẩm / mã SKU cần báo giá..."
+                    : quoteScope === "order_list"
+                    ? "Nhập tên đơn hàng / đơn mua sắm..."
+                    : quoteScope === "collection"
+                    ? "Nhập tên bộ sưu tập / dòng sản phẩm..."
+                    : "Nhập tên công trình / căn hộ / dự án..."
+                }
+                className="text-xl sm:text-2xl font-bold text-slate-900 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-slate-900 focus:outline-none transition min-w-[280px]"
+              />
 
               {projectStatus === "approved" && (
                 <span className="px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-900 font-semibold text-[11px] flex items-center gap-1 border border-zinc-200">
@@ -1725,11 +1841,24 @@ function QuotingWorkspace() {
         {/* Thông tin khách hàng & Markup Slider */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3 border-t border-slate-100 text-xs">
           <div>
-            <label className="font-semibold text-slate-500 block mb-1">Tên khách hàng / Chủ nhà:</label>
+            <label className="font-semibold text-slate-500 block mb-1">
+              {quoteScope === "collection"
+                ? "Thương hiệu / Đối tác mua sỉ:"
+                : quoteScope === "order_list"
+                ? "Khách hàng / Đơn vị đặt hàng:"
+                : quoteScope === "single_item"
+                ? "Khách hàng / Đối tác:"
+                : "Chủ đầu tư / Khách hàng:"}
+            </label>
             <input
               type="text"
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
+              placeholder={
+                quoteScope === "collection"
+                  ? "Nhập tên thương hiệu, đại lý hoặc Buyer..."
+                  : "Nhập tên khách hàng hoặc công ty..."
+              }
               className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:border-zinc-900"
             />
           </div>
@@ -1739,6 +1868,7 @@ function QuotingWorkspace() {
               type="text"
               value={clientPhone}
               onChange={(e) => setClientPhone(e.target.value)}
+              placeholder="09xx xxx xxx"
               className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:border-zinc-900"
             />
           </div>
@@ -1766,6 +1896,11 @@ function QuotingWorkspace() {
               onChange={(e) => setProfitMargin(Number(e.target.value))}
               className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-zinc-900 mt-2"
             />
+            {quoteScope === "collection" && (
+              <span className="text-[10px] text-slate-400 block mt-1">
+                * Áp dụng chung toàn BST (có thể chỉnh riêng % lãi trên từng thẻ sản phẩm).
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -1777,12 +1912,19 @@ function QuotingWorkspace() {
         <ProjectProductsCollectionBar
           products={projectProducts}
           activeProductId={activeProductId}
+          quoteScope={quoteScope}
           onSelectProduct={handleSelectProduct}
           onAddProduct={handleAddProduct}
           onDuplicateProduct={handleDuplicateProduct}
           onDeleteProduct={handleDeleteProduct}
           onUpdateProductQty={handleUpdateProductQty}
           onUpdateProductRoom={handleUpdateProductRoom}
+          onUpdateProductTag={handleUpdateProductTag}
+          onUpdateProductMarkup={handleUpdateProductMarkup}
+          onChangeScope={(newScope) => {
+            setQuoteScope(newScope);
+            setCollectionType(newScope === "collection" ? "collection" : "project");
+          }}
           productPrices={productPrices}
           totalQuotePrice={projectTotals.totalQuote}
           totalCOGSPrice={projectTotals.totalCOGS}
@@ -5537,11 +5679,40 @@ function QuotingWorkspace() {
 
       {/* Embedded Live Preview of A4 Sheet (no-print preview wrapper, print-area when printing) */}
       <div className="space-y-3">
-        <div className="no-print flex items-center justify-between px-1">
-          <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
-            <Eye className="w-4 h-4 text-slate-500" />
-            Xem trước Báo giá chuẩn A4 gửi khách
-          </span>
+        <div className="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+              <Eye className="w-4 h-4 text-slate-500" />
+              Xem trước Báo giá chuẩn A4 gửi khách
+            </span>
+
+            {/* Sub-tab toggle giữa Báo Giá Tổng Hợp vs Bảng Báo Giá Bộ Sưu Tập (Catalog Matrix) */}
+            <div className="inline-flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs">
+              <button
+                type="button"
+                onClick={() => setA4ViewMode("order_summary")}
+                className={`px-2.5 py-1 rounded-md font-semibold text-xs transition cursor-pointer ${
+                  a4ViewMode === "order_summary"
+                    ? "bg-white text-zinc-900 shadow-2xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Đơn hàng / Tổng dự án
+              </button>
+              <button
+                type="button"
+                onClick={() => setA4ViewMode("catalog_matrix")}
+                className={`px-2.5 py-1 rounded-md font-semibold text-xs transition cursor-pointer ${
+                  a4ViewMode === "catalog_matrix"
+                    ? "bg-white text-zinc-900 shadow-2xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Bộ sưu tập (Catalog Matrix)
+              </button>
+            </div>
+          </div>
+
           <button
             type="button"
             onClick={handlePrintA4}
@@ -5576,7 +5747,7 @@ function QuotingWorkspace() {
             <div className="flex items-center gap-4">
               <div className="text-right space-y-1">
                 <span className="inline-block text-xs font-black px-3.5 py-1 rounded-md bg-slate-900 text-white tracking-widest uppercase">
-                  BÁO GIÁ THI CÔNG
+                  {a4ViewMode === "catalog_matrix" ? "BẢNG GIÁ CATALOG" : "BÁO GIÁ THI CÔNG"}
                 </span>
                 <p className="text-[11px] text-slate-500 font-mono">
                   Số HĐ: <strong className="text-slate-800">HĐNT-2026-VN{editId ? editId.slice(0, 4).toUpperCase() : "889"}</strong>
@@ -5591,99 +5762,183 @@ function QuotingWorkspace() {
           {/* Thông tin dự án & Khách hàng */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-4 rounded-md bg-slate-50 border border-slate-200 text-xs">
             <div>
-              <span className="text-slate-400 block text-[10px] font-bold">CÔNG TRÌNH / DỰ ÁN:</span>
-              <strong className="text-slate-900 text-sm font-bold">{projectName}</strong>
+              <span className="text-slate-400 block text-[10px] font-bold">
+                {quoteScope === "collection" ? "BỘ SƯU TẬP / DÒNG HÀNG:" : "CÔNG TRÌNH / DỰ ÁN:"}
+              </span>
+              <strong className="text-slate-900 text-sm font-bold">{projectName || "Báo giá sản phẩm"}</strong>
             </div>
             <div>
-              <span className="text-slate-400 block text-[10px] font-bold">KHÁCH HÀNG:</span>
+              <span className="text-slate-400 block text-[10px] font-bold">
+                {quoteScope === "collection" ? "ĐỐI TÁC / ĐẠI LÝ:" : "KHÁCH HÀNG:"}
+              </span>
               <strong className="text-slate-900 text-sm font-bold">
-                {clientName} {clientPhone ? `(${clientPhone})` : ""}
+                {clientName || "Quý khách hàng"} {clientPhone ? `(${clientPhone})` : ""}
               </strong>
             </div>
           </div>
 
-          {/* Bảng hạng mục báo giá gom theo Module */}
-          <div className="space-y-2 overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs min-w-[500px]">
-              <thead className="bg-slate-100 text-slate-700 font-bold border-y border-slate-300">
-                <tr>
-                  <th className="p-3 w-10 text-center">STT</th>
-                  <th className="p-3">Hạng Mục Sản Phẩm</th>
-                  <th className="p-3">Quy Cách Kích Thước &amp; Vật Liệu</th>
-                  <th className="p-3 w-12 text-center">ĐVT</th>
-                  <th className="p-3 w-12 text-center">SL</th>
-                  <th className="p-3 text-right">Đơn Giá (VNĐ)</th>
-                  <th className="p-3 text-right">Thành Tiền (VNĐ)</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 text-slate-800">
-                {projectTotals.items && projectTotals.items.length > 0 ? (
-                  projectTotals.items.map((item, idx) => {
-                    const prod = projectProducts.find((p) => p.id === item.productId);
-                    const dims = prod?.questionnaire?.dimensions || { widthMm: 0, depthMm: 0, heightMm: 0 };
-                    const core = prod?.questionnaire?.materials?.coreCode || "MDF chống ẩm 17mm";
-                    const surface = prod?.questionnaire?.materials?.surfaceCode || "Melamine";
-                    return (
-                      <tr key={item.productId} className="hover:bg-slate-50/50 transition">
+          {a4ViewMode === "catalog_matrix" ? (
+            /* BẢNG BÁO GIÁ BỘ SƯU TẬP (CATALOG MOQ MATRIX) */
+            <div className="space-y-4">
+              <div className="p-3 bg-slate-50 rounded-md border border-slate-200 text-xs text-slate-600">
+                <span className="font-bold text-slate-900">Bảng giá xuất xưởng theo số lượng đặt hàng tối thiểu (MOQ):</span> Đơn giá từng mã sản phẩm theo các bậc sản lượng đặt hàng.
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs min-w-[650px]">
+                  <thead className="bg-slate-100 text-slate-700 font-bold border-y border-slate-300">
+                    <tr>
+                      <th className="p-2.5 w-10 text-center">STT</th>
+                      <th className="p-2.5">Mã &amp; Tên Sản Phẩm</th>
+                      <th className="p-2.5 w-24 text-center">Phân Loại</th>
+                      <th className="p-2.5 w-36">Kích Thước (W×D×H)</th>
+                      <th className="p-2.5 text-right">MOQ 1</th>
+                      <th className="p-2.5 text-right">MOQ 5</th>
+                      <th className="p-2.5 text-right">MOQ 10</th>
+                      <th className="p-2.5 text-right font-black text-slate-900">MOQ 20+</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 text-slate-800">
+                    {projectProducts.map((prod, idx) => {
+                      const costing = productCostings[prod.id];
+                      const dims = prod.questionnaire?.dimensions || { widthMm: 0, depthMm: 0, heightMm: 0 };
+                      const basePrice = productPrices[prod.id] || costing?.summary?.calculateSalesPrice || 0;
+                      const moq1 = costing?.summary?.moqPrices?.[1] || basePrice;
+                      const moq5 = costing?.summary?.moqPrices?.[5] || Math.round(basePrice * 0.95);
+                      const moq10 = costing?.summary?.moqPrices?.[10] || Math.round(basePrice * 0.90);
+                      const moq20 = costing?.summary?.moqPrices?.[20] || Math.round(basePrice * 0.85);
+
+                      return (
+                        <tr key={prod.id} className="hover:bg-slate-50/50 transition">
+                          <td className="p-2.5 text-center text-slate-400 font-mono">{idx + 1}</td>
+                          <td className="p-2.5 font-bold text-slate-900">
+                            <div>{prod.name}</div>
+                            <div className="text-[10px] text-slate-500 font-normal">
+                              {prod.questionnaire?.materials?.coreCode || "MDF chống ẩm 17mm"} • {prod.questionnaire?.materials?.surfaceCode || "Melamine"}
+                            </div>
+                          </td>
+                          <td className="p-2.5 text-center">
+                            <span className="text-[10px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                              {prod.tag || prod.room || "Sản phẩm"}
+                            </span>
+                          </td>
+                          <td className="p-2.5 font-mono text-slate-700 text-[11px]">
+                            {dims.widthMm} × {dims.depthMm} × {dims.heightMm} mm
+                          </td>
+                          <td className="p-2.5 text-right font-mono text-slate-700">
+                            {formatVND(moq1)}
+                          </td>
+                          <td className="p-2.5 text-right font-mono text-slate-700">
+                            {formatVND(moq5)}
+                          </td>
+                          <td className="p-2.5 text-right font-mono text-slate-700">
+                            {formatVND(moq10)}
+                          </td>
+                          <td className="p-2.5 text-right font-mono font-bold text-zinc-900">
+                            {formatVND(moq20)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : (
+            /* Bảng hạng mục báo giá gom theo Module */
+            <div className="space-y-2 overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs min-w-[500px]">
+                <thead className="bg-slate-100 text-slate-700 font-bold border-y border-slate-300">
+                  <tr>
+                    <th className="p-3 w-10 text-center">STT</th>
+                    <th className="p-3">Hạng Mục Sản Phẩm</th>
+                    <th className="p-3">Quy Cách Kích Thước &amp; Vật Liệu</th>
+                    <th className="p-3 w-12 text-center">ĐVT</th>
+                    <th className="p-3 w-12 text-center">SL</th>
+                    <th className="p-3 text-right">Đơn Giá (VNĐ)</th>
+                    <th className="p-3 text-right">Thành Tiền (VNĐ)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200 text-slate-800">
+                  {projectTotals.items && projectTotals.items.length > 0 ? (
+                    projectTotals.items.map((item, idx) => {
+                      const prod = projectProducts.find((p) => p.id === item.productId);
+                      const dims = prod?.questionnaire?.dimensions || { widthMm: 0, depthMm: 0, heightMm: 0 };
+                      const core = prod?.questionnaire?.materials?.coreCode || "MDF chống ẩm 17mm";
+                      const surface = prod?.questionnaire?.materials?.surfaceCode || "Melamine";
+                      return (
+                        <tr key={item.productId} className="hover:bg-slate-50/50 transition">
+                          <td className="p-3 text-center text-slate-400 font-mono">{idx + 1}</td>
+                          <td className="p-3 font-bold text-slate-900">
+                            <div>{item.productName}</div>
+                            <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 inline-block mt-0.5">
+                              {item.room || (collectionType === "collection" ? "Bộ sưu tập" : "Khu vực chung")}
+                            </span>
+                          </td>
+                          <td className="p-3 text-slate-600 text-[11px]">
+                            <div className="font-mono text-slate-800 font-medium">
+                              {item.dimensionsText || `${dims.widthMm} × ${dims.depthMm} × ${dims.heightMm} mm`}
+                            </div>
+                            <div className="text-[10px] text-slate-500">
+                              {core} • {surface}
+                              {prod?.questionnaire?.materials?.hasStone ? " • Mặt đá" : ""}
+                              {prod?.questionnaire?.materials?.hasLed ? " • Đèn LED" : ""}
+                            </div>
+                          </td>
+                          <td className="p-3 text-center text-slate-600 text-[11px]">{item.unit || "Bộ"}</td>
+                          <td className="p-3 text-center font-mono font-bold text-slate-800">{item.qty}</td>
+                          <td className="p-3 text-right font-mono text-slate-700">
+                            {formatVND(item.unitPrice)}
+                          </td>
+                          <td className="p-3 text-right font-mono font-black text-slate-900 text-sm">
+                            {formatVND(item.totalPrice)}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    calcResult.moduleQuotes.map((m, idx) => (
+                      <tr key={m.moduleName}>
                         <td className="p-3 text-center text-slate-400 font-mono">{idx + 1}</td>
-                        <td className="p-3 font-bold text-slate-900">
-                          <div>{item.productName}</div>
-                          <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 inline-block mt-0.5">
-                            {item.room || (collectionType === "collection" ? "Bộ sưu tập" : "Khu vực chung")}
-                          </span>
-                        </td>
+                        <td className="p-3 font-bold text-slate-900">{m.moduleName}</td>
                         <td className="p-3 text-slate-600 text-[11px]">
-                          <div className="font-mono text-slate-800 font-medium">
-                            {item.dimensionsText || `${dims.widthMm} × ${dims.depthMm} × ${dims.heightMm} mm`}
-                          </div>
-                          <div className="text-[10px] text-slate-500">
-                            {core} • {surface}
-                            {prod?.questionnaire?.materials?.hasStone ? " • Mặt đá" : ""}
-                            {prod?.questionnaire?.materials?.hasLed ? " • Đèn LED" : ""}
-                          </div>
+                          {m.description || "Gỗ MDF chống ẩm phủ Melamine, dán cạnh chỉ PVC đồng màu, phụ kiện bản lề giảm chấn"}
                         </td>
-                        <td className="p-3 text-center text-slate-600 text-[11px]">{item.unit || "Bộ"}</td>
-                        <td className="p-3 text-center font-mono font-bold text-slate-800">{item.qty}</td>
-                        <td className="p-3 text-right font-mono text-slate-700">
-                          {formatVND(item.unitPrice)}
-                        </td>
+                        <td className="p-3 text-center text-slate-600 text-[11px]">Bộ</td>
+                        <td className="p-3 text-center font-mono text-slate-500">{m.partCount}</td>
+                        <td className="p-3 text-right font-mono text-slate-700">{formatVND(m.quotePrice)}</td>
                         <td className="p-3 text-right font-mono font-black text-slate-900 text-sm">
-                          {formatVND(item.totalPrice)}
+                          {formatVND(m.quotePrice)}
                         </td>
                       </tr>
-                    );
-                  })
-                ) : (
-                  calcResult.moduleQuotes.map((m, idx) => (
-                    <tr key={m.moduleName}>
-                      <td className="p-3 text-center text-slate-400 font-mono">{idx + 1}</td>
-                      <td className="p-3 font-bold text-slate-900">{m.moduleName}</td>
-                      <td className="p-3 text-slate-600 text-[11px]">
-                        {m.description || "Gỗ MDF chống ẩm phủ Melamine, dán cạnh chỉ PVC đồng màu, phụ kiện bản lề giảm chấn"}
-                      </td>
-                      <td className="p-3 text-center text-slate-600 text-[11px]">Bộ</td>
-                      <td className="p-3 text-center font-mono text-slate-500">{m.partCount}</td>
-                      <td className="p-3 text-right font-mono text-slate-700">{formatVND(m.quotePrice)}</td>
-                      <td className="p-3 text-right font-mono font-black text-slate-900 text-sm">
-                        {formatVND(m.quotePrice)}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Tổng cộng thanh toán */}
-          <div className="pt-4 border-t-2 border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs">
-            <div>
-              <span className="font-black text-slate-900 text-sm block">TỔNG CỘNG THANH TOÁN:</span>
-              <span className="text-slate-500 text-[11px]">Đã bao gồm chi phí gia công, vận chuyển và lắp đặt hoàn thiện.</span>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
-            <span className="text-2xl font-black text-zinc-900 font-mono">
-              {formatVND(projectTotals.totalQuote > 0 ? projectTotals.totalQuote : calcResult.totalQuotePrice)}
-            </span>
-          </div>
+          )}
+
+          {/* Tổng cộng thanh toán hoặc Số lượng mã */}
+          {a4ViewMode === "catalog_matrix" ? (
+            <div className="pt-4 border-t-2 border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs">
+              <div>
+                <span className="font-black text-slate-900 text-sm block">DANH MỤC BỘ SƯU TẬP:</span>
+                <span className="text-slate-500 text-[11px]">Đơn giá xuất xưởng theo từng bậc sản lượng đặt hàng tối thiểu (MOQ).</span>
+              </div>
+              <span className="text-base font-bold text-zinc-900 font-mono">
+                {projectProducts.length} chủng loại sản phẩm
+              </span>
+            </div>
+          ) : (
+            <div className="pt-4 border-t-2 border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs">
+              <div>
+                <span className="font-black text-slate-900 text-sm block">TỔNG CỘNG THANH TOÁN:</span>
+                <span className="text-slate-500 text-[11px]">Đã bao gồm chi phí gia công, vận chuyển và lắp đặt hoàn thiện.</span>
+              </div>
+              <span className="text-2xl font-black text-zinc-900 font-mono">
+                {formatVND(projectTotals.totalQuote > 0 ? projectTotals.totalQuote : calcResult.totalQuotePrice)}
+              </span>
+            </div>
+          )}
 
           {/* Điều khoản & Cam kết của xưởng chuẩn thương mại */}
           <div className="p-4 rounded-md bg-slate-50 border border-slate-200 text-[11px] text-slate-600 space-y-1.5">
