@@ -244,6 +244,8 @@ export interface SavedProject {
   calcVersion?: number;              // Phiên bản thuật toán tính toán (1: công thức hiện tại)
   costConfigSnapshot?: WorkshopCostConfig; // Snapshot cấu hình chi phí xưởng (bảo toàn giá khi đổi setting)
   snapshotTotals?: FrozenProjectTotals; // Snapshot tổng tiền và BOM đóng băng
+  projectProducts?: any[];              // Danh sách sản phẩm trong dự án / bộ sưu tập đa sản phẩm
+  collectionType?: "project" | "collection"; // Loại hình: Dự án thi công hoặc Bộ sưu tập sản phẩm
 }
 
 export interface FeatureLead {

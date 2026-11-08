@@ -104,6 +104,16 @@ import { trackFunnelEvent } from "@/core/monitoring/telemetry";
 import ProductArchetypeSelector from "@/core/components/ProductArchetypeSelector";
 import { PRODUCT_ARCHETYPES_CATALOG, type ProductArchetypeItem } from "@/core/data/productArchetypesCatalog";
 import MaterialCatalogDrawer from "@/core/components/MaterialCatalogDrawer";
+import ProjectProductsCollectionBar from "@/core/components/ProjectProductsCollectionBar";
+import {
+  createProjectProduct,
+  duplicateProjectProduct,
+  calculateProjectCollectionTotals,
+  generateProjectRolledUpBOM,
+  computeSingleProductCosting,
+  DEFAULT_SAMPLE_PROJECT_PRODUCTS,
+  type ProjectProductItem,
+} from "@/core/calculations/project-collection";
 import {
   SAMPLE_MATERIALS_CATALOG,
   LABOR_PROCESSES,
@@ -176,31 +186,32 @@ function QuotingWorkspace() {
   const [showShareModal, setShowShareModal] = useState(false);
 
   // ==========================================================================
-  // COSTING V2: BẢNG CÂU HỎI THÔNG SỐ (PARAMETRIC QUESTIONNAIRE)
+  // DỰ ÁN & BỘ SƯU TẬP ĐA SẢN PHẨM (MULTI-PRODUCT PROJECT & COLLECTION)
   // ==========================================================================
-  const [questionnaire, setQuestionnaire] = useState<CostingQuestionnaire>({
-    productType: "wardrobe",
-    name: "Tủ áo Master kịch trần",
-    calcMode: "detail",
-    dimensions: { widthMm: 1800, depthMm: 600, heightMm: 2400, unit: "mm" },
-    materials: {
-      coreCode: "MDF_17_CHONG_AM",
-      surfaceCode: "Melamine",
-      backPanelCode: "MDF_6_HAU",
-      hasStone: false,
-      stoneType: "vicostone",
-      hasGlass: false,
-      hasMetal: false,
-      hasUpholstery: false,
-      hasLed: false,
-    },
-    details: {
-      drawerCount: 2,
-      doorCount: 4,
-      specialNotes: "Cánh phẳng soi chỉ, bản lề giảm chấn Inox 304, ray âm",
-      moqTiers: [1, 5, 10, 20],
-    },
-  });
+  const [collectionType, setCollectionType] = useState<"project" | "collection">("project");
+  const [projectProducts, setProjectProducts] = useState<ProjectProductItem[]>(DEFAULT_SAMPLE_PROJECT_PRODUCTS);
+  const [activeProductId, setActiveProductId] = useState<string>("prod-vinhomes-01");
+
+  const activeProduct = useMemo(() => {
+    return (
+      projectProducts.find((p) => p.id === activeProductId) ||
+      projectProducts[0] ||
+      DEFAULT_SAMPLE_PROJECT_PRODUCTS[0]
+    );
+  }, [projectProducts, activeProductId]);
+
+  const questionnaire = activeProduct.questionnaire;
+  const setQuestionnaire = (
+    updater: CostingQuestionnaire | ((prev: CostingQuestionnaire) => CostingQuestionnaire)
+  ) => {
+    setProjectProducts((prev) =>
+      prev.map((p) => {
+        if (p.id !== activeProductId) return p;
+        const newQ = typeof updater === "function" ? updater(p.questionnaire) : updater;
+        return { ...p, questionnaire: newQ, name: newQ.name || p.name };
+      })
+    );
+  };
 
   const [selectedArchetypeId, setSelectedArchetypeId] = useState<string>("wardrobe_master");
 
@@ -357,320 +368,262 @@ function QuotingWorkspace() {
   };
 
   // ==========================================================================
-  // SMART EDITABLE BOM & OVERRIDES (BUG-01, BUG-04)
+  // SMART EDITABLE BOM & OVERRIDES THEO SẢN PHẨM (BUG-01, BUG-04)
   // ==========================================================================
-  const [bomOverrides, setBomOverrides] = useState<
-    Record<
-      string,
-      {
-        qty?: number;
-        unitPrice?: number;
-        wasteFactor?: number;
-        name?: string;
-        unit?: string;
-        description?: string;
-        isOverridden?: boolean;
-        isDeleted?: boolean;
-      }
-    >
-  >({});
-  const [extraBOMRows, setExtraBOMRows] = useState<MaterialLaborRow[]>([]);
+  const bomOverrides = activeProduct.bomOverrides || {};
+  const setBomOverrides = (
+    updater:
+      | Record<string, any>
+      | ((prev: Record<string, any>) => Record<string, any>)
+  ) => {
+    setProjectProducts((prev) =>
+      prev.map((p) => {
+        if (p.id !== activeProductId) return p;
+        const newOvr = typeof updater === "function" ? updater(p.bomOverrides || {}) : updater;
+        return { ...p, bomOverrides: newOvr };
+      })
+    );
+  };
+
+  const extraBOMRows = activeProduct.extraBOMRows || [];
+  const setExtraBOMRows = (
+    updater: MaterialLaborRow[] | ((prev: MaterialLaborRow[]) => MaterialLaborRow[])
+  ) => {
+    setProjectProducts((prev) =>
+      prev.map((p) => {
+        if (p.id !== activeProductId) return p;
+        const newRows = typeof updater === "function" ? updater(p.extraBOMRows || []) : updater;
+        return { ...p, extraBOMRows: newRows };
+      })
+    );
+  };
+
   const [catalogDrawerOpen, setCatalogDrawerOpen] = useState(false);
   const [pickingTargetRowId, setPickingTargetRowId] = useState<string | null>(null);
 
   // ==========================================================================
   // 37 LABOR PROCESSES @ 105.000 đ/h & DUAL VIEW (BUG-02)
   // ==========================================================================
-  const [laborHourlyRate, setLaborHourlyRate] = useState<number>(105_000);
-  const [laborViewMode, setLaborViewMode] = useState<"compact" | "detailed">("compact");
-  const [laborProcessOverrides, setLaborProcessOverrides] = useState<
-    Record<string, { hours?: number; rate?: number }>
-  >({});
+  const laborHourlyRate = activeProduct.laborHourlyRate || 105_000;
+  const setLaborHourlyRate = (updater: number | ((prev: number) => number)) => {
+    setProjectProducts((prev) =>
+      prev.map((p) => {
+        if (p.id !== activeProductId) return p;
+        const newRate = typeof updater === "function" ? updater(p.laborHourlyRate || 105_000) : updater;
+        return { ...p, laborHourlyRate: newRate };
+      })
+    );
+  };
+
+  const laborViewMode = activeProduct.laborViewMode || "compact";
+  const setLaborViewMode = (
+    updater: "compact" | "detailed" | ((prev: "compact" | "detailed") => "compact" | "detailed")
+  ) => {
+    setProjectProducts((prev) =>
+      prev.map((p) => {
+        if (p.id !== activeProductId) return p;
+        const newMode = typeof updater === "function" ? updater(p.laborViewMode || "compact") : updater;
+        return { ...p, laborViewMode: newMode };
+      })
+    );
+  };
+
+  const laborProcessOverrides = activeProduct.laborProcessOverrides || {};
+  const setLaborProcessOverrides = (
+    updater:
+      | Record<string, { hours?: number; rate?: number }>
+      | ((prev: Record<string, { hours?: number; rate?: number }>) => Record<string, { hours?: number; rate?: number }>)
+  ) => {
+    setProjectProducts((prev) =>
+      prev.map((p) => {
+        if (p.id !== activeProductId) return p;
+        const newOvr = typeof updater === "function" ? updater(p.laborProcessOverrides || {}) : updater;
+        return { ...p, laborProcessOverrides: newOvr };
+      })
+    );
+  };
 
   // ==========================================================================
   // DYNAMIC MOQ TIERS (BUG-03)
   // ==========================================================================
-  const [moqConfigTiers, setMoqConfigTiers] = useState<MoqConfigTier[]>(DEFAULT_MOQ_TIERS);
+  const moqConfigTiers = activeProduct.moqConfigTiers || DEFAULT_MOQ_TIERS;
+  const setMoqConfigTiers = (
+    updater: MoqConfigTier[] | ((prev: MoqConfigTier[]) => MoqConfigTier[])
+  ) => {
+    setProjectProducts((prev) =>
+      prev.map((p) => {
+        if (p.id !== activeProductId) return p;
+        const newTiers = typeof updater === "function" ? updater(p.moqConfigTiers || DEFAULT_MOQ_TIERS) : updater;
+        return { ...p, moqConfigTiers: newTiers };
+      })
+    );
+  };
 
   // ==========================================================================
   // SUB-CONFIGURATORS & COMPLEXITY MULTIPLIER (P1)
   // ==========================================================================
-  const [complexityMultiplier, setComplexityMultiplier] = useState<number>(1.0);
-  const [hardwareTier, setHardwareTier] = useState<"standard" | "mid" | "luxury">("standard");
-  const [glassFrame, setGlassFrame] = useState<"slim_16" | "standard_20">("slim_16");
-  const [glassColor, setGlassColor] = useState<"smoke" | "tea" | "ultra_clear">("smoke");
-  const [stoneGrade, setStoneGrade] = useState<"artificial_white" | "black_galaxy" | "quartz">("artificial_white");
-  const [stoneEdge, setStoneEdge] = useState<"bevel_45" | "round_r" | "flat">("bevel_45");
-  const [ledSensor, setLedSensor] = useState<"door" | "wave">("door");
+  const complexityMultiplier = activeProduct.complexityMultiplier || 1.0;
+  const setComplexityMultiplier = (updater: number | ((prev: number) => number)) => {
+    setProjectProducts((prev) =>
+      prev.map((p) => {
+        if (p.id !== activeProductId) return p;
+        const newMult = typeof updater === "function" ? updater(p.complexityMultiplier || 1.0) : updater;
+        return { ...p, complexityMultiplier: newMult };
+      })
+    );
+  };
 
-  // Động cơ tính toán Costing V2 từ Bảng câu hỏi thông số
-  const parametricCosting = useMemo<GeneratedCostingResult>(() => {
-    return generateCostingFromQuestionnaire(questionnaire, materials, {
-      profitRate: profitMargin >= 1 ? profitMargin - 1 : profitMargin,
-      roundingStep,
+  const hardwareTier = activeProduct.hardwareTier || "standard";
+  const setHardwareTier = (val: "standard" | "mid" | "luxury") => {
+    setProjectProducts((prev) =>
+      prev.map((p) => (p.id === activeProductId ? { ...p, hardwareTier: val } : p))
+    );
+  };
+
+  const glassFrame = activeProduct.glassFrame || "slim_16";
+  const setGlassFrame = (val: "slim_16" | "standard_20") => {
+    setProjectProducts((prev) =>
+      prev.map((p) => (p.id === activeProductId ? { ...p, glassFrame: val } : p))
+    );
+  };
+
+  const glassColor = activeProduct.glassColor || "smoke";
+  const setGlassColor = (val: "smoke" | "tea" | "ultra_clear") => {
+    setProjectProducts((prev) =>
+      prev.map((p) => (p.id === activeProductId ? { ...p, glassColor: val } : p))
+    );
+  };
+
+  const stoneGrade = activeProduct.stoneGrade || "artificial_white";
+  const setStoneGrade = (val: "artificial_white" | "black_galaxy" | "quartz") => {
+    setProjectProducts((prev) =>
+      prev.map((p) => (p.id === activeProductId ? { ...p, stoneGrade: val } : p))
+    );
+  };
+
+  const stoneEdge = activeProduct.stoneEdge || "bevel_45";
+  const setStoneEdge = (val: "bevel_45" | "round_r" | "flat") => {
+    setProjectProducts((prev) =>
+      prev.map((p) => (p.id === activeProductId ? { ...p, stoneEdge: val } : p))
+    );
+  };
+
+  const ledSensor = activeProduct.ledSensor || "door";
+  const setLedSensor = (val: "door" | "wave") => {
+    setProjectProducts((prev) =>
+      prev.map((p) => (p.id === activeProductId ? { ...p, ledSensor: val } : p))
+    );
+  };
+
+  // ==========================================================================
+  // MULTI-PRODUCT COSTING ENGINE & PROJECT ROLLUP
+  // ==========================================================================
+  const productCostings = useMemo<Record<string, GeneratedCostingResult>>(() => {
+    const res: Record<string, GeneratedCostingResult> = {};
+    projectProducts.forEach((prod) => {
+      res[prod.id] = computeSingleProductCosting(
+        prod,
+        materials,
+        profitMargin,
+        roundingStep
+      );
     });
-  }, [questionnaire, materials, profitMargin, roundingStep]);
+    return res;
+  }, [projectProducts, materials, profitMargin, roundingStep]);
 
-  // ==========================================================================
-  // ACTIVE COSTING: BỘ TÍNH TOÁN HIỆU DỤNG LIÊN THÔNG OVERRIDES (ACTIVE ENGINE)
-  // ==========================================================================
+  // Chiết tính của sản phẩm đang được chọn cấu hình
   const activeCosting = useMemo<GeneratedCostingResult>(() => {
-    // 1. Tính toán BOM hiệu dụng (Effective BOM Rows)
-    const baseRows = parametricCosting.materialsLabor || [];
-    const mappedBaseRows = baseRows
-      .filter((row) => !bomOverrides[row.id]?.isDeleted)
-      .map((row) => {
-        const ovr = bomOverrides[row.id];
-        const qty = ovr?.qty !== undefined ? ovr.qty : row.qty;
-        const unitPrice = ovr?.unitPrice !== undefined ? ovr.unitPrice : row.unitPrice;
-        const wasteFactor = ovr?.wasteFactor !== undefined ? ovr.wasteFactor : row.wasteFactor;
-        const name = ovr?.name || row.name;
-        const unit = ovr?.unit || row.unit;
-        const description = ovr?.description || row.description;
-        const totalAmount = Math.round(qty * unitPrice * wasteFactor);
-        const isOverridden = !!ovr?.isOverridden;
+    return (
+      productCostings[activeProductId] ||
+      productCostings[projectProducts[0]?.id] ||
+      computeSingleProductCosting(
+        projectProducts[0] || DEFAULT_SAMPLE_PROJECT_PRODUCTS[0],
+        materials,
+        profitMargin,
+        roundingStep
+      )
+    );
+  }, [productCostings, activeProductId, projectProducts, materials, profitMargin, roundingStep]);
 
-        return {
-          ...row,
-          name,
-          unit,
-          description,
-          qty,
-          unitPrice,
-          wasteFactor,
-          totalAmount,
-          isOverridden,
-          originalAutoValue: {
-            qty: row.qty,
-            unitPrice: row.unitPrice,
-            wasteFactor: row.wasteFactor,
-          },
-        } as MaterialLaborRow & {
-          isOverridden?: boolean;
-          originalAutoValue?: { qty: number; unitPrice: number; wasteFactor: number };
-        };
-      });
+  // Alias tương thích ngược cho các hook/UI phụ thuộc
+  const parametricCosting = activeCosting;
 
-    const allBOMRows = [...mappedBaseRows, ...extraBOMRows];
+  // Tổng hợp KPI và doanh thu/giá vốn toàn bộ dự án
+  const projectTotals = useMemo(() => {
+    return calculateProjectCollectionTotals(projectProducts, productCostings);
+  }, [projectProducts, productCostings]);
 
-    // 2. Tính toán 37 công đoạn nhân công thực tế (Effective Labor Processes)
-    const w = (questionnaire.dimensions.widthMm || 1800) / 1000;
-    const h = (questionnaire.dimensions.heightMm || 2400) / 1000;
-    const sheets = Math.max(1, Math.ceil((w * h * 2.5 * 1.15) / 2.9768));
-    const drawers = questionnaire.details?.drawerCount || 2;
-
-    const computedLaborProcesses = LABOR_PROCESSES.map((proc) => {
-      let defaultHours = 0;
-      if (proc.code === "CNC" || proc.code === "CNC-MDF") {
-        defaultHours = Number((sheets * 0.45 * complexityMultiplier).toFixed(1));
-      } else if (proc.code === "ASSE" || proc.code === "SUB") {
-        defaultHours = Number(((sheets * 0.75 + drawers * 0.4) * complexityMultiplier).toFixed(1));
-      } else if (proc.code === "SAND") {
-        defaultHours = complexityMultiplier > 1.0 ? 1.5 : 0.8;
-      } else if (proc.code === "SPR") {
-        defaultHours = questionnaire.materials.surfaceCode === "Veneer" || questionnaire.materials.surfaceCode === "Sơn bệt 2K" ? 2.5 : 0;
-      } else if (proc.code === "PAK") {
-        defaultHours = 1.0;
-      } else if (proc.code === "FITTING") {
-        defaultHours = Number((drawers * 0.2 + 0.5).toFixed(1));
-      } else if (proc.code === "UPH" && questionnaire.materials.hasUpholstery) {
-        defaultHours = 3.0;
-      }
-
-      const ovr = laborProcessOverrides[proc.code];
-      const hours = ovr?.hours !== undefined ? ovr.hours : defaultHours;
-      const rate = ovr?.rate !== undefined ? ovr.rate : laborHourlyRate;
-      const totalAmount = Math.round(hours * rate);
-
-      return {
-        ...proc,
-        hours,
-        rate,
-        totalAmount,
-      };
+  const productPrices = useMemo(() => {
+    const map: Record<string, number> = {};
+    projectProducts.forEach((p) => {
+      map[p.id] = productCostings[p.id]?.summary?.calculateSalesPrice || 0;
     });
+    return map;
+  }, [projectProducts, productCostings]);
 
-    const laborCostTotal = computedLaborProcesses.reduce((sum, p) => sum + p.totalAmount, 0);
+  // Handlers for Project Products Collection
+  const handleSelectProduct = (productId: string) => {
+    setActiveProductId(productId);
+  };
 
-    // Gom 5 bộ phận chính cho chế độ Rút gọn
-    const deptHours: Record<string, { name: string; hours: number; total: number }> = {
-      carcass: { name: "Pha phôi, Cắt CNC & Dán nẹp", hours: 0, total: 0 },
-      finishing: { name: "Chà nhám, Phun sơn lót & Phủ 2K", hours: 0, total: 0 },
-      upholstery: { name: "Bọc nệm mút, May đo vải da", hours: 0, total: 0 },
-      fitting: { name: "Lắp ráp phụ kiện, Đèn LED & Kính", hours: 0, total: 0 },
-      packing: { name: "Đóng gói bọc PE & Lắp đặt công trình", hours: 0, total: 0 },
-    };
-
-    computedLaborProcesses.forEach((p) => {
-      if (p.code === "CNC" || p.code === "CNC-MDF" || p.group === "RAW" || p.group === "MAC" || p.group === "MDF") {
-        deptHours.carcass.hours += p.hours;
-        deptHours.carcass.total += p.totalAmount;
-      } else if (p.group === "SAS" || p.group === "SPD" || p.code === "SAND" || p.code === "SPR" || p.group === "CMF" || p.group === "FIN") {
-        deptHours.finishing.hours += p.hours;
-        deptHours.finishing.total += p.totalAmount;
-      } else if (p.group === "UPH" || p.code === "LEA") {
-        deptHours.upholstery.hours += p.hours;
-        deptHours.upholstery.total += p.totalAmount;
-      } else if (p.group === "ASSE" || p.group === "FTD" || p.code === "ASSE" || p.code === "FITTING" || p.group === "SUB" || p.group === "DED" || p.group === "DEG") {
-        deptHours.fitting.hours += p.hours;
-        deptHours.fitting.total += p.totalAmount;
-      } else {
-        deptHours.packing.hours += p.hours;
-        deptHours.packing.total += p.totalAmount;
-      }
+  const handleAddProduct = (archetype?: ProductArchetypeItem, room?: string) => {
+    const newProd = createProjectProduct({
+      name: archetype?.name || "Hạng mục sản phẩm mới",
+      room: room || "Không gian chung",
+      archetypeId: archetype?.id || "custom",
+      dimensions: archetype?.defaultDimensions,
+      materials: archetype
+        ? {
+            coreCode: archetype.defaultCoreCode,
+            surfaceCode: archetype.defaultSurfaceCode,
+            hasStone: archetype.defaultFlags.hasStone,
+            stoneType: archetype.defaultFlags.stoneType,
+            hasGlass: archetype.defaultFlags.hasGlass,
+            hasMetal: archetype.defaultFlags.hasMetal,
+            hasUpholstery: archetype.defaultFlags.hasUpholstery,
+            hasLed: archetype.defaultFlags.hasLed,
+          }
+        : undefined,
     });
+    setProjectProducts((prev) => [...prev, newProd]);
+    setActiveProductId(newProd.id);
+    showToast(`Đã thêm sản phẩm: ${newProd.name}!`, "success");
+  };
 
-    const effectiveLabourDepts: LabourDeptRow[] = [
-      {
-        department: "cnc_cutting",
-        name: deptHours.carcass.name,
-        hours: Number(deptHours.carcass.hours.toFixed(1)),
-        hourlyRate: laborHourlyRate,
-        totalAmount: deptHours.carcass.total,
-      },
-      {
-        department: "sanding_spray",
-        name: deptHours.finishing.name,
-        hours: Number(deptHours.finishing.hours.toFixed(1)),
-        hourlyRate: laborHourlyRate,
-        totalAmount: deptHours.finishing.total,
-      },
-      {
-        department: "assembly",
-        name: deptHours.fitting.name,
-        hours: Number(deptHours.fitting.hours.toFixed(1)),
-        hourlyRate: laborHourlyRate,
-        totalAmount: deptHours.fitting.total,
-      },
-      {
-        department: "packing_install",
-        name: deptHours.packing.name,
-        hours: Number(deptHours.packing.hours.toFixed(1)),
-        hourlyRate: laborHourlyRate,
-        totalAmount: deptHours.packing.total,
-      },
-    ];
+  const handleDuplicateProduct = (productId: string) => {
+    const target = projectProducts.find((p) => p.id === productId);
+    if (target) {
+      const clone = duplicateProjectProduct(target);
+      setProjectProducts((prev) => [...prev, clone]);
+      setActiveProductId(clone.id);
+      showToast(`Đã nhân bản: ${clone.name}!`, "success");
+    }
+  };
 
-    // 3. Tính toán 12 nhóm chi phí theo phân loại chuẩn
-    let stoneSum = 0;
-    let uphSum = 0;
-    let metalFrameSSum = 0;
-    let subContractSum = 0;
-    let woodSum = 0;
-    let metalFramePSum = 0;
-    let glassSum = 0;
-    let chemicalSum = 0;
-    let hardwareSum = 0;
-    let consumablesSum = 0;
-    let packingSum = 0;
+  const handleDeleteProduct = (productId: string) => {
+    if (projectProducts.length <= 1) {
+      showToast("Dự án cần có ít nhất 1 sản phẩm!", "error");
+      return;
+    }
+    const remaining = projectProducts.filter((p) => p.id !== productId);
+    setProjectProducts(remaining);
+    if (activeProductId === productId) {
+      setActiveProductId(remaining[0].id);
+    }
+    showToast("Đã xóa sản phẩm khỏi dự án!", "info");
+  };
 
-    allBOMRows.forEach((row) => {
-      const b = (row.block || "").toLowerCase();
-      if (b.includes("stone")) stoneSum += row.totalAmount;
-      else if (b.includes("upholstery")) uphSum += row.totalAmount;
-      else if (b.includes("metal")) metalFrameSSum += row.totalAmount;
-      else if (b.includes("subcon") || b.includes("acrylic")) subContractSum += row.totalAmount;
-      else if (b.includes("wood") || b.includes("carcass") || b.includes("fronts") || b.includes("backpanel")) woodSum += row.totalAmount;
-      else if (b.includes("glass")) glassSum += row.totalAmount;
-      else if (b.includes("chemical") || b.includes("paint")) chemicalSum += row.totalAmount;
-      else if (b.includes("hardware") || b.includes("hinge") || b.includes("slide") || b.includes("led")) hardwareSum += row.totalAmount;
-      else if (b.includes("consumable") || b.includes("edge") || b.includes("supplies")) consumablesSum += row.totalAmount;
-      else if (b.includes("packing") || b.includes("delivery")) packingSum += row.totalAmount;
-      else woodSum += row.totalAmount;
-    });
+  const handleUpdateProductQty = (productId: string, newQty: number) => {
+    setProjectProducts((prev) =>
+      prev.map((p) => (p.id === productId ? { ...p, qty: Math.max(1, newQty) } : p))
+    );
+  };
 
-    const totalDirectLM =
-      stoneSum +
-      uphSum +
-      metalFrameSSum +
-      subContractSum +
-      woodSum +
-      metalFramePSum +
-      glassSum +
-      chemicalSum +
-      hardwareSum +
-      consumablesSum +
-      packingSum +
-      laborCostTotal;
-
-    // Phân bổ OH
-    const workshopBasis = woodSum + chemicalSum + consumablesSum + hardwareSum + packingSum + laborCostTotal;
-    const ohWorkshopRate = parametricCosting.summary.ohWorkshopRate || 0.25;
-    const ohWorkshopAmount = Math.round(workshopBasis * ohWorkshopRate);
-
-    const subcontractBasis = metalFrameSSum + uphSum + subContractSum + glassSum;
-    const ohSubcontractRate = parametricCosting.summary.ohSubcontractRate || 0.10;
-    const ohSubcontractAmount = Math.round(subcontractBasis * ohSubcontractRate);
-
-    const totalOH = ohWorkshopAmount + ohSubcontractAmount;
-    const cogs = totalDirectLM + totalOH;
-    const effectiveProfitRate = profitMargin >= 1 ? profitMargin - 1 : profitMargin;
-    const profitAmount = Math.round(cogs * effectiveProfitRate);
-    const calculateSalesPrice = cogs + profitAmount;
-
-    // Dự phòng rủi ro theo Mức độ
-    const estLevel = questionnaire.estimationLevel || 2;
-    const contingencyRate = estLevel === 1 ? 0.10 : estLevel === 4 ? 0.0 : 0.05;
-    const contingencyAmount = Math.round(calculateSalesPrice * contingencyRate);
-    const recommendedPrice = calculateSalesPrice + contingencyAmount;
-
-    // Bảng giá MOQ động
-    const moqPrices: Record<number, number> = {};
-    moqConfigTiers.forEach((tier) => {
-      const baseForSurcharge = Math.max(0, calculateSalesPrice - stoneSum);
-      const unitPrice = Math.round(baseForSurcharge * (1 + (tier.surchargePercent || 0) / 100) + stoneSum);
-      moqPrices[tier.moq] = unitPrice;
-    });
-
-    return {
-      ...parametricCosting,
-      materialsLabor: allBOMRows,
-      labourDepts: effectiveLabourDepts,
-      contingencyRate,
-      contingencyAmount,
-      priceRange: {
-        min: Math.round(recommendedPrice * 0.9),
-        max: Math.round(recommendedPrice * 1.15),
-        formatted: `${formatVND(Math.round(recommendedPrice * 0.9))} ~ ${formatVND(Math.round(recommendedPrice * 1.15))}`,
-      },
-      summary: {
-        ...parametricCosting.summary,
-        stone: stoneSum,
-        upholstery: uphSum,
-        metalFrameS: metalFrameSSum,
-        subContract: subContractSum,
-        wood: woodSum,
-        metalFrameP: metalFramePSum,
-        glass: glassSum,
-        chemical: chemicalSum,
-        hardware: hardwareSum,
-        consumables: consumablesSum,
-        packingDelivery: packingSum,
-        laborCostTotal,
-        totalDirectLM,
-        ohWorkshopAmount,
-        ohSubcontractAmount,
-        totalOH,
-        cogs,
-        profitAmount,
-        calculateSalesPrice,
-        moqPrices,
-      },
-    };
-  }, [
-    parametricCosting,
-    bomOverrides,
-    extraBOMRows,
-    laborProcessOverrides,
-    laborHourlyRate,
-    complexityMultiplier,
-    moqConfigTiers,
-    profitMargin,
-    questionnaire.dimensions,
-    questionnaire.materials.surfaceCode,
-    questionnaire.details?.drawerCount,
-    questionnaire.estimationLevel,
-  ]);
+  const handleUpdateProductRoom = (productId: string, newRoom: string) => {
+    setProjectProducts((prev) =>
+      prev.map((p) => (p.id === productId ? { ...p, room: newRoom } : p))
+    );
+  };
 
   // Handlers for BOM Smart Grid
   const handleUpdateBOMRow = (id: string, patch: Partial<MaterialLaborRow>) => {
@@ -1115,6 +1068,13 @@ function QuotingWorkspace() {
         setProjectVersionNo(found.versionNo ?? found.version ?? 1);
         setParentProjectId(found.parentProjectId);
         setProjectStatus(found.status || "draft");
+        if (found.projectProducts && found.projectProducts.length > 0) {
+          setProjectProducts(found.projectProducts);
+          setActiveProductId(found.projectProducts[0].id);
+        }
+        if (found.collectionType) {
+          setCollectionType(found.collectionType);
+        }
         if (found.items && found.items.length > 0) {
           setCurrentStep(2);
         }
@@ -1498,6 +1458,9 @@ function QuotingWorkspace() {
       return;
     }
     const projectId = editId || `proj-${Date.now()}`;
+    const effectiveTotalCost = projectTotals.totalCOGS > 0 ? projectTotals.totalCOGS : calcResult.totalBaseCost;
+    const effectiveTotalQuote = projectTotals.totalQuote > 0 ? projectTotals.totalQuote : calcResult.totalQuotePrice;
+
     const projectToSave: SavedProject = {
       id: projectId,
       projectName,
@@ -1506,12 +1469,14 @@ function QuotingWorkspace() {
       createdAt: new Date().toISOString(),
       status: projectStatus,
       items: parts,
+      projectProducts: projectProducts,
+      collectionType: collectionType,
       materialsSnapshot: materials,
       materialSnapshots: materials,
       profitMargin,
       roundingStep,
-      totalCost: calcResult.totalBaseCost,
-      totalQuote: calcResult.totalQuotePrice,
+      totalCost: effectiveTotalCost,
+      totalQuote: effectiveTotalQuote,
       calcVersion: 1,
       versionNo: projectVersionNo,
       parentProjectId: parentProjectId,
@@ -1648,6 +1613,38 @@ function QuotingWorkspace() {
                 className="text-xl sm:text-2xl font-bold text-slate-900 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-slate-900 focus:outline-none transition"
               />
 
+              {/* Chế độ: Dự Án Công Trình vs Bộ Sưu Tập */}
+              <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCollectionType("project");
+                    showToast("Đã chuyển sang chế độ Dự Án Công Trình (nhiều phòng/khu vực)", "info");
+                  }}
+                  className={`px-2.5 py-1 rounded-md font-semibold text-xs transition cursor-pointer ${
+                    collectionType === "project"
+                      ? "bg-white text-zinc-900 shadow-2xs"
+                      : "text-slate-500 hover:text-slate-900"
+                  }`}
+                >
+                  Dự án công trình
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCollectionType("collection");
+                    showToast("Đã chuyển sang chế độ Bộ Sưu Tập Sản Phẩm (dòng hàng mẫu)", "info");
+                  }}
+                  className={`px-2.5 py-1 rounded-md font-semibold text-xs transition cursor-pointer ${
+                    collectionType === "collection"
+                      ? "bg-white text-zinc-900 shadow-2xs"
+                      : "text-slate-500 hover:text-slate-900"
+                  }`}
+                >
+                  Bộ sưu tập sản phẩm
+                </button>
+              </div>
+
               {/* Trạng thái dự án & Lệnh xưởng */}
               <div className="flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-md text-xs">
                 <span className="text-slate-500 text-[10px] uppercase font-semibold">Trạng thái:</span>
@@ -1779,6 +1776,26 @@ function QuotingWorkspace() {
       </div>
 
       {/* ================================================================== */}
+      {/* THANH DANH SÁCH SẢN PHẨM TRONG DỰ ÁN / BỘ SƯU TẬP (no-print)        */}
+      {/* ================================================================== */}
+      <div className="no-print">
+        <ProjectProductsCollectionBar
+          products={projectProducts}
+          activeProductId={activeProductId}
+          onSelectProduct={handleSelectProduct}
+          onAddProduct={handleAddProduct}
+          onDuplicateProduct={handleDuplicateProduct}
+          onDeleteProduct={handleDeleteProduct}
+          onUpdateProductQty={handleUpdateProductQty}
+          onUpdateProductRoom={handleUpdateProductRoom}
+          productPrices={productPrices}
+          totalQuotePrice={projectTotals.totalQuote}
+          totalCOGSPrice={projectTotals.totalCOGS}
+          collectionType={collectionType}
+        />
+      </div>
+
+      {/* ================================================================== */}
       {/* THANH ĐIỀU HƯỚNG 3 BƯỚC (STEPPER) & CHẾ ĐỘ NÂNG CAO (no-print)      */}
       {/* ================================================================== */}
       <div className="no-print space-y-2">
@@ -1894,6 +1911,36 @@ function QuotingWorkspace() {
       {/* ================================================================== */}
       {currentStep === 1 && (
         <div className="space-y-6">
+          {/* Active Product Context Banner */}
+          <div className="no-print bg-slate-900 text-white p-3.5 rounded-xl flex flex-wrap items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                <Box className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider">
+                    {collectionType === "collection" ? "Sản phẩm đang chọn trong BST:" : "Sản phẩm đang chọn trong dự án:"}
+                  </span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-white/10 text-white">
+                    {activeProduct.room || "Khu vực chung"}
+                  </span>
+                </div>
+                <h3 className="text-sm font-bold text-white line-clamp-1">{activeProduct.name}</h3>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 text-xs font-mono">
+              <span className="text-slate-300">
+                Kích thước: <strong className="text-white">{activeProduct.questionnaire?.dimensions?.widthMm || 0} × {activeProduct.questionnaire?.dimensions?.depthMm || 0} × {activeProduct.questionnaire?.dimensions?.heightMm || 0} mm</strong>
+              </span>
+              <span className="text-slate-300">
+                SL: <strong className="text-white">{activeProduct.qty || 1}</strong>
+              </span>
+              <span className="text-zinc-200 font-bold">
+                Tạm tính: {formatVND((productPrices[activeProduct.id] || 0) * (activeProduct.qty || 1))}
+              </span>
+            </div>
+          </div>
           {/* Sub-tab switcher giữa Báo giá thông số và Nạp file */}
           <div className="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-2.5 rounded-lg border border-slate-200 shadow-2xs">
             <div className="flex items-center gap-1.5">
@@ -3954,6 +4001,36 @@ function QuotingWorkspace() {
       {/* ================================================================== */}
       {currentStep === 2 && (
         <div className="space-y-6">
+          {/* Active Product Context Banner */}
+          <div className="no-print bg-slate-900 text-white p-3.5 rounded-xl flex flex-wrap items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                <Box className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider">
+                    {collectionType === "collection" ? "Bảng phân tích giá vốn của sản phẩm:" : "Bảng phân tích giá vốn của sản phẩm:"}
+                  </span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-white/10 text-white">
+                    {activeProduct.room || "Khu vực chung"}
+                  </span>
+                </div>
+                <h3 className="text-sm font-bold text-white line-clamp-1">{activeProduct.name}</h3>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 text-xs font-mono">
+              <span className="text-slate-300">
+                Kích thước: <strong className="text-white">{activeProduct.questionnaire?.dimensions?.widthMm || 0} × {activeProduct.questionnaire?.dimensions?.depthMm || 0} × {activeProduct.questionnaire?.dimensions?.heightMm || 0} mm</strong>
+              </span>
+              <span className="text-slate-300">
+                SL: <strong className="text-white">{activeProduct.qty || 1}</strong>
+              </span>
+              <span className="text-zinc-200 font-bold">
+                Báo giá (đã gồm lãi): {formatVND((productPrices[activeProduct.id] || 0) * (activeProduct.qty || 1))}
+              </span>
+            </div>
+          </div>
           {/* Banner Onboarding H5: Gợi ý sau lần demo đầu tiên */}
           {!isAuthenticated && (
             <div className="no-print p-4 rounded-lg bg-zinc-100 border border-zinc-200 text-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
@@ -5099,32 +5176,74 @@ function QuotingWorkspace() {
                 </div>
               </div>
 
-              {/* Bảng hạng mục báo giá gom theo Module */}
+              {/* Bảng hạng mục báo giá gom theo Module hoặc Danh sách Sản phẩm */}
               <div className="space-y-2 overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs min-w-[500px]">
                   <thead className="bg-slate-100 text-slate-700 font-bold border-y border-slate-300">
                     <tr>
-                      <th className="p-3 w-12 text-center">STT</th>
-                      <th className="p-3">Hạng Mục Thành Phẩm</th>
-                      <th className="p-3">Quy Cách & Chi Tiết Cấu Thành</th>
-                      <th className="p-3 text-right">Số Tấm</th>
+                      <th className="p-3 w-10 text-center">STT</th>
+                      <th className="p-3">Hạng Mục Sản Phẩm</th>
+                      <th className="p-3">Quy Cách Kích Thước &amp; Vật Liệu</th>
+                      <th className="p-3 w-12 text-center">ĐVT</th>
+                      <th className="p-3 w-12 text-center">SL</th>
+                      <th className="p-3 text-right">Đơn Giá (VNĐ)</th>
                       <th className="p-3 text-right">Thành Tiền (VNĐ)</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200 text-slate-800">
-                    {calcResult.moduleQuotes.map((m, idx) => (
-                      <tr key={m.moduleName}>
-                        <td className="p-3 text-center text-slate-400 font-mono">{idx + 1}</td>
-                        <td className="p-3 font-bold text-slate-900">{m.moduleName}</td>
-                        <td className="p-3 text-slate-600 text-[11px]">
-                          {m.description || "Gỗ MDF chống ẩm phủ Melamine, dán cạnh chỉ PVC đồng màu, phụ kiện bản lề giảm chấn"}
-                        </td>
-                        <td className="p-3 text-right font-mono text-slate-500">{m.partCount}</td>
-                        <td className="p-3 text-right font-mono font-black text-slate-900 text-sm">
-                          {formatVND(m.quotePrice)}
-                        </td>
-                      </tr>
-                    ))}
+                    {projectTotals.items && projectTotals.items.length > 0 ? (
+                      projectTotals.items.map((item, idx) => {
+                        const prod = projectProducts.find((p) => p.id === item.productId);
+                        const dims = prod?.questionnaire?.dimensions || { widthMm: 0, depthMm: 0, heightMm: 0 };
+                        const core = prod?.questionnaire?.materials?.coreCode || "MDF chống ẩm 17mm";
+                        const surface = prod?.questionnaire?.materials?.surfaceCode || "Melamine";
+                        return (
+                          <tr key={item.productId} className="hover:bg-slate-50/50 transition">
+                            <td className="p-3 text-center text-slate-400 font-mono">{idx + 1}</td>
+                            <td className="p-3 font-bold text-slate-900">
+                              <div>{item.productName}</div>
+                              <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 inline-block mt-0.5">
+                                {item.room || (collectionType === "collection" ? "Bộ sưu tập" : "Khu vực chung")}
+                              </span>
+                            </td>
+                            <td className="p-3 text-slate-600 text-[11px]">
+                              <div className="font-mono text-slate-800 font-medium">
+                                {item.dimensionsText || `${dims.widthMm} × ${dims.depthMm} × ${dims.heightMm} mm`}
+                              </div>
+                              <div className="text-[10px] text-slate-500">
+                                {core} • {surface}
+                                {prod?.questionnaire?.materials?.hasStone ? " • Mặt đá" : ""}
+                                {prod?.questionnaire?.materials?.hasLed ? " • Đèn LED" : ""}
+                              </div>
+                            </td>
+                            <td className="p-3 text-center text-slate-600 text-[11px]">{item.unit || "Bộ"}</td>
+                            <td className="p-3 text-center font-mono font-bold text-slate-800">{item.qty}</td>
+                            <td className="p-3 text-right font-mono text-slate-700">
+                              {formatVND(item.unitPrice)}
+                            </td>
+                            <td className="p-3 text-right font-mono font-black text-slate-900 text-sm">
+                              {formatVND(item.totalPrice)}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      calcResult.moduleQuotes.map((m, idx) => (
+                        <tr key={m.moduleName}>
+                          <td className="p-3 text-center text-slate-400 font-mono">{idx + 1}</td>
+                          <td className="p-3 font-bold text-slate-900">{m.moduleName}</td>
+                          <td className="p-3 text-slate-600 text-[11px]">
+                            {m.description || "Gỗ MDF chống ẩm phủ Melamine, dán cạnh chỉ PVC đồng màu, phụ kiện bản lề giảm chấn"}
+                          </td>
+                          <td className="p-3 text-center text-slate-600 text-[11px]">Bộ</td>
+                          <td className="p-3 text-center font-mono text-slate-500">{m.partCount}</td>
+                          <td className="p-3 text-right font-mono text-slate-700">{formatVND(m.quotePrice)}</td>
+                          <td className="p-3 text-right font-mono font-black text-slate-900 text-sm">
+                            {formatVND(m.quotePrice)}
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -5136,7 +5255,7 @@ function QuotingWorkspace() {
                   <span className="text-slate-500 text-[11px]">Đã bao gồm chi phí gia công, vận chuyển và lắp đặt hoàn thiện.</span>
                 </div>
                 <span className="text-2xl font-black text-zinc-900 font-mono">
-                  {formatVND(calcResult.totalQuotePrice)}
+                  {formatVND(projectTotals.totalQuote > 0 ? projectTotals.totalQuote : calcResult.totalQuotePrice)}
                 </span>
               </div>
 
@@ -5511,27 +5630,69 @@ function QuotingWorkspace() {
             <table className="w-full text-left border-collapse text-xs min-w-[500px]">
               <thead className="bg-slate-100 text-slate-700 font-bold border-y border-slate-300">
                 <tr>
-                  <th className="p-3 w-12 text-center">STT</th>
-                  <th className="p-3">Hạng Mục Thành Phẩm</th>
-                  <th className="p-3">Quy Cách & Chi Tiết Cấu Thành</th>
-                  <th className="p-3 text-right">Số Tấm</th>
+                  <th className="p-3 w-10 text-center">STT</th>
+                  <th className="p-3">Hạng Mục Sản Phẩm</th>
+                  <th className="p-3">Quy Cách Kích Thước &amp; Vật Liệu</th>
+                  <th className="p-3 w-12 text-center">ĐVT</th>
+                  <th className="p-3 w-12 text-center">SL</th>
+                  <th className="p-3 text-right">Đơn Giá (VNĐ)</th>
                   <th className="p-3 text-right">Thành Tiền (VNĐ)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 text-slate-800">
-                {calcResult.moduleQuotes.map((m, idx) => (
-                  <tr key={m.moduleName}>
-                    <td className="p-3 text-center text-slate-400 font-mono">{idx + 1}</td>
-                    <td className="p-3 font-bold text-slate-900">{m.moduleName}</td>
-                    <td className="p-3 text-slate-600 text-[11px]">
-                      {m.description || "Gỗ MDF chống ẩm phủ Melamine, dán cạnh chỉ PVC đồng màu, phụ kiện bản lề giảm chấn"}
-                    </td>
-                    <td className="p-3 text-right font-mono text-slate-500">{m.partCount}</td>
-                    <td className="p-3 text-right font-mono font-black text-slate-900 text-sm">
-                      {formatVND(m.quotePrice)}
-                    </td>
-                  </tr>
-                ))}
+                {projectTotals.items && projectTotals.items.length > 0 ? (
+                  projectTotals.items.map((item, idx) => {
+                    const prod = projectProducts.find((p) => p.id === item.productId);
+                    const dims = prod?.questionnaire?.dimensions || { widthMm: 0, depthMm: 0, heightMm: 0 };
+                    const core = prod?.questionnaire?.materials?.coreCode || "MDF chống ẩm 17mm";
+                    const surface = prod?.questionnaire?.materials?.surfaceCode || "Melamine";
+                    return (
+                      <tr key={item.productId} className="hover:bg-slate-50/50 transition">
+                        <td className="p-3 text-center text-slate-400 font-mono">{idx + 1}</td>
+                        <td className="p-3 font-bold text-slate-900">
+                          <div>{item.productName}</div>
+                          <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 inline-block mt-0.5">
+                            {item.room || (collectionType === "collection" ? "Bộ sưu tập" : "Khu vực chung")}
+                          </span>
+                        </td>
+                        <td className="p-3 text-slate-600 text-[11px]">
+                          <div className="font-mono text-slate-800 font-medium">
+                            {item.dimensionsText || `${dims.widthMm} × ${dims.depthMm} × ${dims.heightMm} mm`}
+                          </div>
+                          <div className="text-[10px] text-slate-500">
+                            {core} • {surface}
+                            {prod?.questionnaire?.materials?.hasStone ? " • Mặt đá" : ""}
+                            {prod?.questionnaire?.materials?.hasLed ? " • Đèn LED" : ""}
+                          </div>
+                        </td>
+                        <td className="p-3 text-center text-slate-600 text-[11px]">{item.unit || "Bộ"}</td>
+                        <td className="p-3 text-center font-mono font-bold text-slate-800">{item.qty}</td>
+                        <td className="p-3 text-right font-mono text-slate-700">
+                          {formatVND(item.unitPrice)}
+                        </td>
+                        <td className="p-3 text-right font-mono font-black text-slate-900 text-sm">
+                          {formatVND(item.totalPrice)}
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  calcResult.moduleQuotes.map((m, idx) => (
+                    <tr key={m.moduleName}>
+                      <td className="p-3 text-center text-slate-400 font-mono">{idx + 1}</td>
+                      <td className="p-3 font-bold text-slate-900">{m.moduleName}</td>
+                      <td className="p-3 text-slate-600 text-[11px]">
+                        {m.description || "Gỗ MDF chống ẩm phủ Melamine, dán cạnh chỉ PVC đồng màu, phụ kiện bản lề giảm chấn"}
+                      </td>
+                      <td className="p-3 text-center text-slate-600 text-[11px]">Bộ</td>
+                      <td className="p-3 text-center font-mono text-slate-500">{m.partCount}</td>
+                      <td className="p-3 text-right font-mono text-slate-700">{formatVND(m.quotePrice)}</td>
+                      <td className="p-3 text-right font-mono font-black text-slate-900 text-sm">
+                        {formatVND(m.quotePrice)}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -5543,7 +5704,7 @@ function QuotingWorkspace() {
               <span className="text-slate-500 text-[11px]">Đã bao gồm chi phí gia công, vận chuyển và lắp đặt hoàn thiện.</span>
             </div>
             <span className="text-2xl font-black text-zinc-900 font-mono">
-              {formatVND(calcResult.totalQuotePrice)}
+              {formatVND(projectTotals.totalQuote > 0 ? projectTotals.totalQuote : calcResult.totalQuotePrice)}
             </span>
           </div>
 
