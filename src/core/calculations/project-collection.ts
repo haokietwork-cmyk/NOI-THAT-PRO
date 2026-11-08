@@ -18,6 +18,8 @@ import {
 } from "../data/exportFurnitureCatalog.ts";
 import { generateCostingFromQuestionnaire } from "./parametric-generator.ts";
 import type { MaterialItem } from "../types/index.ts";
+import type { UniversalProductStructure } from "./structural-schema.ts";
+import { resolveUniversalCosting } from "./universal-resolver.ts";
 
 export interface ProjectProductItem {
   id: string;
@@ -29,6 +31,7 @@ export interface ProjectProductItem {
   unit: string;
   archetypeId: string;
   questionnaire: CostingQuestionnaire;
+  universalStructure?: UniversalProductStructure;
   bomOverrides: Record<
     string,
     {
@@ -330,6 +333,77 @@ export function computeSingleProductCosting(
   profitMargin: number,
   roundingStep: 0.5 | 1
 ): GeneratedCostingResult {
+  // Nếu có universalStructure, tính toán thông qua Động Cơ Lắp Ghép Tổng Quát (Universal Composable Engine)
+  if (prod.universalStructure) {
+    const targetMargin = prod.customProfitMargin !== undefined ? prod.customProfitMargin : profitMargin;
+    const structWithQty: UniversalProductStructure = {
+      ...prod.universalStructure,
+      productName: prod.name || prod.universalStructure.productName,
+      orderQuantity: prod.qty || prod.universalStructure.orderQuantity || 1,
+      targetMarginPercent: (targetMargin >= 1 ? targetMargin - 1 : targetMargin) * 100,
+    };
+    const universalResult = resolveUniversalCosting(structWithQty, materials);
+
+    const bomOverrides = prod.bomOverrides || {};
+    const extraBOMRows = prod.extraBOMRows || [];
+
+    if (Object.keys(bomOverrides).length === 0 && extraBOMRows.length === 0) {
+      return universalResult;
+    }
+
+    const baseRows = universalResult.materialsLabor || [];
+    const mappedBaseRows = baseRows
+      .filter((row) => !bomOverrides[row.id]?.isDeleted)
+      .map((row) => {
+        const ovr = bomOverrides[row.id];
+        if (!ovr) return row;
+        const qty = ovr.qty !== undefined ? ovr.qty : row.qty;
+        const unitPrice = ovr.unitPrice !== undefined ? ovr.unitPrice : row.unitPrice;
+        const wasteFactor = ovr.wasteFactor !== undefined ? ovr.wasteFactor : row.wasteFactor;
+        const name = ovr.name || row.name;
+        const unit = ovr.unit || row.unit;
+        const description = ovr.description || row.description;
+        const totalAmount = Math.round(qty * unitPrice * wasteFactor);
+        return {
+          ...row,
+          name,
+          unit,
+          description,
+          qty,
+          unitPrice,
+          wasteFactor,
+          totalAmount,
+          isOverridden: !!ovr.isOverridden,
+        };
+      });
+
+    const finalRows = [...mappedBaseRows, ...extraBOMRows];
+    const totalMat = finalRows.reduce((sum, r) => sum + r.totalAmount, 0);
+    const laborCostTotal = universalResult.summary.laborCostTotal;
+    const totalDirectLM = totalMat + laborCostTotal;
+    const ohWorkshopAmount = Math.round(totalDirectLM * universalResult.summary.ohWorkshopRate);
+    const ohSubcontractAmount = universalResult.summary.ohSubcontractAmount;
+    const totalOH = ohWorkshopAmount + ohSubcontractAmount;
+    const cogs = totalDirectLM + totalOH + universalResult.summary.packingDelivery;
+    const profitRate = universalResult.summary.profitRate;
+    const profitAmount = Math.round(cogs * profitRate);
+    const calculateSalesPrice = cogs + profitAmount;
+
+    return {
+      ...universalResult,
+      materialsLabor: finalRows,
+      summary: {
+        ...universalResult.summary,
+        totalDirectLM,
+        ohWorkshopAmount,
+        totalOH,
+        cogs,
+        profitAmount,
+        calculateSalesPrice,
+      },
+    };
+  }
+
   // 1. Tính toán parametric costing cơ sở từ questionnaire
   const parametricCosting = generateCostingFromQuestionnaire(prod.questionnaire, materials, {
     profitRate: profitMargin >= 1 ? profitMargin - 1 : profitMargin,

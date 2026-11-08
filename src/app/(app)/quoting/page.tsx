@@ -105,6 +105,9 @@ import ProductArchetypeSelector from "@/core/components/ProductArchetypeSelector
 import { PRODUCT_ARCHETYPES_CATALOG, type ProductArchetypeItem } from "@/core/data/productArchetypesCatalog";
 import MaterialCatalogDrawer from "@/core/components/MaterialCatalogDrawer";
 import ProjectProductsCollectionBar from "@/core/components/ProjectProductsCollectionBar";
+import UniversalStructureBlockConfigurator from "@/core/components/UniversalStructureBlockConfigurator";
+import type { UniversalProductStructure, StructuralBlockId } from "@/core/calculations/structural-schema";
+import { adaptQuestionnaireToUniversalStructure } from "@/core/calculations/structural-schema";
 import {
   createProjectProduct,
   createBlankProduct,
@@ -218,6 +221,54 @@ function QuotingWorkspace() {
     );
   }, [projectProducts, activeProductId]);
 
+  // Cấu hình tiền tệ kép (VNĐ / USD + VNĐ)
+  const [currencyMode, setCurrencyMode] = useState<"VND" | "USD_VND">("VND");
+  const [usdRate, setUsdRate] = useState<number>(25000);
+
+  const formatPriceDual = (vndAmount: number) => {
+    const vndText = (vndAmount || 0).toLocaleString("vi-VN") + " đ";
+    if (currencyMode === "USD_VND") {
+      const usdVal = Math.round((vndAmount || 0) / (usdRate || 25000));
+      return `${vndText} (~${usdVal.toLocaleString()})`;
+    }
+    return vndText;
+  };
+
+  // Cấu trúc mô-đun kết cấu vật lý tổng quát (Universal Composable Structure)
+  const currentStructure = useMemo<UniversalProductStructure>(() => {
+    if (activeProduct.universalStructure) {
+      return {
+        ...activeProduct.universalStructure,
+        productName: activeProduct.name || activeProduct.universalStructure.productName,
+        orderQuantity: activeProduct.qty || activeProduct.universalStructure.orderQuantity || 1,
+        dimensionsMm: {
+          width: activeProduct.questionnaire?.dimensions?.widthMm || activeProduct.universalStructure.dimensionsMm.width,
+          depth: activeProduct.questionnaire?.dimensions?.depthMm || activeProduct.universalStructure.dimensionsMm.depth,
+          height: activeProduct.questionnaire?.dimensions?.heightMm || activeProduct.universalStructure.dimensionsMm.height,
+        },
+      };
+    }
+    return adaptQuestionnaireToUniversalStructure(activeProduct.questionnaire, activeProduct.qty || 1);
+  }, [activeProduct]);
+
+  const handleUpdateUniversalStructure = (
+    updater: (prev: UniversalProductStructure) => UniversalProductStructure
+  ) => {
+    setProjectProducts((prev) =>
+      prev.map((p) => {
+        if (p.id !== activeProductId) return p;
+        const oldStruct = p.universalStructure || adaptQuestionnaireToUniversalStructure(p.questionnaire, p.qty || 1);
+        const newStruct = updater(oldStruct);
+        return {
+          ...p,
+          universalStructure: newStruct,
+          name: newStruct.productName || p.name,
+          qty: newStruct.orderQuantity || p.qty,
+        };
+      })
+    );
+  };
+
   const questionnaire = activeProduct.questionnaire;
   const setQuestionnaire = (
     updater: CostingQuestionnaire | ((prev: CostingQuestionnaire) => CostingQuestionnaire)
@@ -248,6 +299,56 @@ function QuotingWorkspace() {
     else if (item.id.includes("vanity")) baseArchetype = "vanity";
     else if (item.id.includes("wall_panel")) baseArchetype = "wall_panel";
 
+    // Xác định các khối kết cấu vật lý phù hợp cho archetype này (Universal Composable Engine)
+    const isSofaOrUpholstery = item.id.includes("sofa") || item.category === "upholstery";
+    const isTableOrChair = item.id.includes("table") || item.category === "solid_wood" || item.id.includes("chair");
+    const isCabinet = item.id.includes("wardrobe") || item.id.includes("kitchen") || item.id.includes("cabinet") || item.id.includes("shelf") || item.category === "cabinet";
+
+    const enabledBlocks: StructuralBlockId[] = [];
+    if (isCabinet) enabledBlocks.push("B1_PANEL_BOX", "B6_HARDWARE_ELECTRO");
+    else if (isSofaOrUpholstery) enabledBlocks.push("B2_FRAME_SKELETON", "B4_VOLUME_CUSHION", "B6_HARDWARE_ELECTRO");
+    else if (isTableOrChair) enabledBlocks.push("B2_FRAME_SKELETON", "B3_SURFACE_SLAB", "B5_SURFACE_FINISH");
+    else enabledBlocks.push("B1_PANEL_BOX", "B6_HARDWARE_ELECTRO");
+
+    if (item.defaultFlags.hasStone && !enabledBlocks.includes("B3_SURFACE_SLAB")) enabledBlocks.push("B3_SURFACE_SLAB");
+    if (item.defaultFlags.hasGlass && !enabledBlocks.includes("B3_SURFACE_SLAB")) enabledBlocks.push("B3_SURFACE_SLAB");
+    if (item.defaultFlags.hasUpholstery && !enabledBlocks.includes("B4_VOLUME_CUSHION")) enabledBlocks.push("B4_VOLUME_CUSHION");
+    if (item.defaultFlags.hasLed && !enabledBlocks.includes("B6_HARDWARE_ELECTRO")) enabledBlocks.push("B6_HARDWARE_ELECTRO");
+
+    const defaultDrawers = isCabinet ? (item.id.includes("wardrobe") ? 2 : 0) : 0;
+    const defaultDoors = isCabinet ? (item.id.includes("wardrobe") ? 4 : 2) : 0;
+
+    const newQ: CostingQuestionnaire = {
+      productType: baseArchetype,
+      name: item.name,
+      dimensions: {
+        widthMm: item.defaultDimensions.widthMm,
+        depthMm: item.defaultDimensions.depthMm,
+        heightMm: item.defaultDimensions.heightMm,
+      },
+      materials: {
+        coreCode: item.defaultCoreCode || "MDF_17_CHONG_AM",
+        surfaceCode: item.defaultSurfaceCode || "Melamine",
+        hasStone: item.defaultFlags.hasStone,
+        stoneType: item.defaultFlags.stoneType || "vicostone",
+        hasGlass: item.defaultFlags.hasGlass,
+        hasMetal: item.defaultFlags.hasMetal,
+        hasUpholstery: item.defaultFlags.hasUpholstery,
+        hasLed: item.defaultFlags.hasLed,
+      },
+      details: {
+        drawerCount: defaultDrawers,
+        doorCount: defaultDoors,
+        moqTiers: [1, 5, 10, 20, 50, 100, 200, 500],
+      },
+      calcMode: "detail",
+      estimationLevel: 4,
+    };
+
+    const newStruct = adaptQuestionnaireToUniversalStructure(newQ, activeProduct.qty || 1);
+    newStruct.enabledBlocks = enabledBlocks;
+    newStruct.productName = item.name;
+
     setProjectProducts((prev) =>
       prev.map((p) =>
         p.id === activeProductId
@@ -256,33 +357,12 @@ function QuotingWorkspace() {
               name: item.name,
               archetypeId: item.id,
               tag: p.tag || item.categoryLabel || "Sản phẩm",
+              questionnaire: newQ,
+              universalStructure: newStruct,
             }
           : p
       )
     );
-
-    setQuestionnaire((prev) => ({
-      ...prev,
-      productType: baseArchetype,
-      name: item.name,
-      dimensions: {
-        ...prev.dimensions,
-        widthMm: item.defaultDimensions.widthMm,
-        depthMm: item.defaultDimensions.depthMm,
-        heightMm: item.defaultDimensions.heightMm,
-      },
-      materials: {
-        ...prev.materials,
-        coreCode: item.defaultCoreCode || prev.materials.coreCode,
-        surfaceCode: item.defaultSurfaceCode || prev.materials.surfaceCode,
-        hasStone: item.defaultFlags.hasStone,
-        stoneType: item.defaultFlags.stoneType || prev.materials.stoneType,
-        hasGlass: item.defaultFlags.hasGlass,
-        hasMetal: item.defaultFlags.hasMetal,
-        hasUpholstery: item.defaultFlags.hasUpholstery,
-        hasLed: item.defaultFlags.hasLed,
-      },
-    }));
   };
 
   const handleClearArchetype = () => {
@@ -1711,81 +1791,70 @@ function QuotingWorkspace() {
       )}
 
       {/* ================================================================== */}
-      {/* THANH ĐIỀU KHIỂN BÁO GIÁ & TIÊU ĐỀ (no-print)                       */}
-      {/* ================================================================== */}
+      {/* THANH ĐIỀU KHIỂN BÁO GIÁ & TIÊU ĐỀ THÍCH ỨNG (no-print) */}
       <div className="no-print bg-white rounded-lg border border-slate-200 p-5 shadow-xs space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-2">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="space-y-2.5">
             <div className="flex flex-wrap items-center gap-2">
               <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 <FileSpreadsheet className="w-3.5 h-3.5 text-zinc-900" />
-                <span>Báo Giá &amp; Dự Toán Chi Phí</span>
+                <span>Không Gian Dự Toán</span>
               </div>
 
-              {/* 4 Chế độ quy mô báo giá: 1 SP lẻ | Đơn hàng | Bộ sưu tập | Dự án */}
-              <div className="flex flex-wrap items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs">
+              {/* 3 Chế độ quy mô báo giá thích ứng */}
+              <div className="flex flex-wrap items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-medium">
                 <button
                   type="button"
                   onClick={() => {
                     setQuoteScope("single_item");
                     setCollectionType("project");
-                    showToast("Đã chọn chế độ: 1 Sản phẩm lẻ (SKU)", "info");
+                    showToast("Đã chọn chế độ: 1 Sản phẩm đơn lẻ (SKU / Lô mẫu)", "info");
                   }}
-                  className={`px-2.5 py-1 rounded-md font-semibold text-xs transition cursor-pointer flex items-center gap-1 ${
+                  className={`px-3 py-1 rounded-md font-semibold text-xs transition cursor-pointer flex items-center gap-1.5 ${
                     quoteScope === "single_item"
                       ? "bg-white text-zinc-900 shadow-2xs"
                       : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
-                  <Box className="w-3 h-3" />
-                  <span>1 SP lẻ (SKU)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setQuoteScope("order_list");
-                    setCollectionType("project");
-                    showToast("Đã chọn chế độ: Đơn hàng mua sắm nhiều món", "info");
-                  }}
-                  className={`px-2.5 py-1 rounded-md font-semibold text-xs transition cursor-pointer flex items-center gap-1 ${
-                    quoteScope === "order_list"
-                      ? "bg-white text-zinc-900 shadow-2xs"
-                      : "text-slate-600 hover:text-slate-900"
-                  }`}
-                >
-                  <Layers className="w-3 h-3" />
-                  <span>Đơn hàng</span>
+                  <Box className="w-3.5 h-3.5 text-slate-800" />
+                  <span>1 Sản phẩm lẻ (SKU)</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => {
                     setQuoteScope("collection");
                     setCollectionType("collection");
+                    if (!projectName || projectName.includes("Vinhomes")) {
+                      setProjectName("Bộ sưu tập sản phẩm xuất khẩu");
+                    }
                     showToast("Đã chọn chế độ: Bộ sưu tập sản phẩm (Catalog Matrix)", "info");
                   }}
-                  className={`px-2.5 py-1 rounded-md font-semibold text-xs transition cursor-pointer flex items-center gap-1 ${
+                  className={`px-3 py-1 rounded-md font-semibold text-xs transition cursor-pointer flex items-center gap-1.5 ${
                     quoteScope === "collection"
                       ? "bg-white text-zinc-900 shadow-2xs"
                       : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
-                  <Sparkles className="w-3 h-3" />
-                  <span>Bộ sưu tập (Catalog)</span>
+                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Bộ sưu tập (Catalog Sỉ)</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => {
                     setQuoteScope("room_package");
                     setCollectionType("project");
+                    if (!projectName) {
+                      setProjectName("Công trình hoàn thiện nội thất");
+                    }
                     showToast("Đã chọn chế độ: Dự án công trình (theo phòng / khu vực)", "info");
                   }}
-                  className={`px-2.5 py-1 rounded-md font-semibold text-xs transition cursor-pointer flex items-center gap-1 ${
+                  className={`px-3 py-1 rounded-md font-semibold text-xs transition cursor-pointer flex items-center gap-1.5 ${
                     quoteScope === "room_package"
                       ? "bg-white text-zinc-900 shadow-2xs"
                       : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
-                  <Building2 className="w-3 h-3" />
+                  <Building2 className="w-3.5 h-3.5 text-sky-600" />
                   <span>Dự án công trình</span>
                 </button>
               </div>
@@ -1794,7 +1863,7 @@ function QuotingWorkspace() {
               <button
                 type="button"
                 onClick={handleLoadDemoData}
-                title="Nạp nhanh 3 sản phẩm mẫu căn hộ để xem trước quy trình tính giá"
+                title="Nạp nhanh sản phẩm mẫu để xem trước quy trình tính giá"
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-md transition cursor-pointer"
               >
                 <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
@@ -1821,44 +1890,149 @@ function QuotingWorkspace() {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <input
-                type="text"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                placeholder={
-                  quoteScope === "single_item"
-                    ? "Nhập tên sản phẩm / mã SKU cần báo giá..."
-                    : quoteScope === "order_list"
-                    ? "Nhập tên đơn hàng / đơn mua sắm..."
-                    : quoteScope === "collection"
-                    ? "Nhập tên bộ sưu tập / dòng sản phẩm..."
-                    : "Nhập tên công trình / căn hộ / dự án..."
-                }
-                className="text-xl sm:text-2xl font-bold text-slate-900 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-slate-900 focus:outline-none transition min-w-[280px]"
-              />
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-3">
+                <input
+                  type="text"
+                  value={
+                    quoteScope === "single_item"
+                      ? activeProduct.name
+                      : projectName
+                  }
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (quoteScope === "single_item") {
+                      setProjectProducts((prev) =>
+                        prev.map((p) => (p.id === activeProductId ? { ...p, name: val } : p))
+                      );
+                      setQuestionnaire((prev) => ({ ...prev, name: val }));
+                    } else {
+                      setProjectName(val);
+                    }
+                  }}
+                  placeholder={
+                    quoteScope === "single_item"
+                      ? "Nhập tên sản phẩm / mã SKU cần báo giá..."
+                      : quoteScope === "order_list"
+                      ? "Nhập tên đơn hàng / đơn mua sắm..."
+                      : quoteScope === "collection"
+                      ? "Nhập tên bộ sưu tập / dòng sản phẩm (VD: BST Bàn Ghế Bắc Âu 2026)..."
+                      : "Nhập tên công trình / căn hộ / dự án (VD: Căn hộ 2PN Vinhomes)..."
+                  }
+                  className="text-xl sm:text-2xl font-bold text-slate-900 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-slate-900 focus:outline-none transition min-w-[320px]"
+                />
 
-              {projectStatus === "approved" && (
-                <span className="px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-900 font-semibold text-[11px] flex items-center gap-1 border border-zinc-200">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-zinc-900" />
-                  <span>Đã duyệt hợp đồng</span>
-                </span>
+                {projectStatus === "approved" && (
+                  <span className="px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-900 font-semibold text-[11px] flex items-center gap-1 border border-zinc-200">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-zinc-900" />
+                    <span>Đã duyệt hợp đồng</span>
+                  </span>
+                )}
+
+                {projectStatus === "in_production" && (
+                  <span className="px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-800 font-semibold text-[11px] flex items-center gap-1 border border-indigo-200">
+                    <Wrench className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Đang chạy Lệnh Xưởng</span>
+                  </span>
+                )}
+              </div>
+
+              {/* Dòng tóm tắt quy mô thích ứng ngay dưới tiêu đề */}
+              {quoteScope === "single_item" && (
+                <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                  <span className="text-[11px] font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                    Quy cách: {activeProduct.questionnaire?.dimensions?.widthMm || 1200} × {activeProduct.questionnaire?.dimensions?.depthMm || 600} × {activeProduct.questionnaire?.dimensions?.heightMm || 750} mm • SL: <strong>{activeProduct.qty || 1} cái</strong>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuoteScope("collection");
+                      setCollectionType("collection");
+                      setProjectName("Bộ sưu tập nội thất mới");
+                      showToast("Đã chuyển sang không gian Bộ sưu tập (Catalog)!", "info");
+                    }}
+                    className="text-[11px] font-semibold text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-2 py-0.5 rounded border border-amber-200 transition cursor-pointer flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" />
+                    <span>+ Đưa vào Bộ sưu tập</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuoteScope("room_package");
+                      setCollectionType("project");
+                      setProjectName("Dự án nội thất mới");
+                      showToast("Đã chuyển sang không gian Dự án công trình!", "info");
+                    }}
+                    className="text-[11px] font-semibold text-sky-700 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 px-2 py-0.5 rounded border border-sky-200 transition cursor-pointer flex items-center gap-1"
+                  >
+                    <Building2 className="w-3 h-3" />
+                    <span>+ Đưa vào Dự án công trình</span>
+                  </button>
+                </div>
               )}
 
-              {projectStatus === "in_production" && (
-                <span className="px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-800 font-semibold text-[11px] flex items-center gap-1 border border-indigo-200">
-                  <Wrench className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>Đang chạy Lệnh Xưởng</span>
-                </span>
+              {quoteScope === "collection" && (
+                <div className="flex items-center gap-2 pt-0.5">
+                  <span className="text-[11px] font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                    Bộ sưu tập sỉ • {projectProducts.length} mẫu sản phẩm • Tổng giá trị niêm yết: <strong className="text-slate-900 font-bold">{formatPriceDual(projectTotals.totalQuote)}</strong>
+                  </span>
+                </div>
+              )}
+
+              {quoteScope === "room_package" && (
+                <div className="flex items-center gap-2 pt-0.5">
+                  <span className="text-[11px] font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                    Công trình hoàn thiện • {projectProducts.length} hạng mục • Tổng dự toán: <strong className="text-slate-900 font-bold">{formatPriceDual(projectTotals.totalQuote)}</strong>
+                  </span>
+                </div>
               )}
             </div>
           </div>
 
+          {/* Nhóm nút tác vụ & Bộ chuyển đổi tiền tệ */}
           <div className="flex flex-wrap items-center gap-2">
+            {/* Bộ chuyển đổi tiền tệ VNĐ / USD + VNĐ (BUG-08 Fix) */}
+            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+              <button
+                type="button"
+                onClick={() => setCurrencyMode("VND")}
+                className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer ${
+                  currencyMode === "VND"
+                    ? "bg-white text-slate-900 shadow-2xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                VNĐ
+              </button>
+              <button
+                type="button"
+                onClick={() => setCurrencyMode("USD_VND")}
+                className={`px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 cursor-pointer ${
+                  currencyMode === "USD_VND"
+                    ? "bg-white text-slate-900 shadow-2xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <span>USD + VNĐ</span>
+              </button>
+              {currencyMode === "USD_VND" && (
+                <div className="flex items-center gap-1 pl-1 border-l border-slate-200">
+                  <span className="text-[10px] text-slate-500 font-mono">1$ =</span>
+                  <input
+                    type="number"
+                    value={usdRate}
+                    onChange={(e) => setUsdRate(Math.max(1, parseInt(e.target.value) || 25000))}
+                    className="w-16 px-1.5 py-0.5 bg-white border border-slate-300 rounded font-mono font-bold text-slate-900 text-[11px]"
+                  />
+                </div>
+              )}
+            </div>
+
             {saveSuccess && (
               <span className="text-xs font-semibold text-zinc-900 bg-zinc-100 px-3 py-1.5 rounded-xl border border-zinc-200 flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Đã lưu vào danh sách dự án!</span>
+                <span>Đã lưu!</span>
               </span>
             )}
 
@@ -1870,16 +2044,16 @@ function QuotingWorkspace() {
                 className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition cursor-pointer"
               >
                 <Copy className="w-3.5 h-3.5 text-slate-500" />
-                <span>Nhân bản báo giá</span>
+                <span>Nhân bản</span>
               </button>
             )}
 
             <button
               onClick={handleSaveProject}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition cursor-pointer"
             >
               <Save className="w-3.5 h-3.5" />
-              <span>Lưu dự án</span>
+              <span>Lưu</span>
             </button>
 
             <button
@@ -1900,7 +2074,6 @@ function QuotingWorkspace() {
             </button>
           </div>
         </div>
-
         {/* Thông tin khách hàng & Markup Slider */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3 border-t border-slate-100 text-xs">
           <div>
@@ -2576,7 +2749,7 @@ function QuotingWorkspace() {
                   </div>
                 </div>
 
-                {/* KHỐI 2: VẬT LIỆU & KẾT CẤU CHỦ LỰC (* BẮT BUỘC) */}
+                {/* KHỐI 2: VẬT LIỆU & KẾT CẤU CHỦ LỰC (UNIVERSAL COMPOSABLE ENGINE) */}
                 <div className="bg-white rounded-lg border border-slate-200 p-5 shadow-2xs space-y-4">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                     <div className="flex items-center gap-2">
@@ -2584,539 +2757,19 @@ function QuotingWorkspace() {
                         2
                       </span>
                       <h3 className="font-semibold text-slate-900 text-xs tracking-tight">
-                        Vật liệu &amp; Kết cấu chủ lực (* Bắt buộc)
+                        Vật liệu &amp; Kết cấu chủ lực (Lắp ghép Mô-đun Vật lý)
                       </h3>
                     </div>
-                    <span className="text-[11px] text-slate-500">Vật liệu chính cấu thành sản phẩm</span>
+                    <span className="text-[11px] text-slate-500">
+                      Bật/tắt 6 khối cấu tạo • Phối đa vật liệu • Tự động tính toán theo hình học
+                    </span>
                   </div>
 
-                  {/* Cốt ván & Bề mặt */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <label className="text-xs font-semibold text-slate-700 block">
-                          Cốt vật liệu thùng &amp; đợt:
-                        </label>
-                      </div>
-                      <select
-                        value={isCustomCore ? "CUSTOM" : questionnaire.materials.coreCode}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val === "CUSTOM") {
-                            setIsCustomCore(true);
-                          } else {
-                            setIsCustomCore(false);
-                            setQuestionnaire((prev) => ({
-                              ...prev,
-                              materials: { ...prev.materials, coreCode: val },
-                            }));
-                          }
-                        }}
-                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-md text-xs font-medium text-slate-900 focus:outline-none focus:border-slate-900"
-                      >
-                        <optgroup label="Gỗ Công Nghiệp Hiện Đại">
-                          <option value="MDF_17_CHONG_AM">MDF chống ẩm lõi xanh HMR 17mm</option>
-                          <option value="MDF_6_HAU">MDF hậu 6mm chống ẩm</option>
-                          <option value="MDF_17_JUMBO">MDF khổ lớn Jumbo 1830×2440×17mm</option>
-                          <option value="HDF_BLACK_17">HDF siêu chống ẩm Black HDF 17mm</option>
-                          <option value="MFC_18_CHONG_AM">MFC lõi xanh kháng ẩm 18mm</option>
-                          <option value="PLYWOOD_17">Plywood Birch / Bạch Dương kháng nước 17mm</option>
-                        </optgroup>
-                        <optgroup label="Ván Nhựa Cao Cấp Chịu Nước 100%">
-                          <option value="PVC_17">Ván nhựa PVC Picomat đặc chịu nước 100%</option>
-                          <option value="WPB_17_CHIU_NUOC">Tấm nhựa WPB An Cường chịu nước tuyệt đối</option>
-                        </optgroup>
-                        <optgroup label="Gỗ Tự Nhiên &amp; Ghép Thanh">
-                          <option value="OAK_NATURAL">Gỗ tự nhiên Sồi Mỹ (Oak) xẻ sấy</option>
-                          <option value="WALNUT_NATURAL">Gỗ Óc Chó (Walnut) Bắc Mỹ vân Nu</option>
-                          <option value="RUBBER_FINGER_18">Gỗ Cao Su ghép thanh loại A 18mm</option>
-                          <option value="ASH_NATURAL">Gỗ Tần Bì (Ash) tự nhiên</option>
-                        </optgroup>
-                        <optgroup label="Khung Kim Loại &amp; Nhôm Kính">
-                          <option value="SLIM_ALU_FRAME">Khung nhôm hệ Slim định hình Anodized</option>
-                          <option value="STEEL_FRAME">Khung sắt hộp sơn tĩnh điện / Inox 304</option>
-                        </optgroup>
-                        {workshopBoardMaterials.length > 0 && (
-                          <optgroup label="Từ Thư Viện Đơn Giá Của Xưởng">
-                            {workshopBoardMaterials.map((mat) => (
-                              <option key={mat.id} value={mat.code}>
-                                {mat.name} ({mat.unitPrice.toLocaleString("vi-VN")} đ/{mat.unit})
-                              </option>
-                            ))}
-                          </optgroup>
-                        )}
-                        <optgroup label="Tùy Chọn Khác">
-                          <option value="CUSTOM">Tự nhập mã/tên vật tư tùy chỉnh...</option>
-                        </optgroup>
-                      </select>
-
-                      {isCustomCore && (
-                        <div className="mt-2">
-                          <input
-                            type="text"
-                            placeholder="Nhập mã hoặc tên vật liệu cốt..."
-                            value={questionnaire.materials.coreCode}
-                            onChange={(e) =>
-                              setQuestionnaire((prev) => ({
-                                ...prev,
-                                materials: { ...prev.materials, coreCode: e.target.value },
-                              }))
-                            }
-                            className="w-full p-2 bg-white border border-slate-300 rounded-md text-xs font-medium text-slate-900 focus:outline-none focus:border-slate-900"
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <label className="text-xs font-semibold text-slate-700 block">
-                          Bề mặt cánh &amp; mặt tiền:
-                        </label>
-                        <span className="text-[10px] text-slate-500 font-mono">Hoàn thiện</span>
-                      </div>
-                      <select
-                        value={isCustomSurface ? "CUSTOM" : questionnaire.materials.surfaceCode}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val === "CUSTOM") {
-                            setIsCustomSurface(true);
-                          } else {
-                            setIsCustomSurface(false);
-                            setQuestionnaire((prev) => ({
-                              ...prev,
-                              materials: { ...prev.materials, surfaceCode: val },
-                            }));
-                          }
-                        }}
-                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-md text-xs font-medium text-slate-900 focus:outline-none focus:border-slate-900"
-                      >
-                        <optgroup label="Bề Mặt Gỗ Công Nghiệp">
-                          <option value="Melamine">Phủ Melamine 2 mặt chống trầy</option>
-                          <option value="Acrylic">Cánh phủ Acrylic bóng gương No Line</option>
-                          <option value="Laminate">Phủ Laminate Kingdom / Formica chống trầy</option>
-                          <option value="Son2K">Sơn bệt men mờ 2K chống ố vàng</option>
-                        </optgroup>
-                        <optgroup label="Cánh Kính Khung Nhôm Slim">
-                          <option value="CanhKinh_Tra">Cánh Kính Khung Nhôm Slim - Kính Trà 5mm</option>
-                          <option value="CanhKinh_Khoi">Cánh Kính Khung Nhôm Slim - Kính Xám Khói</option>
-                          <option value="CanhKinh_Fluted">Cánh Kính Khung Nhôm Slim - Kính Sọc Fluted</option>
-                          <option value="CanhKinh_Trong">Cánh Kính Khung Nhôm Slim - Kính Siêu Trong</option>
-                        </optgroup>
-                        <optgroup label="Gỗ Tự Nhiên &amp; Mộc Mạc">
-                          <option value="Veneer">Phủ Veneer Sồi / Óc chó sơn PU mờ</option>
-                          <option value="SonInchem">Sơn PU Inchem 5 lớp cao cấp tiêu chuẩn Mỹ</option>
-                          <option value="LauDau_Rubio">Hoàn thiện lau dầu dưỡng gỗ mộc cao cấp</option>
-                          <option value="CanhLongMay">Cánh khung gỗ lồng mây mắt cáo tự nhiên</option>
-                        </optgroup>
-                        <optgroup label="Bọc Da &amp; Bọc Nệm">
-                          <option value="BocDa_Microfiber">Bọc Da Bò Nhân Tạo Microfiber cao cấp</option>
-                          <option value="BocVai_Ni">Bọc Vải Nỉ Nhung Tuyết / Vải Bố Hàn Quốc</option>
-                        </optgroup>
-                        <optgroup label="Tân Cổ Điển Soi Pano">
-                          <option value="Pano_CNC">Cánh phay Pano CNC sơn 2K tân cổ điển</option>
-                        </optgroup>
-                        <optgroup label="Tùy Chọn Khác">
-                          <option value="CUSTOM">Tự nhập bề mặt / hoàn thiện tùy chỉnh...</option>
-                        </optgroup>
-                      </select>
-
-                      {isCustomSurface && (
-                        <div className="mt-2">
-                          <input
-                            type="text"
-                            placeholder="Nhập tên hoặc quy cách bề mặt hoàn thiện..."
-                            value={questionnaire.materials.surfaceCode}
-                            onChange={(e) =>
-                              setQuestionnaire((prev) => ({
-                                ...prev,
-                                materials: { ...prev.materials, surfaceCode: e.target.value },
-                              }))
-                            }
-                            className="w-full p-2 bg-white border border-slate-300 rounded-md text-xs font-medium text-slate-900 focus:outline-none focus:border-slate-900"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* 5 CÂU HỎI THÀNH PHẦN KẾT CẤU ĐẶC THÙ */}
-                  <div className="space-y-3 pt-2">
-                    <label className="text-xs font-semibold text-slate-700 block">
-                      Thành phần kết cấu &amp; vật liệu phụ trợ:
-                    </label>
-
-                    {/* Câu 1: Mặt đá */}
-                    <div className="p-3 rounded-lg border border-slate-200 bg-slate-50/50 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <span className="text-xs font-medium text-slate-900 block">Mặt đá tự nhiên / nhân tạo (0% OH)</span>
-                          <span className="text-[11px] text-slate-500 block">
-                            Đá Vicostone, Granite hoặc sứ nung kết (Mua đứt, không tính OH xưởng)
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-1 bg-white p-1 rounded-md border border-slate-200">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setQuestionnaire((prev) => ({
-                                ...prev,
-                                materials: { ...prev.materials, hasStone: false },
-                              }))
-                            }
-                            className={`px-3 py-1 text-xs font-medium rounded transition cursor-pointer ${
-                              !questionnaire.materials.hasStone
-                                ? "bg-slate-900 text-white"
-                                : "text-slate-500 hover:text-slate-900"
-                            }`}
-                          >
-                            Không
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setQuestionnaire((prev) => ({
-                                ...prev,
-                                materials: { ...prev.materials, hasStone: true },
-                              }))
-                            }
-                            className={`px-3 py-1 text-xs font-medium rounded transition cursor-pointer ${
-                              questionnaire.materials.hasStone
-                                ? "bg-slate-900 text-white shadow-xs"
-                                : "text-slate-500 hover:text-slate-900"
-                            }`}
-                          >
-                            Có
-                          </button>
-                        </div>
-                      </div>
-
-                      {questionnaire.materials.hasStone && (
-                        <div className="p-3 bg-zinc-50 rounded-lg border border-zinc-200 mt-2 space-y-2">
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                            <div>
-                              <label className="text-[11px] font-bold text-zinc-700 block mb-1">Chủng loại đá:</label>
-                              <select
-                                value={questionnaire.materials.stoneType || "vicostone"}
-                                onChange={(e) =>
-                                  setQuestionnaire((prev) => ({
-                                    ...prev,
-                                    materials: { ...prev.materials, stoneType: e.target.value },
-                                  }))
-                                }
-                                className="w-full p-1.5 bg-white border border-zinc-300 rounded text-xs font-sans"
-                              >
-                                <option value="vicostone">Đá Vicostone thạch anh nhân tạo cao cấp</option>
-                                <option value="white_ceramic">Đá trắng sứ nhân tạo vân mây chống ố</option>
-                                <option value="black_galaxy">Đá Granite Kim sa trung tự nhiên</option>
-                              </select>
-                            </div>
-                            <div>
-                              <label className="text-[11px] font-bold text-zinc-700 block mb-1">Gia công cạnh mòi:</label>
-                              <select
-                                value={stoneEdge}
-                                onChange={(e) => setStoneEdge(e.target.value as any)}
-                                className="w-full p-1.5 bg-white border border-zinc-300 rounded text-xs font-sans"
-                              >
-                                <option value="bevel_45">Vát mòi 45° ghép liền khối (sang trọng)</option>
-                                <option value="round_r">Bo tròn R5 cạnh đá</option>
-                                <option value="flat">Mài vát mép thẳng tiêu chuẩn</option>
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Câu 2: Kính / Cánh kính khung nhôm */}
-                    <div className="p-3 rounded-lg border border-slate-200 bg-slate-50/50 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <span className="text-xs font-medium text-slate-900 block">Kính cường lực / cánh kính khung nhôm</span>
-                          <span className="text-[11px] text-slate-500 block">Kính 5mm/8mm hoặc nhôm hệ Slim nội thất</span>
-                        </div>
-
-                        <div className="flex items-center gap-1 bg-white p-1 rounded-md border border-slate-200">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setQuestionnaire((prev) => ({
-                                ...prev,
-                                materials: { ...prev.materials, hasGlass: false },
-                              }))
-                            }
-                            className={`px-3 py-1 text-xs font-medium rounded transition cursor-pointer ${
-                              !questionnaire.materials.hasGlass
-                                ? "bg-slate-900 text-white"
-                                : "text-slate-500 hover:text-slate-900"
-                            }`}
-                          >
-                            Không
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setQuestionnaire((prev) => ({
-                                ...prev,
-                                materials: { ...prev.materials, hasGlass: true },
-                              }))
-                            }
-                            className={`px-3 py-1 text-xs font-medium rounded transition cursor-pointer ${
-                              questionnaire.materials.hasGlass
-                                ? "bg-slate-900 text-white shadow-xs"
-                                : "text-slate-500 hover:text-slate-900"
-                            }`}
-                          >
-                            Có
-                          </button>
-                        </div>
-                      </div>
-
-                      {questionnaire.materials.hasGlass && (
-                        <div className="p-3 bg-zinc-50 rounded-lg border border-zinc-200 mt-2 space-y-2">
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                            <div>
-                              <label className="text-[11px] font-bold text-zinc-700 block mb-1">Khung nhôm định hình:</label>
-                              <select
-                                value={glassFrame}
-                                onChange={(e) => setGlassFrame(e.target.value as any)}
-                                className="w-full p-1.5 bg-white border border-zinc-300 rounded text-xs font-sans"
-                              >
-                                <option value="slim_16">Nhôm Anode Slim 16mm (Hàn góc siêu mỏng)</option>
-                                <option value="standard_20">Nhôm hệ 20mm tiêu chuẩn</option>
-                              </select>
-                            </div>
-                            <div>
-                              <label className="text-[11px] font-bold text-zinc-700 block mb-1">Quy cách kính:</label>
-                              <select
-                                value={glassColor}
-                                onChange={(e) => setGlassColor(e.target.value as any)}
-                                className="w-full p-1.5 bg-white border border-zinc-300 rounded text-xs font-sans"
-                              >
-                                <option value="smoke">Kính tôi nhiệt 5mm màu xám khói</option>
-                                <option value="tea">Kính tôi nhiệt 5mm màu trà</option>
-                                <option value="ultra_clear">Kính siêu trong 8mm tôi nhiệt</option>
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Câu 3: Khung kim loại sắt sơn / inox */}
-                    <div className="p-3 rounded-lg border border-slate-200 bg-slate-50/50 flex items-center justify-between">
-                      <div>
-                        <span className="text-xs font-medium text-slate-900 block">Khung kim loại (sắt sơn tĩnh điện / inox PVD)</span>
-                        <span className="text-[11px] text-slate-500 block">Chân bàn làm việc, giá treo quần áo hoặc vách ngăn</span>
-                      </div>
-
-                      <div className="flex items-center gap-1 bg-white p-1 rounded-md border border-slate-200">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setQuestionnaire((prev) => ({
-                              ...prev,
-                              materials: { ...prev.materials, hasMetal: false },
-                            }))
-                          }
-                          className={`px-3 py-1 text-xs font-medium rounded transition cursor-pointer ${
-                            !questionnaire.materials.hasMetal
-                              ? "bg-slate-900 text-white"
-                              : "text-slate-500 hover:text-slate-900"
-                          }`}
-                        >
-                          Không
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setQuestionnaire((prev) => ({
-                              ...prev,
-                              materials: { ...prev.materials, hasMetal: true },
-                            }))
-                          }
-                          className={`px-3 py-1 text-xs font-medium rounded transition cursor-pointer ${
-                            questionnaire.materials.hasMetal
-                              ? "bg-slate-900 text-white shadow-xs"
-                              : "text-slate-500 hover:text-slate-900"
-                          }`}
-                        >
-                          Có
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Câu 4: Bọc nệm / Da / Vải / Mây */}
-                    <div className="p-3 rounded-lg border border-slate-200 bg-slate-50/50 flex items-center justify-between">
-                      <div>
-                        <span className="text-xs font-medium text-slate-900 block">Bọc nệm, da, nỉ hoặc mây mắt cáo</span>
-                        <span className="text-[11px] text-slate-500 block">Đầu giường bọc da microfiber, cánh tủ đan mây</span>
-                      </div>
-
-                      <div className="flex items-center gap-1 bg-white p-1 rounded-md border border-slate-200">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setQuestionnaire((prev) => ({
-                              ...prev,
-                              materials: { ...prev.materials, hasUpholstery: false },
-                            }))
-                          }
-                          className={`px-3 py-1 text-xs font-medium rounded transition cursor-pointer ${
-                            !questionnaire.materials.hasUpholstery
-                              ? "bg-slate-900 text-white"
-                              : "text-slate-500 hover:text-slate-900"
-                          }`}
-                        >
-                          Không
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setQuestionnaire((prev) => ({
-                              ...prev,
-                              materials: { ...prev.materials, hasUpholstery: true },
-                            }))
-                          }
-                          className={`px-3 py-1 text-xs font-medium rounded transition cursor-pointer ${
-                            questionnaire.materials.hasUpholstery
-                              ? "bg-slate-900 text-white shadow-xs"
-                              : "text-slate-500 hover:text-slate-900"
-                          }`}
-                        >
-                          Có
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Câu 5: Đèn LED nội thất */}
-                    <div className="p-3 rounded-lg border border-slate-200 bg-slate-50/50 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <span className="text-xs font-medium text-slate-900 block">Hệ đèn LED nội thất &amp; cảm biến</span>
-                          <span className="text-[11px] text-slate-500 block">Máng nhôm định hình, dây LED 12V, bộ nguồn và cảm ứng</span>
-                        </div>
-
-                        <div className="flex items-center gap-1 bg-white p-1 rounded-md border border-slate-200">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setQuestionnaire((prev) => ({
-                                ...prev,
-                                materials: { ...prev.materials, hasLed: false },
-                              }))
-                            }
-                            className={`px-3 py-1 text-xs font-medium rounded transition cursor-pointer ${
-                              !questionnaire.materials.hasLed
-                                ? "bg-slate-900 text-white"
-                                : "text-slate-500 hover:text-slate-900"
-                            }`}
-                          >
-                            Không
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setQuestionnaire((prev) => ({
-                                ...prev,
-                                materials: { ...prev.materials, hasLed: true },
-                              }))
-                            }
-                            className={`px-3 py-1 text-xs font-medium rounded transition cursor-pointer ${
-                              questionnaire.materials.hasLed
-                                ? "bg-slate-900 text-white shadow-xs"
-                                : "text-slate-500 hover:text-slate-900"
-                            }`}
-                          >
-                            Có
-                          </button>
-                        </div>
-                      </div>
-
-                      {questionnaire.materials.hasLed && (
-                        <div className="p-3 bg-zinc-50 rounded-lg border border-zinc-200 mt-2 space-y-2">
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                            <div>
-                              <label className="text-[11px] font-bold text-zinc-700 block mb-1">Cảm biến đóng ngắt:</label>
-                              <select
-                                value={ledSensor}
-                                onChange={(e) => setLedSensor(e.target.value as any)}
-                                className="w-full p-1.5 bg-white border border-zinc-300 rounded text-xs font-sans"
-                              >
-                                <option value="door">Cảm biến đóng mở cánh (tự sáng khi mở tủ)</option>
-                                <option value="wave">Cảm biến vẫy tay không chạm</option>
-                              </select>
-                            </div>
-                            <div>
-                              <label className="text-[11px] font-bold text-zinc-700 block mb-1">Bộ nguồn hạ áp:</label>
-                              <div className="p-1.5 bg-white border border-zinc-200 rounded text-xs text-zinc-700 font-mono">
-                                Nguồn đũa 12V 60W nhôm tản nhiệt
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Sub-configurator: Phân khúc phụ kiện & Độ khó gia công */}
-                    <div className="p-4 bg-zinc-50 rounded-lg border border-zinc-200 space-y-3">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                        <div>
-                          <label className="text-xs font-bold text-zinc-900 block mb-1">
-                            Phân khúc phụ kiện kim khí (Hardware Tier):
-                          </label>
-                          <div className="grid grid-cols-3 gap-1 bg-white p-1 rounded-md border border-zinc-200">
-                            {[
-                              { id: "standard", label: "Tiêu chuẩn (DTC)" },
-                              { id: "mid", label: "Trung cấp (Hafele)" },
-                              { id: "luxury", label: "Cao cấp (Blum Áo)" },
-                            ].map((tier) => (
-                              <button
-                                key={tier.id}
-                                type="button"
-                                onClick={() => setHardwareTier(tier.id as any)}
-                                className={`py-1 text-[11px] font-bold rounded transition cursor-pointer text-center ${
-                                  hardwareTier === tier.id
-                                    ? "bg-zinc-900 text-white shadow-xs"
-                                    : "text-zinc-600 hover:text-zinc-900"
-                                }`}
-                              >
-                                {tier.label}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="text-xs font-bold text-zinc-900 block mb-1">
-                            Hệ số độ khó gia công (Complexity Multiplier):
-                          </label>
-                          <div className="grid grid-cols-3 gap-1 bg-white p-1 rounded-md border border-zinc-200">
-                            {[
-                              { mult: 1.0, label: "1.0x Tiêu chuẩn", desc: "Cắt thẳng nẹp PVC" },
-                              { mult: 1.25, label: "1.25x Tinh xảo", desc: "Vát mòi 45°, LED âm" },
-                              { mult: 1.5, label: "1.50x May đo XK", desc: "Uốn cong, sơn 2K" },
-                            ].map((item) => (
-                              <button
-                                key={item.mult}
-                                type="button"
-                                onClick={() => setComplexityMultiplier(item.mult)}
-                                className={`py-1 text-[11px] font-bold rounded transition cursor-pointer text-center ${
-                                  complexityMultiplier === item.mult
-                                    ? "bg-zinc-900 text-white shadow-xs"
-                                    : "text-zinc-600 hover:text-zinc-900"
-                                }`}
-                                title={item.desc}
-                              >
-                                {item.label}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <UniversalStructureBlockConfigurator
+                    structure={currentStructure}
+                    onChange={handleUpdateUniversalStructure}
+                    workshopMaterials={workshopBoardMaterials}
+                  />
                 </div>
 
                 {/* KHỐI 3: CHI TIẾT & GHI CHÚ ĐẶC BIỆT */}
