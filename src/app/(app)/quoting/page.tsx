@@ -103,6 +103,16 @@ import {
 import { trackFunnelEvent } from "@/core/monitoring/telemetry";
 import ProductArchetypeSelector from "@/core/components/ProductArchetypeSelector";
 import { PRODUCT_ARCHETYPES_CATALOG, type ProductArchetypeItem } from "@/core/data/productArchetypesCatalog";
+import MaterialCatalogDrawer from "@/core/components/MaterialCatalogDrawer";
+import {
+  SAMPLE_MATERIALS_CATALOG,
+  LABOR_PROCESSES,
+  DEFAULT_MOQ_TIERS,
+  DEFAULT_EXPORT_CONSTANTS,
+  type ExportMaterialItem,
+  type LaborProcessDefinition,
+  type MoqConfigTier,
+} from "@/core/data/exportFurnitureCatalog";
 
 function QuotingWorkspace() {
   const router = useRouter();
@@ -342,6 +352,53 @@ function QuotingWorkspace() {
     showToast("Đã xóa dòng chi phí tự do!");
   };
 
+  // ==========================================================================
+  // SMART EDITABLE BOM & OVERRIDES (BUG-01, BUG-04)
+  // ==========================================================================
+  const [bomOverrides, setBomOverrides] = useState<
+    Record<
+      string,
+      {
+        qty?: number;
+        unitPrice?: number;
+        wasteFactor?: number;
+        name?: string;
+        unit?: string;
+        description?: string;
+        isOverridden?: boolean;
+        isDeleted?: boolean;
+      }
+    >
+  >({});
+  const [extraBOMRows, setExtraBOMRows] = useState<MaterialLaborRow[]>([]);
+  const [catalogDrawerOpen, setCatalogDrawerOpen] = useState(false);
+  const [pickingTargetRowId, setPickingTargetRowId] = useState<string | null>(null);
+
+  // ==========================================================================
+  // 37 LABOR PROCESSES @ 105.000 đ/h & DUAL VIEW (BUG-02)
+  // ==========================================================================
+  const [laborHourlyRate, setLaborHourlyRate] = useState<number>(105_000);
+  const [laborViewMode, setLaborViewMode] = useState<"compact" | "detailed">("compact");
+  const [laborProcessOverrides, setLaborProcessOverrides] = useState<
+    Record<string, { hours?: number; rate?: number }>
+  >({});
+
+  // ==========================================================================
+  // DYNAMIC MOQ TIERS (BUG-03)
+  // ==========================================================================
+  const [moqConfigTiers, setMoqConfigTiers] = useState<MoqConfigTier[]>(DEFAULT_MOQ_TIERS);
+
+  // ==========================================================================
+  // SUB-CONFIGURATORS & COMPLEXITY MULTIPLIER (P1)
+  // ==========================================================================
+  const [complexityMultiplier, setComplexityMultiplier] = useState<number>(1.0);
+  const [hardwareTier, setHardwareTier] = useState<"standard" | "mid" | "luxury">("standard");
+  const [glassFrame, setGlassFrame] = useState<"slim_16" | "standard_20">("slim_16");
+  const [glassColor, setGlassColor] = useState<"smoke" | "tea" | "ultra_clear">("smoke");
+  const [stoneGrade, setStoneGrade] = useState<"artificial_white" | "black_galaxy" | "quartz">("artificial_white");
+  const [stoneEdge, setStoneEdge] = useState<"bevel_45" | "round_r" | "flat">("bevel_45");
+  const [ledSensor, setLedSensor] = useState<"door" | "wave">("door");
+
   // Động cơ tính toán Costing V2 từ Bảng câu hỏi thông số
   const parametricCosting = useMemo<GeneratedCostingResult>(() => {
     return generateCostingFromQuestionnaire(questionnaire, materials, {
@@ -349,6 +406,375 @@ function QuotingWorkspace() {
       roundingStep,
     });
   }, [questionnaire, materials, profitMargin, roundingStep]);
+
+  // ==========================================================================
+  // ACTIVE COSTING: BỘ TÍNH TOÁN HIỆU DỤNG LIÊN THÔNG OVERRIDES (ACTIVE ENGINE)
+  // ==========================================================================
+  const activeCosting = useMemo<GeneratedCostingResult>(() => {
+    // 1. Tính toán BOM hiệu dụng (Effective BOM Rows)
+    const baseRows = parametricCosting.materialsLabor || [];
+    const mappedBaseRows = baseRows
+      .filter((row) => !bomOverrides[row.id]?.isDeleted)
+      .map((row) => {
+        const ovr = bomOverrides[row.id];
+        const qty = ovr?.qty !== undefined ? ovr.qty : row.qty;
+        const unitPrice = ovr?.unitPrice !== undefined ? ovr.unitPrice : row.unitPrice;
+        const wasteFactor = ovr?.wasteFactor !== undefined ? ovr.wasteFactor : row.wasteFactor;
+        const name = ovr?.name || row.name;
+        const unit = ovr?.unit || row.unit;
+        const description = ovr?.description || row.description;
+        const totalAmount = Math.round(qty * unitPrice * wasteFactor);
+        const isOverridden = !!ovr?.isOverridden;
+
+        return {
+          ...row,
+          name,
+          unit,
+          description,
+          qty,
+          unitPrice,
+          wasteFactor,
+          totalAmount,
+          isOverridden,
+          originalAutoValue: {
+            qty: row.qty,
+            unitPrice: row.unitPrice,
+            wasteFactor: row.wasteFactor,
+          },
+        } as MaterialLaborRow & {
+          isOverridden?: boolean;
+          originalAutoValue?: { qty: number; unitPrice: number; wasteFactor: number };
+        };
+      });
+
+    const allBOMRows = [...mappedBaseRows, ...extraBOMRows];
+
+    // 2. Tính toán 37 công đoạn nhân công thực tế (Effective Labor Processes)
+    const w = (questionnaire.dimensions.widthMm || 1800) / 1000;
+    const h = (questionnaire.dimensions.heightMm || 2400) / 1000;
+    const sheets = Math.max(1, Math.ceil((w * h * 2.5 * 1.15) / 2.9768));
+    const drawers = questionnaire.details?.drawerCount || 2;
+
+    const computedLaborProcesses = LABOR_PROCESSES.map((proc) => {
+      let defaultHours = 0;
+      if (proc.code === "CNC" || proc.code === "CNC-MDF") {
+        defaultHours = Number((sheets * 0.45 * complexityMultiplier).toFixed(1));
+      } else if (proc.code === "ASSE" || proc.code === "SUB") {
+        defaultHours = Number(((sheets * 0.75 + drawers * 0.4) * complexityMultiplier).toFixed(1));
+      } else if (proc.code === "SAND") {
+        defaultHours = complexityMultiplier > 1.0 ? 1.5 : 0.8;
+      } else if (proc.code === "SPR") {
+        defaultHours = questionnaire.materials.surfaceCode === "Veneer" || questionnaire.materials.surfaceCode === "Sơn bệt 2K" ? 2.5 : 0;
+      } else if (proc.code === "PAK") {
+        defaultHours = 1.0;
+      } else if (proc.code === "FITTING") {
+        defaultHours = Number((drawers * 0.2 + 0.5).toFixed(1));
+      } else if (proc.code === "UPH" && questionnaire.materials.hasUpholstery) {
+        defaultHours = 3.0;
+      }
+
+      const ovr = laborProcessOverrides[proc.code];
+      const hours = ovr?.hours !== undefined ? ovr.hours : defaultHours;
+      const rate = ovr?.rate !== undefined ? ovr.rate : laborHourlyRate;
+      const totalAmount = Math.round(hours * rate);
+
+      return {
+        ...proc,
+        hours,
+        rate,
+        totalAmount,
+      };
+    });
+
+    const laborCostTotal = computedLaborProcesses.reduce((sum, p) => sum + p.totalAmount, 0);
+
+    // Gom 5 bộ phận chính cho chế độ Rút gọn
+    const deptHours: Record<string, { name: string; hours: number; total: number }> = {
+      carcass: { name: "Pha phôi, Cắt CNC & Dán nẹp", hours: 0, total: 0 },
+      finishing: { name: "Chà nhám, Phun sơn lót & Phủ 2K", hours: 0, total: 0 },
+      upholstery: { name: "Bọc nệm mút, May đo vải da", hours: 0, total: 0 },
+      fitting: { name: "Lắp ráp phụ kiện, Đèn LED & Kính", hours: 0, total: 0 },
+      packing: { name: "Đóng gói bọc PE & Lắp đặt công trình", hours: 0, total: 0 },
+    };
+
+    computedLaborProcesses.forEach((p) => {
+      if (p.code === "CNC" || p.code === "CNC-MDF" || p.group === "RAW" || p.group === "MAC" || p.group === "MDF") {
+        deptHours.carcass.hours += p.hours;
+        deptHours.carcass.total += p.totalAmount;
+      } else if (p.group === "SAS" || p.group === "SPD" || p.code === "SAND" || p.code === "SPR" || p.group === "CMF" || p.group === "FIN") {
+        deptHours.finishing.hours += p.hours;
+        deptHours.finishing.total += p.totalAmount;
+      } else if (p.group === "UPH" || p.code === "LEA") {
+        deptHours.upholstery.hours += p.hours;
+        deptHours.upholstery.total += p.totalAmount;
+      } else if (p.group === "ASSE" || p.group === "FTD" || p.code === "ASSE" || p.code === "FITTING" || p.group === "SUB" || p.group === "DED" || p.group === "DEG") {
+        deptHours.fitting.hours += p.hours;
+        deptHours.fitting.total += p.totalAmount;
+      } else {
+        deptHours.packing.hours += p.hours;
+        deptHours.packing.total += p.totalAmount;
+      }
+    });
+
+    const effectiveLabourDepts: LabourDeptRow[] = [
+      {
+        department: "cnc_cutting",
+        name: deptHours.carcass.name,
+        hours: Number(deptHours.carcass.hours.toFixed(1)),
+        hourlyRate: laborHourlyRate,
+        totalAmount: deptHours.carcass.total,
+      },
+      {
+        department: "sanding_spray",
+        name: deptHours.finishing.name,
+        hours: Number(deptHours.finishing.hours.toFixed(1)),
+        hourlyRate: laborHourlyRate,
+        totalAmount: deptHours.finishing.total,
+      },
+      {
+        department: "assembly",
+        name: deptHours.fitting.name,
+        hours: Number(deptHours.fitting.hours.toFixed(1)),
+        hourlyRate: laborHourlyRate,
+        totalAmount: deptHours.fitting.total,
+      },
+      {
+        department: "packing_install",
+        name: deptHours.packing.name,
+        hours: Number(deptHours.packing.hours.toFixed(1)),
+        hourlyRate: laborHourlyRate,
+        totalAmount: deptHours.packing.total,
+      },
+    ];
+
+    // 3. Tính toán 12 nhóm chi phí theo phân loại chuẩn
+    let stoneSum = 0;
+    let uphSum = 0;
+    let metalFrameSSum = 0;
+    let subContractSum = 0;
+    let woodSum = 0;
+    let metalFramePSum = 0;
+    let glassSum = 0;
+    let chemicalSum = 0;
+    let hardwareSum = 0;
+    let consumablesSum = 0;
+    let packingSum = 0;
+
+    allBOMRows.forEach((row) => {
+      const b = (row.block || "").toLowerCase();
+      if (b.includes("stone")) stoneSum += row.totalAmount;
+      else if (b.includes("upholstery")) uphSum += row.totalAmount;
+      else if (b.includes("metal")) metalFrameSSum += row.totalAmount;
+      else if (b.includes("subcon") || b.includes("acrylic")) subContractSum += row.totalAmount;
+      else if (b.includes("wood") || b.includes("carcass") || b.includes("fronts") || b.includes("backpanel")) woodSum += row.totalAmount;
+      else if (b.includes("glass")) glassSum += row.totalAmount;
+      else if (b.includes("chemical") || b.includes("paint")) chemicalSum += row.totalAmount;
+      else if (b.includes("hardware") || b.includes("hinge") || b.includes("slide") || b.includes("led")) hardwareSum += row.totalAmount;
+      else if (b.includes("consumable") || b.includes("edge") || b.includes("supplies")) consumablesSum += row.totalAmount;
+      else if (b.includes("packing") || b.includes("delivery")) packingSum += row.totalAmount;
+      else woodSum += row.totalAmount;
+    });
+
+    const totalDirectLM =
+      stoneSum +
+      uphSum +
+      metalFrameSSum +
+      subContractSum +
+      woodSum +
+      metalFramePSum +
+      glassSum +
+      chemicalSum +
+      hardwareSum +
+      consumablesSum +
+      packingSum +
+      laborCostTotal;
+
+    // Phân bổ OH
+    const workshopBasis = woodSum + chemicalSum + consumablesSum + hardwareSum + packingSum + laborCostTotal;
+    const ohWorkshopRate = parametricCosting.summary.ohWorkshopRate || 0.25;
+    const ohWorkshopAmount = Math.round(workshopBasis * ohWorkshopRate);
+
+    const subcontractBasis = metalFrameSSum + uphSum + subContractSum + glassSum;
+    const ohSubcontractRate = parametricCosting.summary.ohSubcontractRate || 0.10;
+    const ohSubcontractAmount = Math.round(subcontractBasis * ohSubcontractRate);
+
+    const totalOH = ohWorkshopAmount + ohSubcontractAmount;
+    const cogs = totalDirectLM + totalOH;
+    const effectiveProfitRate = profitMargin >= 1 ? profitMargin - 1 : profitMargin;
+    const profitAmount = Math.round(cogs * effectiveProfitRate);
+    const calculateSalesPrice = cogs + profitAmount;
+
+    // Dự phòng rủi ro theo Mức độ
+    const estLevel = questionnaire.estimationLevel || 2;
+    const contingencyRate = estLevel === 1 ? 0.10 : estLevel === 4 ? 0.0 : 0.05;
+    const contingencyAmount = Math.round(calculateSalesPrice * contingencyRate);
+    const recommendedPrice = calculateSalesPrice + contingencyAmount;
+
+    // Bảng giá MOQ động
+    const moqPrices: Record<number, number> = {};
+    moqConfigTiers.forEach((tier) => {
+      const baseForSurcharge = Math.max(0, calculateSalesPrice - stoneSum);
+      const unitPrice = Math.round(baseForSurcharge * (1 + (tier.surchargePercent || 0) / 100) + stoneSum);
+      moqPrices[tier.moq] = unitPrice;
+    });
+
+    return {
+      ...parametricCosting,
+      materialsLabor: allBOMRows,
+      labourDepts: effectiveLabourDepts,
+      contingencyRate,
+      contingencyAmount,
+      priceRange: {
+        min: Math.round(recommendedPrice * 0.9),
+        max: Math.round(recommendedPrice * 1.15),
+        formatted: `${formatVND(Math.round(recommendedPrice * 0.9))} ~ ${formatVND(Math.round(recommendedPrice * 1.15))}`,
+      },
+      summary: {
+        ...parametricCosting.summary,
+        stone: stoneSum,
+        upholstery: uphSum,
+        metalFrameS: metalFrameSSum,
+        subContract: subContractSum,
+        wood: woodSum,
+        metalFrameP: metalFramePSum,
+        glass: glassSum,
+        chemical: chemicalSum,
+        hardware: hardwareSum,
+        consumables: consumablesSum,
+        packingDelivery: packingSum,
+        laborCostTotal,
+        totalDirectLM,
+        ohWorkshopAmount,
+        ohSubcontractAmount,
+        totalOH,
+        cogs,
+        profitAmount,
+        calculateSalesPrice,
+        moqPrices,
+      },
+    };
+  }, [
+    parametricCosting,
+    bomOverrides,
+    extraBOMRows,
+    laborProcessOverrides,
+    laborHourlyRate,
+    complexityMultiplier,
+    moqConfigTiers,
+    profitMargin,
+    questionnaire.dimensions,
+    questionnaire.materials.surfaceCode,
+    questionnaire.details?.drawerCount,
+    questionnaire.estimationLevel,
+  ]);
+
+  // Handlers for BOM Smart Grid
+  const handleUpdateBOMRow = (id: string, patch: Partial<MaterialLaborRow>) => {
+    setBomOverrides((prev) => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        ...patch,
+        isOverridden: true,
+      },
+    }));
+  };
+
+  const handleResetBOMRow = (id: string) => {
+    setBomOverrides((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+    showToast("Đã khôi phục dòng vật tư về mặc định theo công thức!", "info");
+  };
+
+  const handleDeleteBOMRow = (id: string) => {
+    if (id.startsWith("extra_")) {
+      setExtraBOMRows((prev) => prev.filter((r) => r.id !== id));
+    } else {
+      setBomOverrides((prev) => ({
+        ...prev,
+        [id]: {
+          ...prev[id],
+          isDeleted: true,
+        },
+      }));
+    }
+    showToast("Đã xóa dòng vật tư!", "info");
+  };
+
+  const handleDuplicateBOMRow = (row: MaterialLaborRow) => {
+    const duplicated: MaterialLaborRow = {
+      ...row,
+      id: `extra_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      name: `${row.name} (Bản sao)`,
+    };
+    setExtraBOMRows((prev) => [...prev, duplicated]);
+    showToast(`Đã nhân bản dòng ${row.name}!`, "success");
+  };
+
+  const handleSelectMaterialFromCatalog = (mat: ExportMaterialItem) => {
+    if (pickingTargetRowId && pickingTargetRowId !== "NEW_ROW") {
+      handleUpdateBOMRow(pickingTargetRowId, {
+        name: mat.name,
+        unit: mat.unit,
+        unitPrice: mat.priceVND,
+        wasteFactor: 1 + (mat.waste || 0),
+        description: `Mã VT: ${mat.rmCode || "N/A"} • ${mat.category}${mat.subCategory ? ` / ${mat.subCategory}` : ""}`,
+      });
+      showToast(`Đã áp dụng vật tư: ${mat.name}!`, "success");
+    } else {
+      const newRow: MaterialLaborRow = {
+        id: `extra_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        block: mat.category === "WOOD" || mat.category === "BOARD" || mat.category === "PLYWOOD" ? "Wood" : mat.category === "STONE" ? "Stone" : mat.category === "HARDWARE" ? "Hardware" : "Consumables",
+        name: mat.name,
+        description: `Mã VT: ${mat.rmCode || "N/A"} • ${mat.category}`,
+        qty: 1,
+        unit: mat.unit,
+        unitPrice: mat.priceVND,
+        wasteFactor: 1 + (mat.waste || 0),
+        totalAmount: Math.round(1 * mat.priceVND * (1 + (mat.waste || 0))),
+      };
+      setExtraBOMRows((prev) => [...prev, newRow]);
+      showToast(`Đã chèn vật tư mới: ${mat.name}!`, "success");
+    }
+    setPickingTargetRowId(null);
+  };
+
+  // Handlers for MOQ Tiers
+  const handleAddMoqTier = () => {
+    const nextMoq = (moqConfigTiers[moqConfigTiers.length - 1]?.moq || 20) + 10;
+    setMoqConfigTiers((prev) => [
+      ...prev,
+      { moq: nextMoq, surchargePercent: 0 },
+    ]);
+  };
+
+  const handleUpdateMoqTier = (index: number, patch: Partial<MoqConfigTier>) => {
+    setMoqConfigTiers((prev) =>
+      prev.map((t, idx) => (idx === index ? { ...t, ...patch } : t))
+    );
+  };
+
+  const handleDeleteMoqTier = (index: number) => {
+    if (moqConfigTiers.length <= 1) {
+      showToast("Cần giữ ít nhất 1 bậc MOQ!", "error");
+      return;
+    }
+    setMoqConfigTiers((prev) => prev.filter((_, idx) => idx !== index));
+  };
+
+  // Handlers for 37 Labor Processes
+  const handleUpdateLaborProcess = (code: string, patch: { hours?: number; rate?: number }) => {
+    setLaborProcessOverrides((prev) => ({
+      ...prev,
+      [code]: {
+        ...prev[code],
+        ...patch,
+      },
+    }));
+  };
 
   // Danh sách sản phẩm tương tự từ lịch sử dự án
   const similarHistoryItems: SimilarProjectItem[] = useMemo(() => {
@@ -1391,12 +1817,13 @@ function QuotingWorkspace() {
             onClick={toggleAdvancedMode}
             className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition border cursor-pointer ${
               advancedMode
-                ? "bg-slate-900 text-white border-slate-800 shadow-xs"
-                : "bg-white text-slate-600 hover:bg-slate-50 border-slate-200"
+                ? "bg-zinc-900 text-white border-zinc-800 shadow-xs"
+                : "bg-white text-zinc-700 hover:bg-zinc-50 border-zinc-200"
             }`}
+            title="Bật để mở khóa 37 công đoạn nhân công và phân tầng Overhead chuyên sâu"
           >
             <Sliders className="w-3.5 h-3.5" />
-            <span>Chế độ kỹ thuật chi tiết: {advancedMode ? "BẬT" : "TẮT"}</span>
+            <span>Chế độ nâng cao (Advanced Mode): <strong className={advancedMode ? "text-white" : "text-zinc-900"}>{advancedMode ? "BẬT" : "TẮT"}</strong></span>
           </button>
         </div>
 
@@ -1972,67 +2399,115 @@ function QuotingWorkspace() {
                       </div>
 
                       {questionnaire.materials.hasStone && (
-                        <div className="pt-2 border-t border-slate-200 flex items-center gap-2">
-                          <span className="text-[11px] font-medium text-slate-600 shrink-0">Chủng loại đá:</span>
-                          <select
-                            value={questionnaire.materials.stoneType || "vicostone"}
-                            onChange={(e) =>
-                              setQuestionnaire((prev) => ({
-                                ...prev,
-                                materials: { ...prev.materials, stoneType: e.target.value },
-                              }))
-                            }
-                            className="p-1.5 bg-white border border-slate-200 rounded-md text-xs font-medium text-slate-800 focus:outline-none w-full"
-                          >
-                            <option value="vicostone">Đá Vicostone thạch anh nhân tạo cao cấp</option>
-                            <option value="white_ceramic">Đá trắng sứ nhân tạo vân mây chống ố</option>
-                            <option value="black_galaxy">Đá Granite Kim sa trung tự nhiên</option>
-                          </select>
+                        <div className="p-3 bg-zinc-50 rounded-lg border border-zinc-200 mt-2 space-y-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                            <div>
+                              <label className="text-[11px] font-bold text-zinc-700 block mb-1">Chủng loại đá:</label>
+                              <select
+                                value={questionnaire.materials.stoneType || "vicostone"}
+                                onChange={(e) =>
+                                  setQuestionnaire((prev) => ({
+                                    ...prev,
+                                    materials: { ...prev.materials, stoneType: e.target.value },
+                                  }))
+                                }
+                                className="w-full p-1.5 bg-white border border-zinc-300 rounded text-xs font-sans"
+                              >
+                                <option value="vicostone">Đá Vicostone thạch anh nhân tạo cao cấp</option>
+                                <option value="white_ceramic">Đá trắng sứ nhân tạo vân mây chống ố</option>
+                                <option value="black_galaxy">Đá Granite Kim sa trung tự nhiên</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="text-[11px] font-bold text-zinc-700 block mb-1">Gia công cạnh mòi:</label>
+                              <select
+                                value={stoneEdge}
+                                onChange={(e) => setStoneEdge(e.target.value as any)}
+                                className="w-full p-1.5 bg-white border border-zinc-300 rounded text-xs font-sans"
+                              >
+                                <option value="bevel_45">Vát mòi 45° ghép liền khối (sang trọng)</option>
+                                <option value="round_r">Bo tròn R5 cạnh đá</option>
+                                <option value="flat">Mài vát mép thẳng tiêu chuẩn</option>
+                              </select>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>
 
                     {/* Câu 2: Kính / Cánh kính khung nhôm */}
-                    <div className="p-3 rounded-lg border border-slate-200 bg-slate-50/50 flex items-center justify-between">
-                      <div>
-                        <span className="text-xs font-medium text-slate-900 block">Kính cường lực / cánh kính khung nhôm</span>
-                        <span className="text-[11px] text-slate-500 block">Kính 5mm/8mm hoặc nhôm hệ Slim nội thất</span>
+                    <div className="p-3 rounded-lg border border-slate-200 bg-slate-50/50 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="text-xs font-medium text-slate-900 block">Kính cường lực / cánh kính khung nhôm</span>
+                          <span className="text-[11px] text-slate-500 block">Kính 5mm/8mm hoặc nhôm hệ Slim nội thất</span>
+                        </div>
+
+                        <div className="flex items-center gap-1 bg-white p-1 rounded-md border border-slate-200">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setQuestionnaire((prev) => ({
+                                ...prev,
+                                materials: { ...prev.materials, hasGlass: false },
+                              }))
+                            }
+                            className={`px-3 py-1 text-xs font-medium rounded transition cursor-pointer ${
+                              !questionnaire.materials.hasGlass
+                                ? "bg-slate-900 text-white"
+                                : "text-slate-500 hover:text-slate-900"
+                            }`}
+                          >
+                            Không
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setQuestionnaire((prev) => ({
+                                ...prev,
+                                materials: { ...prev.materials, hasGlass: true },
+                              }))
+                            }
+                            className={`px-3 py-1 text-xs font-medium rounded transition cursor-pointer ${
+                              questionnaire.materials.hasGlass
+                                ? "bg-slate-900 text-white shadow-xs"
+                                : "text-slate-500 hover:text-slate-900"
+                            }`}
+                          >
+                            Có
+                          </button>
+                        </div>
                       </div>
 
-                      <div className="flex items-center gap-1 bg-white p-1 rounded-md border border-slate-200">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setQuestionnaire((prev) => ({
-                              ...prev,
-                              materials: { ...prev.materials, hasGlass: false },
-                            }))
-                          }
-                          className={`px-3 py-1 text-xs font-medium rounded transition cursor-pointer ${
-                            !questionnaire.materials.hasGlass
-                              ? "bg-slate-900 text-white"
-                              : "text-slate-500 hover:text-slate-900"
-                          }`}
-                        >
-                          Không
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setQuestionnaire((prev) => ({
-                              ...prev,
-                              materials: { ...prev.materials, hasGlass: true },
-                            }))
-                          }
-                          className={`px-3 py-1 text-xs font-medium rounded transition cursor-pointer ${
-                            questionnaire.materials.hasGlass
-                              ? "bg-slate-900 text-white shadow-xs"
-                              : "text-slate-500 hover:text-slate-900"
-                          }`}
-                        >
-                          Có
-                        </button>
-                      </div>
+                      {questionnaire.materials.hasGlass && (
+                        <div className="p-3 bg-zinc-50 rounded-lg border border-zinc-200 mt-2 space-y-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                            <div>
+                              <label className="text-[11px] font-bold text-zinc-700 block mb-1">Khung nhôm định hình:</label>
+                              <select
+                                value={glassFrame}
+                                onChange={(e) => setGlassFrame(e.target.value as any)}
+                                className="w-full p-1.5 bg-white border border-zinc-300 rounded text-xs font-sans"
+                              >
+                                <option value="slim_16">Nhôm Anode Slim 16mm (Hàn góc siêu mỏng)</option>
+                                <option value="standard_20">Nhôm hệ 20mm tiêu chuẩn</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="text-[11px] font-bold text-zinc-700 block mb-1">Quy cách kính:</label>
+                              <select
+                                value={glassColor}
+                                onChange={(e) => setGlassColor(e.target.value as any)}
+                                className="w-full p-1.5 bg-white border border-zinc-300 rounded text-xs font-sans"
+                              >
+                                <option value="smoke">Kính tôi nhiệt 5mm màu xám khói</option>
+                                <option value="tea">Kính tôi nhiệt 5mm màu trà</option>
+                                <option value="ultra_clear">Kính siêu trong 8mm tôi nhiệt</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Câu 3: Khung kim loại sắt sơn / inox */}
@@ -2122,45 +2597,129 @@ function QuotingWorkspace() {
                     </div>
 
                     {/* Câu 5: Đèn LED nội thất */}
-                    <div className="p-3 rounded-lg border border-slate-200 bg-slate-50/50 flex items-center justify-between">
-                      <div>
-                        <span className="text-xs font-medium text-slate-900 block">Hệ đèn LED nội thất &amp; cảm biến vẫy tay</span>
-                        <span className="text-[11px] text-slate-500 block">Máng nhôm định hình, dây LED 12V, bộ nguồn và cảm ứng</span>
+                    <div className="p-3 rounded-lg border border-slate-200 bg-slate-50/50 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="text-xs font-medium text-slate-900 block">Hệ đèn LED nội thất &amp; cảm biến</span>
+                          <span className="text-[11px] text-slate-500 block">Máng nhôm định hình, dây LED 12V, bộ nguồn và cảm ứng</span>
+                        </div>
+
+                        <div className="flex items-center gap-1 bg-white p-1 rounded-md border border-slate-200">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setQuestionnaire((prev) => ({
+                                ...prev,
+                                materials: { ...prev.materials, hasLed: false },
+                              }))
+                            }
+                            className={`px-3 py-1 text-xs font-medium rounded transition cursor-pointer ${
+                              !questionnaire.materials.hasLed
+                                ? "bg-slate-900 text-white"
+                                : "text-slate-500 hover:text-slate-900"
+                            }`}
+                          >
+                            Không
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setQuestionnaire((prev) => ({
+                                ...prev,
+                                materials: { ...prev.materials, hasLed: true },
+                              }))
+                            }
+                            className={`px-3 py-1 text-xs font-medium rounded transition cursor-pointer ${
+                              questionnaire.materials.hasLed
+                                ? "bg-slate-900 text-white shadow-xs"
+                                : "text-slate-500 hover:text-slate-900"
+                            }`}
+                          >
+                            Có
+                          </button>
+                        </div>
                       </div>
 
-                      <div className="flex items-center gap-1 bg-white p-1 rounded-md border border-slate-200">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setQuestionnaire((prev) => ({
-                              ...prev,
-                              materials: { ...prev.materials, hasLed: false },
-                            }))
-                          }
-                          className={`px-3 py-1 text-xs font-medium rounded transition cursor-pointer ${
-                            !questionnaire.materials.hasLed
-                              ? "bg-slate-900 text-white"
-                              : "text-slate-500 hover:text-slate-900"
-                          }`}
-                        >
-                          Không
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setQuestionnaire((prev) => ({
-                              ...prev,
-                              materials: { ...prev.materials, hasLed: true },
-                            }))
-                          }
-                          className={`px-3 py-1 text-xs font-medium rounded transition cursor-pointer ${
-                            questionnaire.materials.hasLed
-                              ? "bg-slate-900 text-white shadow-xs"
-                              : "text-slate-500 hover:text-slate-900"
-                          }`}
-                        >
-                          Có
-                        </button>
+                      {questionnaire.materials.hasLed && (
+                        <div className="p-3 bg-zinc-50 rounded-lg border border-zinc-200 mt-2 space-y-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                            <div>
+                              <label className="text-[11px] font-bold text-zinc-700 block mb-1">Cảm biến đóng ngắt:</label>
+                              <select
+                                value={ledSensor}
+                                onChange={(e) => setLedSensor(e.target.value as any)}
+                                className="w-full p-1.5 bg-white border border-zinc-300 rounded text-xs font-sans"
+                              >
+                                <option value="door">Cảm biến đóng mở cánh (tự sáng khi mở tủ)</option>
+                                <option value="wave">Cảm biến vẫy tay không chạm</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="text-[11px] font-bold text-zinc-700 block mb-1">Bộ nguồn hạ áp:</label>
+                              <div className="p-1.5 bg-white border border-zinc-200 rounded text-xs text-zinc-700 font-mono">
+                                Nguồn đũa 12V 60W nhôm tản nhiệt
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Sub-configurator: Phân khúc phụ kiện & Độ khó gia công */}
+                    <div className="p-4 bg-zinc-50 rounded-lg border border-zinc-200 space-y-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                        <div>
+                          <label className="text-xs font-bold text-zinc-900 block mb-1">
+                            Phân khúc phụ kiện kim khí (Hardware Tier):
+                          </label>
+                          <div className="grid grid-cols-3 gap-1 bg-white p-1 rounded-md border border-zinc-200">
+                            {[
+                              { id: "standard", label: "Tiêu chuẩn (DTC)" },
+                              { id: "mid", label: "Trung cấp (Hafele)" },
+                              { id: "luxury", label: "Cao cấp (Blum Áo)" },
+                            ].map((tier) => (
+                              <button
+                                key={tier.id}
+                                type="button"
+                                onClick={() => setHardwareTier(tier.id as any)}
+                                className={`py-1 text-[11px] font-bold rounded transition cursor-pointer text-center ${
+                                  hardwareTier === tier.id
+                                    ? "bg-zinc-900 text-white shadow-xs"
+                                    : "text-zinc-600 hover:text-zinc-900"
+                                }`}
+                              >
+                                {tier.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-bold text-zinc-900 block mb-1">
+                            Hệ số độ khó gia công (Complexity Multiplier):
+                          </label>
+                          <div className="grid grid-cols-3 gap-1 bg-white p-1 rounded-md border border-zinc-200">
+                            {[
+                              { mult: 1.0, label: "1.0x Tiêu chuẩn", desc: "Cắt thẳng nẹp PVC" },
+                              { mult: 1.25, label: "1.25x Tinh xảo", desc: "Vát mòi 45°, LED âm" },
+                              { mult: 1.5, label: "1.50x May đo XK", desc: "Uốn cong, sơn 2K" },
+                            ].map((item) => (
+                              <button
+                                key={item.mult}
+                                type="button"
+                                onClick={() => setComplexityMultiplier(item.mult)}
+                                className={`py-1 text-[11px] font-bold rounded transition cursor-pointer text-center ${
+                                  complexityMultiplier === item.mult
+                                    ? "bg-zinc-900 text-white shadow-xs"
+                                    : "text-zinc-600 hover:text-zinc-900"
+                                }`}
+                                title={item.desc}
+                              >
+                                {item.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -2501,7 +3060,7 @@ function QuotingWorkspace() {
                           </span>
                         </div>
                         <div className="text-xl sm:text-2xl font-bold font-mono text-white tracking-tight">
-                          {formatVND(parametricCosting.priceRange?.min || 0)} <span className="text-slate-500 font-normal text-sm">~</span> {formatVND(parametricCosting.priceRange?.max || 0)}
+                          {formatVND(activeCosting.priceRange?.min || 0)} <span className="text-slate-500 font-normal text-sm">~</span> {formatVND(activeCosting.priceRange?.max || 0)}
                         </div>
                         <p className="text-[10px] text-slate-400 font-mono">
                           Phản hồi nhanh trong 30s khi khách gửi ảnh Zalo
@@ -2512,11 +3071,11 @@ function QuotingWorkspace() {
                         <div className="flex items-center justify-between text-[11px]">
                           <span className="text-slate-400">Giá bán đề xuất:</span>
                           <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-200 border border-zinc-700">
-                            {parametricCosting.confidence.stars} Sao · {parametricCosting.confidence.label}
+                            {activeCosting.confidence.stars} Sao · {activeCosting.confidence.label}
                           </span>
                         </div>
                         <div className="text-2xl font-extrabold font-mono text-white tracking-tight">
-                          {formatVND(parametricCosting.summary.calculateSalesPrice)}
+                          {formatVND(activeCosting.summary.calculateSalesPrice)}
                         </div>
                       </div>
                     )}
@@ -2524,12 +3083,12 @@ function QuotingWorkspace() {
                     <div className="text-[10px] text-slate-400 flex flex-col gap-1 pt-2 border-t border-slate-800 font-mono">
                       <div className="flex items-center justify-between">
                         <span>Giá vốn xưởng (COGS):</span>
-                        <strong className="text-white font-mono">{formatVND(parametricCosting.summary.cogs)}</strong>
+                        <strong className="text-white font-mono">{formatVND(activeCosting.summary.cogs)}</strong>
                       </div>
                       <div className="flex items-center justify-between">
                         <span>Dự phòng rủi ro kỹ thuật:</span>
                         <span className="text-zinc-300 font-mono">
-                          +{Math.round((parametricCosting.contingencyRate || 0) * 100)}% ({formatVND(parametricCosting.contingencyAmount || 0)})
+                          +{Math.round((activeCosting.contingencyRate || 0) * 100)}% ({formatVND(activeCosting.contingencyAmount || 0)})
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
@@ -2713,6 +3272,80 @@ function QuotingWorkspace() {
           </div>
           ) : (
             <div className="space-y-6">
+              {/* THANH ĐỐI CHIẾU CHÊNH LỆCH GIÁ DELTA VERSION TRACKING (BUG-05) */}
+              <div className="bg-white rounded-xl border border-zinc-200 p-4 shadow-2xs space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-md bg-zinc-900 text-white font-mono font-bold text-xs flex items-center justify-center">
+                      Δ
+                    </span>
+                    <div>
+                      <h3 className="font-bold text-xs text-zinc-900">
+                        Đối Chiếu Chênh Lệch Giá: Mức 2 (BOM Giả Định) vs Mức 4 (BOM Chi Tiết CAD)
+                      </h3>
+                      <p className="text-[11px] text-zinc-500 mt-0.5">
+                        Kế thừa 100% phụ kiện, đá, kính, LED &amp; nhân công đã chọn ở Mức 2 — Thay thế chính xác khối lượng ván và hạ dự phòng rủi ro từ +5% về 0%.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setInputTab("questionnaire");
+                      setQuestionnaire((prev) => ({ ...prev, estimationLevel: 2 }));
+                    }}
+                    className="text-xs font-bold text-zinc-700 hover:text-zinc-900 px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 rounded-lg transition whitespace-nowrap self-start sm:self-auto cursor-pointer"
+                  >
+                    ← Quay lại Mức 2
+                  </button>
+                </div>
+
+                {(() => {
+                  const priceLevel2 = activeCosting.summary.calculateSalesPrice;
+                  const priceLevel4 = calcResult.totalQuotePrice;
+                  const delta = priceLevel4 - priceLevel2;
+                  const pct = priceLevel2 > 0 ? ((delta / priceLevel2) * 100).toFixed(1) : "0.0";
+                  return (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                      <div className="p-3 rounded-lg bg-zinc-50 border border-zinc-200">
+                        <span className="text-[10px] font-mono uppercase text-zinc-400 block font-bold">
+                          Mức 2: Giá Theo Mẫu (+5% Dự Phòng)
+                        </span>
+                        <div className="text-base font-extrabold font-mono text-zinc-800 mt-1">
+                          {formatVND(priceLevel2)}
+                        </div>
+                        <span className="text-[10px] text-zinc-500 font-mono">BOM giả định ước tính nhanh</span>
+                      </div>
+
+                      <div className="p-3 rounded-lg bg-zinc-900 text-white border border-zinc-800">
+                        <span className="text-[10px] font-mono uppercase text-zinc-400 block font-bold">
+                          Mức 4: Giá BOM CAD (0% Dự Phòng)
+                        </span>
+                        <div className="text-base font-extrabold font-mono text-white mt-1">
+                          {formatVND(priceLevel4)}
+                        </div>
+                        <span className="text-[10px] text-zinc-400 font-mono">Chuẩn phôi CNC {calcResult.totalSheets} tấm ván</span>
+                      </div>
+
+                      <div className={`p-3 rounded-lg border ${
+                        delta < 0 ? "bg-emerald-50/50 border-emerald-200 text-emerald-950" : "bg-amber-50/50 border-amber-200 text-amber-950"
+                      }`}>
+                        <span className="text-[10px] font-mono uppercase text-zinc-500 block font-bold">
+                          Chênh Lệch Thực Tế (Δ)
+                        </span>
+                        <div className="text-base font-extrabold font-mono mt-1">
+                          {delta > 0 ? `+${formatVND(delta)}` : formatVND(delta)}
+                        </div>
+                        <span className="text-[10px] font-mono font-bold">
+                          {delta < 0 ? `Tiết kiệm ${Math.abs(Number(pct))}% so với giá dự phòng` : `Tăng ${pct}% do diện tích chi tiết`}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+
               <div className="no-print bg-white rounded-lg border border-slate-200 p-5 shadow-2xs space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
@@ -3411,11 +4044,11 @@ function QuotingWorkspace() {
             </span>
             <div className="h-3 w-px bg-slate-200" />
             <span>
-              Giá vốn: <strong suppressHydrationWarning className="text-slate-900 font-mono">{formatVND(activeOutputTab === "costing_sheet" ? parametricCosting.summary.cogs : calcResult.totalBaseCost)}</strong>
+              Giá vốn: <strong suppressHydrationWarning className="text-slate-900 font-mono">{formatVND(activeOutputTab === "costing_sheet" ? activeCosting.summary.cogs : calcResult.totalBaseCost)}</strong>
             </span>
             <div className="h-3 w-px bg-slate-200" />
             <span>
-              Báo khách: <strong suppressHydrationWarning className="text-slate-900 font-mono">{formatVND(activeOutputTab === "costing_sheet" ? parametricCosting.summary.calculateSalesPrice : calcResult.totalQuotePrice)}</strong>
+              Báo khách: <strong suppressHydrationWarning className="text-slate-900 font-mono">{formatVND(activeOutputTab === "costing_sheet" ? activeCosting.summary.calculateSalesPrice : calcResult.totalQuotePrice)}</strong>
             </span>
           </div>
         </div>
@@ -3435,7 +4068,7 @@ function QuotingWorkspace() {
                   </span>
                 </div>
                 <div className="text-2xl font-bold text-slate-900 font-mono">
-                  {formatVND(parametricCosting.summary.calculateSalesPrice)}
+                  {formatVND(activeCosting.summary.calculateSalesPrice)}
                 </div>
                 <p className="text-xs text-slate-500">Giá đề xuất gửi khách hàng (đã gồm chi phí + lợi nhuận mục tiêu)</p>
               </div>
@@ -3448,9 +4081,9 @@ function QuotingWorkspace() {
                   </span>
                 </div>
                 <div className="text-2xl font-bold text-slate-900 font-mono">
-                  {formatVND(parametricCosting.summary.cogs)}
+                  {formatVND(activeCosting.summary.cogs)}
                 </div>
-                <p className="text-xs text-slate-500">Vật tư + Nhân công trực tiếp + Quản lý xưởng OH &amp; thầu phụ</p>
+                <p className="text-xs text-slate-500">Vật tư + 37 công đoạn nhân công + Quản lý xưởng OH &amp; thầu phụ</p>
               </div>
 
               <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-2xs space-y-2">
@@ -3461,7 +4094,7 @@ function QuotingWorkspace() {
                   </span>
                 </div>
                 <div className="text-2xl font-bold text-slate-900 font-mono">
-                  {formatVND(parametricCosting.summary.profitAmount)}
+                  {formatVND(activeCosting.summary.profitAmount)}
                 </div>
                 <p className="text-xs text-slate-500">Mức chênh lệch an toàn để đảm bảo dòng tiền &amp; tái đầu tư xưởng</p>
               </div>
@@ -3561,7 +4194,7 @@ function QuotingWorkspace() {
                         : "bg-slate-50 text-slate-600 hover:bg-slate-100"
                     }`}
                   >
-                    2. Bảng vật tư chi tiết ({parametricCosting.materialsLabor.length})
+                    2. Bảng vật tư chi tiết ({activeCosting.materialsLabor.length})
                   </button>
                   <button
                     type="button"
@@ -3572,7 +4205,7 @@ function QuotingWorkspace() {
                         : "bg-slate-50 text-slate-600 hover:bg-slate-100"
                     }`}
                   >
-                    3. Nhân công ({parametricCosting.labourDepts.length} công đoạn)
+                    3. Nhân công ({laborViewMode === "compact" ? "5 Phân xưởng" : "37 Công đoạn"})
                   </button>
                   <button
                     type="button"
@@ -3583,7 +4216,7 @@ function QuotingWorkspace() {
                         : "bg-slate-50 text-slate-600 hover:bg-slate-100"
                     }`}
                   >
-                    4. Bậc thang MOQ ({Object.keys(parametricCosting.summary.moqPrices || {}).length} bậc)
+                    4. Bậc thang MOQ ({moqConfigTiers.length} bậc)
                   </button>
                   {similarItems.length > 0 && (
                     <button
@@ -3601,7 +4234,7 @@ function QuotingWorkspace() {
                 </div>
 
                 <span className="text-xs text-slate-500 font-mono hidden sm:inline">
-                  Tổng COGS: <strong className="text-slate-900 font-bold">{formatVND(parametricCosting.summary.cogs)}</strong>
+                  Tổng COGS: <strong className="text-slate-900 font-bold">{formatVND(activeCosting.summary.cogs)}</strong>
                 </span>
               </div>
 
@@ -3619,21 +4252,21 @@ function QuotingWorkspace() {
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {[
-                        { label: "1. Đá tự nhiên / Nhân tạo (Stone)", desc: "Mặt đá Vicostone/Marble (0% OH Xưởng)", amount: parametricCosting.summary.stone, highlight: "0% OH" },
-                        { label: "2. Bọc nệm / Da / Vải (Upholstery)", desc: "Mút xốp D40 + bọc da/nỉ cao cấp", amount: parametricCosting.summary.upholstery },
-                        { label: "3. Khung kim loại gia công ngoài", desc: "Chân bàn, tay nắm kim loại ngoài (10% OH)", amount: parametricCosting.summary.metalFrameS },
-                        { label: "4. Gia công ngoài / Thầu phụ", desc: "Cánh Acrylic bóng gương, gia công CNC ngoài (10% OH)", amount: parametricCosting.summary.subContract },
-                        { label: "5. Gỗ & Ván công nghiệp", desc: "Cốt MDF/HDF chống ẩm thùng & cánh tủ", amount: parametricCosting.summary.wood },
-                        { label: "6. Khung kim loại tự sản xuất", desc: "Khung sắt hộp xưởng tự cắt hàn sơn", amount: parametricCosting.summary.metalFrameP },
-                        { label: "7. Kính / Cánh kính khung nhôm", desc: "Kính cường lực / khung nhôm định hình", amount: parametricCosting.summary.glass },
-                        { label: "8. Hóa chất / Sơn / Dung môi", desc: "Sơn 2K, bả matit, keo dán chuyên dụng", amount: parametricCosting.summary.chemical },
-                        { label: "9. Phụ kiện kim khí (Hardware)", desc: "Bản lề giảm chấn, ray âm, tay nắm, LED", amount: parametricCosting.summary.hardware },
-                        { label: "10. Chỉ dán & Vật tư tiêu hao", desc: "Chỉ nẹp PVC, keo PUR, ốc vít cam", amount: parametricCosting.summary.consumables },
-                        { label: "11. Đóng gói & Vận chuyển", desc: "Màng PE, xốp nổ bọc góc, xe tải giao hàng", amount: parametricCosting.summary.packingDelivery },
-                        { label: "12. Tổng nhân công trực tiếp", desc: "Nhân công 4 bộ phận cắt, dán, ráp, lắp đặt", amount: parametricCosting.summary.laborCostTotal },
+                        { label: "1. Đá tự nhiên / Nhân tạo (Stone)", desc: "Mặt đá Vicostone/Marble (0% OH Xưởng)", amount: activeCosting.summary.stone, highlight: "0% OH" },
+                        { label: "2. Bọc nệm / Da / Vải (Upholstery)", desc: "Mút xốp D40 + bọc da/nỉ cao cấp", amount: activeCosting.summary.upholstery },
+                        { label: "3. Khung kim loại gia công ngoài", desc: "Chân bàn, tay nắm kim loại ngoài (10% OH)", amount: activeCosting.summary.metalFrameS },
+                        { label: "4. Gia công ngoài / Thầu phụ", desc: "Cánh Acrylic bóng gương, gia công CNC ngoài (10% OH)", amount: activeCosting.summary.subContract },
+                        { label: "5. Gỗ & Ván công nghiệp", desc: "Cốt MDF/HDF chống ẩm thùng & cánh tủ", amount: activeCosting.summary.wood },
+                        { label: "6. Khung kim loại tự sản xuất", desc: "Khung sắt hộp xưởng tự cắt hàn sơn", amount: activeCosting.summary.metalFrameP },
+                        { label: "7. Kính / Cánh kính khung nhôm", desc: "Kính cường lực / khung nhôm định hình", amount: activeCosting.summary.glass },
+                        { label: "8. Hóa chất / Sơn / Dung môi", desc: "Sơn 2K, bả matit, keo dán chuyên dụng", amount: activeCosting.summary.chemical },
+                        { label: "9. Phụ kiện kim khí (Hardware)", desc: "Bản lề giảm chấn, ray âm, tay nắm, LED", amount: activeCosting.summary.hardware },
+                        { label: "10. Chỉ dán & Vật tư tiêu hao", desc: "Chỉ nẹp PVC, keo PUR, ốc vít cam", amount: activeCosting.summary.consumables },
+                        { label: "11. Đóng gói & Vận chuyển", desc: "Màng PE, xốp nổ bọc góc, xe tải giao hàng", amount: activeCosting.summary.packingDelivery },
+                        { label: "12. Tổng nhân công trực tiếp", desc: "Nhân công 37 công đoạn thực tế tại xưởng", amount: activeCosting.summary.laborCostTotal },
                       ].map((row, idx) => {
-                        const pct = parametricCosting.summary.cogs > 0
-                          ? ((row.amount / parametricCosting.summary.cogs) * 100).toFixed(1)
+                        const pct = activeCosting.summary.cogs > 0
+                          ? ((row.amount / activeCosting.summary.cogs) * 100).toFixed(1)
                           : "0.0";
                         return (
                           <tr key={idx} className="hover:bg-slate-50/60">
@@ -3655,10 +4288,10 @@ function QuotingWorkspace() {
                           </tr>
                         );
                       })}
-                      {parametricCosting.summary.customGroups &&
-                        Object.entries(parametricCosting.summary.customGroups).map(([groupKey, amount], idx) => {
-                          const pct = parametricCosting.summary.cogs > 0
-                            ? ((amount / parametricCosting.summary.cogs) * 100).toFixed(1)
+                      {activeCosting.summary.customGroups &&
+                        Object.entries(activeCosting.summary.customGroups).map(([groupKey, amount], idx) => {
+                          const pct = activeCosting.summary.cogs > 0
+                            ? ((amount / activeCosting.summary.cogs) * 100).toFixed(1)
                             : "0.0";
                           return (
                             <tr key={`cg_${idx}`} className="hover:bg-slate-50/60 bg-zinc-50">
@@ -3679,23 +4312,23 @@ function QuotingWorkspace() {
                           );
                         })}
                       <tr className="bg-zinc-100 font-semibold">
-                        <td className="p-2.5 text-zinc-900">+ OH Xưởng ({((parametricCosting.summary.ohWorkshopRate) * 100).toFixed(0)}%)</td>
+                        <td className="p-2.5 text-zinc-900">+ OH Xưởng ({((activeCosting.summary.ohWorkshopRate) * 100).toFixed(0)}%)</td>
                         <td className="p-2.5 text-zinc-900 text-[11px]">Khấu hao máy CNC, nhà xưởng, điện 3 pha áp cho nhóm nội bộ</td>
-                        <td className="p-2.5 text-right font-mono font-bold text-zinc-900">{formatVND(parametricCosting.summary.ohWorkshopAmount)}</td>
-                        <td className="p-2.5 text-right font-mono text-zinc-900">{parametricCosting.summary.cogs > 0 ? ((parametricCosting.summary.ohWorkshopAmount / parametricCosting.summary.cogs) * 100).toFixed(1) : 0}%</td>
+                        <td className="p-2.5 text-right font-mono font-bold text-zinc-900">{formatVND(activeCosting.summary.ohWorkshopAmount)}</td>
+                        <td className="p-2.5 text-right font-mono text-zinc-900">{activeCosting.summary.cogs > 0 ? ((activeCosting.summary.ohWorkshopAmount / activeCosting.summary.cogs) * 100).toFixed(1) : 0}%</td>
                       </tr>
                       <tr className="bg-sky-50/40 font-semibold">
-                        <td className="p-2.5 text-sky-900">+ OH Thầu phụ ({((parametricCosting.summary.ohSubcontractRate) * 100).toFixed(0)}%)</td>
+                        <td className="p-2.5 text-sky-900">+ OH Thầu phụ ({((activeCosting.summary.ohSubcontractRate) * 100).toFixed(0)}%)</td>
                         <td className="p-2.5 text-sky-800 text-[11px]">Quản lý & rủi ro lắp đặt thầu phụ</td>
-                        <td className="p-2.5 text-right font-mono font-bold text-sky-900">{formatVND(parametricCosting.summary.ohSubcontractAmount)}</td>
-                        <td className="p-2.5 text-right font-mono text-sky-800">{parametricCosting.summary.cogs > 0 ? ((parametricCosting.summary.ohSubcontractAmount / parametricCosting.summary.cogs) * 100).toFixed(1) : 0}%</td>
+                        <td className="p-2.5 text-right font-mono font-bold text-sky-900">{formatVND(activeCosting.summary.ohSubcontractAmount)}</td>
+                        <td className="p-2.5 text-right font-mono text-sky-800">{activeCosting.summary.cogs > 0 ? ((activeCosting.summary.ohSubcontractAmount / activeCosting.summary.cogs) * 100).toFixed(1) : 0}%</td>
                       </tr>
                     </tbody>
                     <tfoot className="bg-slate-50 font-bold border-t-2 border-slate-300">
                       <tr>
                         <td colSpan={2} className="p-2.5 text-slate-900 uppercase">TỔNG GIÁ VỐN TOÀN DIỆN (COGS)</td>
                         <td className="p-2.5 text-right font-mono text-slate-900 text-sm">
-                          {formatVND(parametricCosting.summary.cogs)}
+                          {formatVND(activeCosting.summary.cogs)}
                         </td>
                         <td className="p-2.5 text-right font-mono text-slate-900">100.0%</td>
                       </tr>
@@ -3704,157 +4337,450 @@ function QuotingWorkspace() {
                 </div>
               )}
 
-              {/* Sub-tab 2: Material Labor Detail */}
+              {/* Sub-tab 2: Material Labor Detail (Smart Editable Grid) */}
               {costingActiveTab === "material_labor" && (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs text-left">
-                    <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
-                      <tr>
-                        <th className="p-2.5">Khối</th>
-                        <th className="p-2.5">Tên Chi Tiết / Vật Tư</th>
-                        <th className="p-2.5">Quy Chuẩn Kỹ Thuật</th>
-                        <th className="p-2.5 text-center">ĐVT</th>
-                        <th className="p-2.5 text-right">Khối Lượng</th>
-                        <th className="p-2.5 text-right">Đơn Giá (VNĐ)</th>
-                        <th className="p-2.5 text-right">Hao Hụt</th>
-                        <th className="p-2.5 text-right">Thành Tiền (VNĐ)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {parametricCosting.materialsLabor.map((row) => (
-                        <tr key={row.id} className="hover:bg-slate-50/60">
-                          <td className="p-2.5">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
-                              {row.block}
-                            </span>
-                          </td>
-                          <td className="p-2.5 font-bold text-slate-800">
-                            <span>{row.name}</span>
-                            {row.id.startsWith("adhoc_") && (
-                              <span className="ml-2 px-1.5 py-0.2 rounded text-[9px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                                Chi phí phụ trợ
-                              </span>
-                            )}
-                          </td>
-                          <td className="p-2.5 text-[11px] text-slate-500">{row.description}</td>
-                          <td className="p-2.5 text-center text-slate-500">{row.unit}</td>
-                          <td className="p-2.5 text-right font-mono font-semibold text-slate-800">
-                            {row.qty.toLocaleString("vi-VN", { maximumFractionDigits: 2 })}
-                          </td>
-                          <td className="p-2.5 text-right font-mono text-slate-600">
-                            {formatVND(row.unitPrice)}
-                          </td>
-                          <td className="p-2.5 text-right font-mono text-slate-500">
-                            x{row.wasteFactor}
-                          </td>
-                          <td className="p-2.5 text-right font-mono font-bold text-slate-900">
-                            {formatVND(row.totalAmount)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <div className="p-3 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-[11px] text-slate-500">
-                      Tổng {parametricCosting.materialsLabor.length} dòng định mức ({questionnaire.adhocLines?.length || 0} dòng phụ trợ)
-                    </span>
+                <div className="overflow-x-auto space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 bg-zinc-50 border border-zinc-200 rounded-lg text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-zinc-900">Bảng BOM Thông Minh:</span>
+                      <span className="text-zinc-600">
+                        Cho phép click sửa trực tiếp Số lượng, Đơn giá, % Hao hụt hoặc đổi mã vật tư từ kho 612 mã Sheet1.
+                      </span>
+                    </div>
                     <button
                       type="button"
                       onClick={() => {
-                        setCurrentStep(1);
-                        setShowAdhocForm(true);
+                        setPickingTargetRowId("NEW_ROW");
+                        setCatalogDrawerOpen(true);
                       }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-zinc-900 bg-zinc-100 hover:bg-zinc-100 border border-zinc-300 rounded-lg transition shadow-2xs cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-zinc-900 hover:bg-black rounded-lg transition shadow-xs cursor-pointer"
                     >
-                      <Plus className="w-3.5 h-3.5 text-zinc-900" />
-                      <span>+ Thêm chi phí phát sinh</span>
+                      <Boxes className="w-3.5 h-3.5" />
+                      <span>+ Thêm vật tư từ kho 612 mã</span>
                     </button>
                   </div>
-                </div>
-              )}
 
-              {/* Sub-tab 3: Labour Departments */}
-              {costingActiveTab === "labour" && (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs text-left">
-                    <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
+                  <table className="w-full text-xs text-left border border-zinc-200 rounded-lg">
+                    <thead className="bg-zinc-50 text-zinc-700 border-b border-zinc-200 font-semibold">
                       <tr>
-                        <th className="p-2.5">Công Đoạn / Bộ Phận</th>
-                        <th className="p-2.5">Mã Phân Xưởng</th>
-                        <th className="p-2.5 text-right">Số Giờ Định Mức</th>
-                        <th className="p-2.5 text-right">Đơn Giá / Giờ (VNĐ)</th>
-                        <th className="p-2.5 text-right">Thành Tiền (VNĐ)</th>
+                        <th className="p-2.5">Khối</th>
+                        <th className="p-2.5 min-w-[220px]">Tên Chi Tiết / Vật Tư</th>
+                        <th className="p-2.5 min-w-[150px]">Quy Chuẩn Kỹ Thuật</th>
+                        <th className="p-2.5 text-center w-16">ĐVT</th>
+                        <th className="p-2.5 text-right w-24">Khối Lượng</th>
+                        <th className="p-2.5 text-right w-28">Đơn Giá (VNĐ)</th>
+                        <th className="p-2.5 text-right w-20">Hao Hụt</th>
+                        <th className="p-2.5 text-right w-28">Thành Tiền (VNĐ)</th>
+                        <th className="p-2.5 text-center w-20">Thao Tác</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {parametricCosting.labourDepts.map((d, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50/60">
-                          <td className="p-2.5 font-bold text-slate-800">{d.name}</td>
-                          <td className="p-2.5 text-slate-500 font-mono text-[11px]">{d.department}</td>
-                          <td className="p-2.5 text-right font-mono font-semibold text-slate-800">
-                            {d.hours.toFixed(1)} h
-                          </td>
-                          <td className="p-2.5 text-right font-mono text-slate-600">
-                            {formatVND(d.hourlyRate)}
-                          </td>
-                          <td className="p-2.5 text-right font-mono font-bold text-slate-900">
-                            {formatVND(d.totalAmount)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot className="bg-slate-50 font-bold border-t-2 border-slate-300">
-                      <tr>
-                        <td colSpan={4} className="p-2.5 text-slate-900 uppercase">TỔNG NHÂN CÔNG TRỰC TIẾP</td>
-                        <td className="p-2.5 text-right font-mono text-slate-900 text-sm">
-                          {formatVND(parametricCosting.summary.laborCostTotal)}
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              )}
-
-              {/* Sub-tab 4: MOQ Tiers */}
-              {costingActiveTab === "moq" && (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs text-left">
-                    <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
-                      <tr>
-                        <th className="p-2.5">Bậc Số Lượng (MOQ)</th>
-                        <th className="p-2.5 text-right">Đơn Giá / Cái (VNĐ)</th>
-                        <th className="p-2.5 text-right">Chiết Khấu Quy Mô</th>
-                        <th className="p-2.5 text-right">Tổng Giá Trị Đơn Hàng (VNĐ)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {Object.entries(parametricCosting.summary.moqPrices || {}).map(([qtyStr, unitPrice]) => {
-                        const q = Number(qtyStr);
-                        const basePrice = parametricCosting.summary.moqPrices[1] || parametricCosting.summary.calculateSalesPrice;
-                        const discount = basePrice > 0 ? Math.round((1 - unitPrice / basePrice) * 100) : 0;
-                        const total = q * unitPrice;
+                    <tbody className="divide-y divide-zinc-100">
+                      {activeCosting.materialsLabor.map((row: any) => {
+                        const isOvr = !!row.isOverridden;
                         return (
-                          <tr key={q} className="hover:bg-slate-50/60">
-                            <td className="p-2.5 font-bold text-slate-800 flex items-center gap-1.5">
-                              <span className="w-5 h-5 rounded-full bg-slate-900 text-white font-mono text-[10px] flex items-center justify-center font-bold">
-                                {q}
+                          <tr key={row.id} className={`hover:bg-zinc-50/70 transition ${isOvr ? "bg-amber-50/30" : ""}`}>
+                            <td className="p-2.5 align-middle">
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-zinc-100 text-zinc-800 border border-zinc-200">
+                                {row.block}
                               </span>
-                              <span>{q} sản phẩm</span>
                             </td>
-                            <td className="p-2.5 text-right font-mono font-bold text-slate-900">
-                              {formatVND(unitPrice)}
+
+                            <td className="p-2.5 align-middle">
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-1.5">
+                                  <input
+                                    type="text"
+                                    value={row.name}
+                                    onChange={(e) => handleUpdateBOMRow(row.id, { name: e.target.value })}
+                                    className="font-bold text-zinc-900 bg-transparent hover:bg-white focus:bg-white border border-transparent hover:border-zinc-300 focus:border-zinc-900 rounded px-1.5 py-0.5 text-xs w-full transition"
+                                  />
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setPickingTargetRowId(row.id);
+                                      setCatalogDrawerOpen(true);
+                                    }}
+                                    className="inline-flex items-center gap-1 text-[10px] text-zinc-600 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200 px-1.5 py-0.5 rounded font-mono transition cursor-pointer"
+                                    title="Tra cứu 612 mã vật tư Sheet1 để thay thế"
+                                  >
+                                    <Boxes className="w-2.5 h-2.5" />
+                                    <span>Đổi từ 612 mã</span>
+                                  </button>
+
+                                  {isOvr && (
+                                    <>
+                                      <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                        Đã sửa thủ công
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleResetBOMRow(row.id)}
+                                        className="text-[10px] text-zinc-500 hover:text-zinc-900 flex items-center gap-0.5 hover:underline"
+                                        title="Khôi phục mặc định ban đầu"
+                                      >
+                                        <RotateCcw className="w-2.5 h-2.5" />
+                                        <span>↺ Mặc định</span>
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
                             </td>
-                            <td className="p-2.5 text-right font-mono text-zinc-900 font-semibold">
-                              {discount > 0 ? `-${discount}%` : "Chuẩn (0%)"}
+
+                            <td className="p-2.5 align-middle">
+                              <input
+                                type="text"
+                                value={row.description || ""}
+                                onChange={(e) => handleUpdateBOMRow(row.id, { description: e.target.value })}
+                                className="text-[11px] text-zinc-500 bg-transparent hover:bg-white focus:bg-white border border-transparent hover:border-zinc-300 focus:border-zinc-900 rounded px-1 py-0.5 w-full transition"
+                              />
                             </td>
-                            <td className="p-2.5 text-right font-mono font-black text-zinc-900">
-                              {formatVND(total)}
+
+                            <td className="p-2.5 text-center align-middle">
+                              <input
+                                type="text"
+                                value={row.unit}
+                                onChange={(e) => handleUpdateBOMRow(row.id, { unit: e.target.value })}
+                                className="text-center text-zinc-600 bg-transparent hover:bg-white focus:bg-white border border-transparent hover:border-zinc-300 focus:border-zinc-900 rounded px-1 py-0.5 w-12 font-mono text-xs transition"
+                              />
+                            </td>
+
+                            <td className="p-2.5 text-right align-middle">
+                              <input
+                                type="number"
+                                step="any"
+                                value={row.qty}
+                                onChange={(e) => handleUpdateBOMRow(row.id, { qty: Math.max(0, parseFloat(e.target.value) || 0) })}
+                                className="text-right font-mono font-bold text-zinc-900 bg-transparent hover:bg-white focus:bg-white border border-transparent hover:border-zinc-300 focus:border-zinc-900 rounded px-1.5 py-0.5 w-20 text-xs transition"
+                              />
+                            </td>
+
+                            <td className="p-2.5 text-right align-middle">
+                              <input
+                                type="number"
+                                step="1000"
+                                value={row.unitPrice}
+                                onChange={(e) => handleUpdateBOMRow(row.id, { unitPrice: Math.max(0, parseInt(e.target.value, 10) || 0) })}
+                                className="text-right font-mono text-zinc-700 bg-transparent hover:bg-white focus:bg-white border border-transparent hover:border-zinc-300 focus:border-zinc-900 rounded px-1.5 py-0.5 w-24 text-xs transition"
+                              />
+                            </td>
+
+                            <td className="p-2.5 text-right align-middle">
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="1"
+                                max="3"
+                                value={row.wasteFactor}
+                                onChange={(e) => handleUpdateBOMRow(row.id, { wasteFactor: Math.max(1, parseFloat(e.target.value) || 1) })}
+                                className="text-right font-mono text-zinc-500 bg-transparent hover:bg-white focus:bg-white border border-transparent hover:border-zinc-300 focus:border-zinc-900 rounded px-1 py-0.5 w-16 text-xs transition"
+                              />
+                            </td>
+
+                            <td className="p-2.5 text-right font-mono font-bold text-zinc-900 align-middle">
+                              {formatVND(row.totalAmount)}
+                            </td>
+
+                            <td className="p-2.5 text-center align-middle">
+                              <div className="flex items-center justify-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => handleDuplicateBOMRow(row)}
+                                  className="p-1 rounded text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition cursor-pointer"
+                                  title="Nhân bản dòng này"
+                                >
+                                  <Copy className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteBOMRow(row.id)}
+                                  className="p-1 rounded text-zinc-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
+                                  title="Xóa dòng này"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );
                       })}
                     </tbody>
                   </table>
+
+                  <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-lg flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-[11px] text-zinc-600 font-mono">
+                      Tổng {activeCosting.materialsLabor.length} dòng định mức (
+                      {activeCosting.materialsLabor.filter((r: any) => r.isOverridden).length} dòng đã tinh chỉnh thủ công)
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPickingTargetRowId("NEW_ROW");
+                          setCatalogDrawerOpen(true);
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-zinc-900 bg-white hover:bg-zinc-50 border border-zinc-300 rounded-lg transition shadow-2xs cursor-pointer"
+                      >
+                        <Boxes className="w-3.5 h-3.5" />
+                        <span>+ Tra cứu 612 mã Sheet1</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCurrentStep(1);
+                          setShowAdhocForm(true);
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-zinc-900 bg-zinc-200 hover:bg-zinc-300 border border-zinc-300 rounded-lg transition shadow-2xs cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>+ Thêm chi phí phát sinh</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Sub-tab 3: Labour Departments (37 Processes @ 105.000 đ/h with Dual View) */}
+              {costingActiveTab === "labour" && (
+                <div className="space-y-3">
+                  {/* Action Bar for Labor Tab */}
+                  <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-zinc-900">Đơn giá nhân công xưởng:</span>
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="number"
+                          step="5000"
+                          value={laborHourlyRate}
+                          onChange={(e) => setLaborHourlyRate(Math.max(10_000, parseInt(e.target.value, 10) || 105_000))}
+                          className="w-24 px-2 py-1 text-xs font-mono font-bold text-zinc-900 bg-white border border-zinc-300 rounded focus:border-zinc-900 text-right"
+                        />
+                        <span className="text-zinc-500 font-mono text-[11px]">đ/giờ (4.2 USD/h)</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 bg-zinc-200/60 p-0.5 rounded-lg border border-zinc-300">
+                      <button
+                        type="button"
+                        onClick={() => setLaborViewMode("compact")}
+                        className={`px-3 py-1 rounded-md text-xs font-bold transition cursor-pointer ${
+                          laborViewMode === "compact"
+                            ? "bg-zinc-900 text-white shadow-2xs"
+                            : "text-zinc-600 hover:text-zinc-900"
+                        }`}
+                      >
+                        Chế độ Rút gọn (5 Phân xưởng)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setLaborViewMode("detailed")}
+                        className={`px-3 py-1 rounded-md text-xs font-bold transition cursor-pointer ${
+                          laborViewMode === "detailed"
+                            ? "bg-zinc-900 text-white shadow-2xs"
+                            : "text-zinc-600 hover:text-zinc-900"
+                        }`}
+                      >
+                        Chế độ Chi tiết (37 Công đoạn)
+                      </button>
+                    </div>
+                  </div>
+
+                  {laborViewMode === "compact" ? (
+                    <div className="overflow-x-auto border border-zinc-200 rounded-lg">
+                      <table className="w-full text-xs text-left">
+                        <thead className="bg-zinc-50 text-zinc-700 border-b border-zinc-200 font-semibold">
+                          <tr>
+                            <th className="p-2.5">Phân Xưởng / Công Đoạn Chính</th>
+                            <th className="p-2.5">Mã Nhóm</th>
+                            <th className="p-2.5 text-right">Tổng Giờ Định Mức</th>
+                            <th className="p-2.5 text-right">Đơn Giá / Giờ</th>
+                            <th className="p-2.5 text-right">Thành Tiền (VNĐ)</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-zinc-100">
+                          {activeCosting.labourDepts.map((d, idx) => (
+                            <tr key={idx} className="hover:bg-zinc-50/60 transition">
+                              <td className="p-2.5 font-bold text-zinc-900">{d.name}</td>
+                              <td className="p-2.5 text-zinc-500 font-mono text-[11px]">{d.department}</td>
+                              <td className="p-2.5 text-right font-mono font-bold text-zinc-900">
+                                {d.hours.toFixed(1)} h
+                              </td>
+                              <td className="p-2.5 text-right font-mono text-zinc-600">
+                                {formatVND(d.hourlyRate)}
+                              </td>
+                              <td className="p-2.5 text-right font-mono font-bold text-zinc-900">
+                                {formatVND(d.totalAmount)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot className="bg-zinc-100 font-bold border-t-2 border-zinc-300">
+                          <tr>
+                            <td colSpan={4} className="p-2.5 text-zinc-900 uppercase">TỔNG NHÂN CÔNG TRỰC TIẾP</td>
+                            <td className="p-2.5 text-right font-mono text-zinc-900 text-sm">
+                              {formatVND(activeCosting.summary.laborCostTotal)}
+                            </td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto border border-zinc-200 rounded-lg max-h-[500px]">
+                      <table className="w-full text-xs text-left">
+                        <thead className="bg-zinc-50 text-zinc-700 border-b border-zinc-200 font-semibold sticky top-0 z-10 shadow-2xs">
+                          <tr>
+                            <th className="p-2 text-center w-10">STT</th>
+                            <th className="p-2 w-16">Nhóm</th>
+                            <th className="p-2 w-20">Mã CĐ</th>
+                            <th className="p-2">Tên Công Đoạn (Tiếng Việt)</th>
+                            <th className="p-2 text-zinc-400">Tên Tiếng Anh</th>
+                            <th className="p-2 text-right w-24">Số Giờ (h)</th>
+                            <th className="p-2 text-right w-28">Đơn Giá / h</th>
+                            <th className="p-2 text-right w-28">Thành Tiền</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-zinc-100">
+                          {LABOR_PROCESSES.map((proc) => {
+                            const ovr = laborProcessOverrides[proc.code];
+                            const defaultHours = proc.code === "CNC" ? 1.5 : proc.code === "ASS" ? 2.5 : proc.code === "PACK" ? 1.0 : 0;
+                            const hours = ovr?.hours !== undefined ? ovr.hours : defaultHours;
+                            const rate = ovr?.rate !== undefined ? ovr.rate : laborHourlyRate;
+                            const amount = Math.round(hours * rate);
+                            return (
+                              <tr key={proc.code} className={`hover:bg-zinc-50/70 transition ${hours > 0 ? "bg-zinc-50/40" : ""}`}>
+                                <td className="p-2 text-center font-mono text-zinc-400 text-[11px]">{proc.stt}</td>
+                                <td className="p-2 font-mono text-[10px] font-bold text-zinc-600">{proc.group}</td>
+                                <td className="p-2 font-mono font-bold text-zinc-900 text-[11px]">{proc.code}</td>
+                                <td className="p-2 font-semibold text-zinc-900">{proc.nameVi}</td>
+                                <td className="p-2 text-zinc-400 text-[11px]">{proc.nameEn}</td>
+                                <td className="p-2 text-right">
+                                  <input
+                                    type="number"
+                                    step="0.1"
+                                    min="0"
+                                    value={hours}
+                                    onChange={(e) => handleUpdateLaborProcess(proc.code, { hours: Math.max(0, parseFloat(e.target.value) || 0) })}
+                                    className="w-16 px-1.5 py-0.5 text-right font-mono font-bold text-zinc-900 bg-white border border-zinc-200 rounded focus:border-zinc-900 text-xs"
+                                  />
+                                </td>
+                                <td className="p-2 text-right">
+                                  <input
+                                    type="number"
+                                    step="5000"
+                                    value={rate}
+                                    onChange={(e) => handleUpdateLaborProcess(proc.code, { rate: Math.max(0, parseInt(e.target.value, 10) || 0) })}
+                                    className="w-20 px-1 py-0.5 text-right font-mono text-zinc-700 bg-white border border-zinc-200 rounded focus:border-zinc-900 text-xs"
+                                  />
+                                </td>
+                                <td className="p-2 text-right font-mono font-bold text-zinc-900">
+                                  {formatVND(amount)}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                        <tfoot className="bg-zinc-100 font-bold border-t-2 border-zinc-300 sticky bottom-0 z-10">
+                          <tr>
+                            <td colSpan={7} className="p-2.5 text-zinc-900 uppercase">TỔNG 37 CÔNG ĐOẠN NHÂN CÔNG</td>
+                            <td className="p-2.5 text-right font-mono text-zinc-900 text-sm">
+                              {formatVND(activeCosting.summary.laborCostTotal)}
+                            </td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Sub-tab 4: MOQ Tiers (Dynamic Editable MOQ Matrix) */}
+              {costingActiveTab === "moq" && (
+                <div className="space-y-3">
+                  <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                    <div>
+                      <span className="font-bold text-zinc-900">Bảng bậc thang MOQ linh hoạt:</span>
+                      <p className="text-zinc-500 text-[11px] mt-0.5">
+                        Tự do thêm bậc, tùy chỉnh số lượng đặt hàng và tỷ lệ phụ phí (+120% cữ máy mẫu lẻ → 0% sản xuất lô).
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddMoqTier}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-zinc-900 hover:bg-black rounded-lg transition shadow-xs cursor-pointer self-start sm:self-auto shrink-0"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>+ Thêm bậc MOQ</span>
+                    </button>
+                  </div>
+
+                  <div className="overflow-x-auto border border-zinc-200 rounded-lg">
+                    <table className="w-full text-xs text-left">
+                      <thead className="bg-zinc-50 text-zinc-700 border-b border-zinc-200 font-semibold">
+                        <tr>
+                          <th className="p-2.5 w-36">Bậc Số Lượng (MOQ)</th>
+                          <th className="p-2.5 w-36 text-right">Phụ Phí / Chiết Khấu</th>
+                          <th className="p-2.5 text-right">Đơn Giá / Cái (VNĐ)</th>
+                          <th className="p-2.5 text-right">Tổng Giá Trị Đơn Hàng (VNĐ)</th>
+                          <th className="p-2.5 text-center w-16">Xóa</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-100">
+                        {moqConfigTiers.map((tier, idx) => {
+                          const unitPrice = activeCosting.summary.moqPrices[tier.moq] || activeCosting.summary.calculateSalesPrice;
+                          const total = tier.moq * unitPrice;
+                          return (
+                            <tr key={idx} className="hover:bg-zinc-50/60 transition">
+                              <td className="p-2.5 font-bold text-zinc-900">
+                                <div className="flex items-center gap-1.5">
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    value={tier.moq}
+                                    onChange={(e) => handleUpdateMoqTier(idx, { moq: Math.max(1, parseInt(e.target.value, 10) || 1) })}
+                                    className="w-16 px-1.5 py-0.5 text-center font-mono font-bold text-zinc-900 bg-white border border-zinc-300 rounded text-xs"
+                                  />
+                                  <span className="text-zinc-600 text-xs">sản phẩm</span>
+                                </div>
+                              </td>
+
+                              <td className="p-2.5 text-right font-mono">
+                                <div className="flex items-center justify-end gap-1">
+                                  <input
+                                    type="number"
+                                    value={tier.surchargePercent}
+                                    onChange={(e) => handleUpdateMoqTier(idx, { surchargePercent: parseFloat(e.target.value) || 0 })}
+                                    className="w-16 px-1.5 py-0.5 text-right font-mono font-bold text-zinc-900 bg-white border border-zinc-300 rounded text-xs"
+                                  />
+                                  <span className="text-zinc-500">%</span>
+                                </div>
+                              </td>
+
+                              <td className="p-2.5 text-right font-mono font-bold text-zinc-900">
+                                {formatVND(unitPrice)}
+                              </td>
+
+                              <td className="p-2.5 text-right font-mono font-black text-zinc-900">
+                                {formatVND(total)}
+                              </td>
+
+                              <td className="p-2.5 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteMoqTier(idx)}
+                                  className="p-1 rounded text-zinc-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
+                                  title="Xóa bậc này"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
 
@@ -4293,6 +5219,35 @@ function QuotingWorkspace() {
     <div className="space-y-6">
       {/* Action Hub: 4 Thẻ Hành Động Chính (Web-Twin Pure White Cards) */}
       <div className="no-print bg-white rounded-lg border border-slate-200 p-6 shadow-2xs space-y-5">
+        
+        {/* CẢNH BÁO CỔNG KHÓA HỢP ĐỒNG (BUG-06) */}
+        {(() => {
+          const unconfirmed = (activeCosting.assumptions || []).filter((a) => !confirmedAssumptions[a]);
+          if (unconfirmed.length === 0) return null;
+          return (
+            <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2.5">
+                <AlertTriangle className="w-5 h-5 text-amber-700 shrink-0" />
+                <div>
+                  <span className="font-bold text-amber-950">
+                    Chưa đủ điều kiện ký Hợp đồng thi công chính thức:
+                  </span>{" "}
+                  <span className="text-amber-900">
+                    Còn {unconfirmed.length} giả định kỹ thuật ở Mức 2 chưa được xác nhận. Vui lòng xác nhận hoặc xuất bản Báo Giá Sơ Bộ.
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleConfirmAllAssumptions}
+                className="px-3.5 py-1.5 bg-zinc-900 hover:bg-black text-white text-xs font-bold rounded-lg transition whitespace-nowrap self-start sm:self-auto cursor-pointer"
+              >
+                ✓ Xác nhận tất cả giả định ngay
+              </button>
+            </div>
+          );
+        })()}
+
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
           <div>
             <h2 className="text-xs font-semibold text-slate-900 tracking-tight flex items-center gap-2">
@@ -4353,13 +5308,13 @@ function QuotingWorkspace() {
               <div>
                 <h3 className="text-xs font-bold text-slate-900">Costing Sheet V2 (.xlsx)</h3>
                 <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-                  Bảng tổng hợp chi phí 12 danh mục, phân bổ OH đa tầng (Đá 0%, Xưởng 25-35%, Thầu phụ 10%), nhân công 8 công đoạn và bậc thang MOQ.
+                  Bảng tổng hợp chi phí 12 danh mục, phân bổ OH đa tầng (Đá 0%, Xưởng 25-35%, Thầu phụ 10%), 37 công đoạn nhân công và bậc thang MOQ.
                 </p>
               </div>
             </div>
             <button
               type="button"
-              onClick={() => exportCostingSheetExcel(projectName, projectVersionNo, clientName, parametricCosting)}
+              onClick={() => exportCostingSheetExcel(projectName, projectVersionNo, clientName, activeCosting)}
               className="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer"
             >
               <Download className="w-4 h-4" />
@@ -4367,28 +5322,66 @@ function QuotingWorkspace() {
             </button>
           </div>
 
-          {/* Card 3: In / Xuất PDF Báo Giá A4 */}
-          <div className="p-4 rounded-xl border border-zinc-200 bg-zinc-100 hover:bg-zinc-100 hover:border-zinc-400 transition flex flex-col justify-between space-y-3 shadow-2xs">
-            <div className="space-y-2">
-              <div className="w-9 h-9 rounded-xl bg-zinc-100 text-zinc-900 flex items-center justify-center">
-                <Printer className="w-5 h-5" />
+          {/* Card 3: In / Xuất PDF Báo Giá A4 & Ký Hợp Đồng (BUG-06) */}
+          {(() => {
+            const unconfirmedCount = (activeCosting.assumptions || []).filter((a) => !confirmedAssumptions[a]).length;
+            const isContractLocked = unconfirmedCount > 0;
+            return (
+              <div className="p-4 rounded-xl border border-zinc-200 bg-white hover:border-zinc-400 transition flex flex-col justify-between space-y-3 shadow-2xs">
+                <div className="space-y-2">
+                  <div className="w-9 h-9 rounded-xl bg-zinc-100 text-zinc-900 flex items-center justify-center">
+                    <Printer className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-zinc-900">In Báo Giá A4 &amp; Hợp Đồng</h3>
+                    <p className="text-[11px] text-zinc-600 mt-1 leading-relaxed">
+                      Báo giá trang trọng gửi khách hàng hoặc xuất hợp đồng thi công chính thức.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={handlePrintA4}
+                    className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 bg-zinc-900 hover:bg-black text-white text-xs font-bold rounded-lg transition shadow-xs cursor-pointer"
+                  >
+                    <Printer className="w-4 h-4" />
+                    <span>Xuất Báo Giá Sơ Bộ (A4)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={isContractLocked}
+                    onClick={() => {
+                      if (!isContractLocked) {
+                        handlePrintA4();
+                        showToast("Đang chuẩn bị bản Hợp đồng thi công chính thức!", "success");
+                      }
+                    }}
+                    className={`w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold rounded-lg transition border ${
+                      isContractLocked
+                        ? "bg-zinc-100 text-zinc-400 border-zinc-200 cursor-not-allowed"
+                        : "bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600 cursor-pointer shadow-xs"
+                    }`}
+                    title={isContractLocked ? `Còn ${unconfirmedCount} giả định kỹ thuật chưa xác nhận` : "Đã đủ điều kiện ký hợp đồng chính thức"}
+                  >
+                    {isContractLocked ? (
+                      <>
+                        <Lock className="w-3.5 h-3.5" />
+                        <span>Khóa Hợp Đồng ({unconfirmedCount})</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        <span>Ký Hợp Đồng Thi Công</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
-              <div>
-                <h3 className="text-xs font-bold text-zinc-900">In Báo Giá Chuẩn A4 (.pdf)</h3>
-                <p className="text-[11px] text-zinc-900 mt-1 leading-relaxed">
-                  Bản báo giá trang trọng gửi khách hàng, gom nhóm thành phẩm, ẩn chi phí nội bộ và có sẵn điều khoản bảo hành.
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={handlePrintA4}
-              className="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 bg-zinc-900 hover:bg-zinc-900 text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer"
-            >
-              <Printer className="w-4 h-4" />
-              <span>In / Lưu PDF A4 Ngay</span>
-            </button>
-          </div>
+            );
+          })()}
 
           {/* Card 4: Chia Sẻ Báo Giá An Toàn (Secure Link) */}
           <div className="p-4 rounded-xl border border-indigo-200 bg-indigo-50/40 hover:bg-indigo-50 hover:border-indigo-300 transition flex flex-col justify-between space-y-3 shadow-2xs">
@@ -4822,6 +5815,17 @@ function QuotingWorkspace() {
           setShowAuthModal(true);
         }}
         onSaveProjectFirst={handleSaveProject}
+      />
+
+      {/* Drawer Tra cứu 612 mã vật tư Sheet1 (BUG-04) */}
+      <MaterialCatalogDrawer
+        isOpen={catalogDrawerOpen}
+        onClose={() => {
+          setCatalogDrawerOpen(false);
+          setPickingTargetRowId(null);
+        }}
+        onSelect={handleSelectMaterialFromCatalog}
+        title={pickingTargetRowId === "NEW_ROW" ? "Chọn vật tư mới từ danh mục 612 mã chuẩn xưởng" : "Thay thế vật tư từ danh mục 612 mã Sheet1"}
       />
 
     </div>

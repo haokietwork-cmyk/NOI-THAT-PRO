@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
 import { 
   Plus, 
   Search, 
@@ -32,6 +33,13 @@ export default function MaterialsPage() {
   const [activeTab, setActiveTab] = useState<string>("all");
   const [brandFilter, setBrandFilter] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [isDemoMode, setIsDemoMode] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsDemoMode(new URLSearchParams(window.location.search).get("demo") === "true");
+    }
+  }, []);
 
   // ==========================================================================
   // PHỄU LỌC NÂNG CAO VẬT TƯ (MATERIALS ADVANCED FILTER FUNNEL)
@@ -308,6 +316,27 @@ export default function MaterialsPage() {
   return (
     <div className="space-y-6 font-sans">
       
+      {/* Banner Chế độ Demo Sandbox */}
+      {isDemoMode && (
+        <div className="p-3.5 rounded-xl bg-zinc-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs border border-zinc-800 shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <Sparkles className="w-4 h-4 text-zinc-300 shrink-0" />
+            <div>
+              <span className="font-bold">Chế độ Xem thử (Demo Sandbox):</span>{" "}
+              <span className="text-zinc-300">
+                Bạn đang khảo sát thư viện vật tư xưởng &amp; đơn giá thị trường. Mọi điều chỉnh được lưu cục bộ trên trình duyệt của bạn mà không cần tài khoản.
+              </span>
+            </div>
+          </div>
+          <Link
+            href="/quoting?demo=true"
+            className="px-3 py-1.5 bg-white text-zinc-900 rounded-lg font-bold text-xs hover:bg-zinc-100 transition whitespace-nowrap self-start sm:self-auto shrink-0"
+          >
+            Về Trình Báo Giá Demo →
+          </Link>
+        </div>
+      )}
+
       {/* Toast thông báo */}
       {saveToast && (
         <div className="fixed top-5 right-5 z-50 bg-zinc-950 text-white px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 text-xs font-semibold border border-zinc-800 animate-in fade-in slide-in-from-top-2 duration-200">

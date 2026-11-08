@@ -133,10 +133,12 @@ const ARCHETYPES: Record<ProductArchetypeKey, ProductArchetype> = {
 };
 
 const MOQ_OPTIONS = [
-  { qty: 1, label: "1 Cái (Mẫu lẻ)", surcharge: 0.20, note: "+20% chi phí setup cữ mẫu" },
-  { qty: 5, label: "5 Cái (Công trình)", surcharge: 0.10, note: "+10% chi phí chuyển đổi" },
-  { qty: 10, label: "10 Cái (Dự án)", surcharge: 0.05, note: "+5% phụ phí lô nhỏ" },
-  { qty: 20, label: "20 Cái (Sản xuất lô)", surcharge: 0.0, note: "Chuẩn giá gốc tối ưu" },
+  { qty: 1, label: "1 Bộ (Mẫu lẻ)", surcharge: 1.20, note: "+120% cữ máy mẫu lẻ" },
+  { qty: 2, label: "2 Bộ (Thử nghiệm)", surcharge: 1.20, note: "+120% chi phí rập mẫu" },
+  { qty: 5, label: "5 Bộ (Công trình)", surcharge: 0.25, note: "+25% chi phí chuyển đổi" },
+  { qty: 10, label: "10 Bộ (Dự án)", surcharge: 0.10, note: "+10% phụ phí lô nhỏ" },
+  { qty: 15, label: "15 Bộ (Lô vừa)", surcharge: 0.05, note: "+5% phụ phí đóng gói" },
+  { qty: 20, label: "20 Bộ (Sản xuất lô)", surcharge: 0.0, note: "Chuẩn giá gốc tối ưu (0%)" },
 ];
 
 export default function CostingSandboxWidget() {
@@ -148,6 +150,8 @@ export default function CostingSandboxWidget() {
   const [h, setH] = useState<number>(archetype.defaults.h);
   const [qty, setQty] = useState<number>(1);
   const [showBreakdown, setShowBreakdown] = useState<boolean>(false);
+  const [boardUnitPrice, setBoardUnitPrice] = useState<number>(680_000);
+  const [laborHourlyRate, setLaborHourlyRate] = useState<number>(105_000);
 
   // Switch archetype and reset to its defaults
   const handleSelectArchetype = (key: ProductArchetypeKey) => {
@@ -163,6 +167,8 @@ export default function CostingSandboxWidget() {
     setD(archetype.defaults.d);
     setH(archetype.defaults.h);
     setQty(1);
+    setBoardUnitPrice(680_000);
+    setLaborHourlyRate(105_000);
   };
 
   // Calculation Engine based on Workshop Rules & Formulas
@@ -177,9 +183,9 @@ export default function CostingSandboxWidget() {
       const sheets = Math.ceil((surfaceAreaM2 * 1.15) / sheetArea);
       const edgeM = Math.round(surfaceAreaM2 * 4.2 * 1.08);
 
-      const matCost = sheets * 680_000 + edgeM * 5_000 + 480_000; // Wood + Edge + Cam lock hardware
+      const matCost = sheets * boardUnitPrice + edgeM * 5_000 + 480_000; // Wood + Edge + Cam lock hardware
       const laborHours = sheets * 1.8 + 3.5;
-      const laborCost = Math.round(laborHours * 105_000);
+      const laborCost = Math.round(laborHours * laborHourlyRate);
       const overhead = Math.round((matCost + laborCost) * 0.30);
       const cogsUnit = matCost + laborCost + overhead;
       const unitSellBase = Math.round((cogsUnit * 1.65) / 1_000) * 1_000;
@@ -649,18 +655,46 @@ export default function CostingSandboxWidget() {
               </button>
 
               {showBreakdown && (
-                <div className="mt-2 p-3 bg-white rounded-lg border border-slate-200 text-xs font-mono space-y-1.5 animate-in fade-in duration-150">
-                  <div className="flex justify-between py-0.5">
+                <div className="mt-2 p-3 bg-white rounded-lg border border-slate-200 text-xs font-mono space-y-2 animate-in fade-in duration-150">
+                  <div className="flex justify-between items-center py-0.5">
                     <span className="text-slate-500 font-sans">1. Vật liệu phôi &amp; phụ kiện:</span>
-                    <span className="text-slate-800">{formatVND(calculation.matCost * qty)}</span>
+                    <span className="text-slate-800 font-bold">{formatVND(calculation.matCost * qty)}</span>
                   </div>
-                  <div className="flex justify-between py-0.5">
+                  {selectedKey === "mdf_wardrobe" && (
+                    <div className="flex items-center justify-between text-[11px] text-zinc-500 bg-zinc-50 p-1.5 rounded">
+                      <span className="font-sans">Giá ván xưởng bạn:</span>
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="number"
+                          step="10000"
+                          value={boardUnitPrice}
+                          onChange={(e) => setBoardUnitPrice(Math.max(100_000, parseInt(e.target.value, 10) || 680_000))}
+                          className="w-20 px-1 py-0.5 text-right font-mono font-bold text-zinc-900 bg-white border border-zinc-300 rounded text-[11px]"
+                        />
+                        <span>đ/tấm</span>
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center py-0.5">
                     <span className="text-slate-500 font-sans">2. Nhân công xưởng thực tế:</span>
-                    <span className="text-slate-800">{formatVND(calculation.laborCost * qty)}</span>
+                    <span className="text-slate-800 font-bold">{formatVND(calculation.laborCost * qty)}</span>
                   </div>
-                  <div className="flex justify-between py-0.5">
+                  <div className="flex items-center justify-between text-[11px] text-zinc-500 bg-zinc-50 p-1.5 rounded">
+                    <span className="font-sans">Đơn giá giờ công:</span>
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="number"
+                        step="5000"
+                        value={laborHourlyRate}
+                        onChange={(e) => setLaborHourlyRate(Math.max(20_000, parseInt(e.target.value, 10) || 105_000))}
+                        className="w-20 px-1 py-0.5 text-right font-mono font-bold text-zinc-900 bg-white border border-zinc-300 rounded text-[11px]"
+                      />
+                      <span>đ/h</span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center py-0.5">
                     <span className="text-slate-500 font-sans">3. Quản lý xưởng &amp; Overhead:</span>
-                    <span className="text-slate-800">{formatVND(calculation.overhead * qty)}</span>
+                    <span className="text-slate-800 font-bold">{formatVND(calculation.overhead * qty)}</span>
                   </div>
                   <div className="flex justify-between py-0.5 pt-1.5 border-t border-slate-100 font-bold">
                     <span className="text-slate-700 font-sans">Tổng giá vốn (COGS):</span>
