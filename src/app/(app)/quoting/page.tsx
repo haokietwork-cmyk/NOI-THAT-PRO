@@ -231,7 +231,8 @@ function QuotingWorkspace() {
     );
   };
 
-  const [selectedArchetypeId, setSelectedArchetypeId] = useState<string>("wardrobe_master");
+  const [selectedArchetypeId, setSelectedArchetypeId] = useState<string>("");
+  const [showArchetypeSelector, setShowArchetypeSelector] = useState<boolean>(false);
 
   const handleArchetypeSelect = (item: ProductArchetypeItem) => {
     setSelectedArchetypeId(item.id);
@@ -246,6 +247,19 @@ function QuotingWorkspace() {
     else if (item.id.includes("shoe_cabinet")) baseArchetype = "shoe_cabinet";
     else if (item.id.includes("vanity")) baseArchetype = "vanity";
     else if (item.id.includes("wall_panel")) baseArchetype = "wall_panel";
+
+    setProjectProducts((prev) =>
+      prev.map((p) =>
+        p.id === activeProductId
+          ? {
+              ...p,
+              name: item.name,
+              archetypeId: item.id,
+              tag: p.tag || item.categoryLabel || "Sản phẩm",
+            }
+          : p
+      )
+    );
 
     setQuestionnaire((prev) => ({
       ...prev,
@@ -270,6 +284,28 @@ function QuotingWorkspace() {
       },
     }));
   };
+
+  const handleClearArchetype = () => {
+    setSelectedArchetypeId("");
+    setProjectProducts((prev) =>
+      prev.map((p) => (p.id === activeProductId ? { ...p, archetypeId: "custom" } : p))
+    );
+    setQuestionnaire((prev) => ({
+      ...prev,
+      productType: "custom",
+    }));
+    showToast("Đã chuyển sản phẩm sang chế độ thiết kế tự do!", "info");
+  };
+
+  useEffect(() => {
+    if (activeProduct) {
+      const archId =
+        activeProduct.archetypeId && activeProduct.archetypeId !== "custom"
+          ? activeProduct.archetypeId
+          : "";
+      setSelectedArchetypeId(archId);
+    }
+  }, [activeProductId]);
 
   useEffect(() => {
     const archetypeParam = searchParams.get("archetype");
@@ -579,6 +615,23 @@ function QuotingWorkspace() {
     return map;
   }, [projectProducts, productCostings]);
 
+  // Danh sách bậc MOQ hợp nhất động từ toàn bộ sản phẩm trong dự án / bộ sưu tập
+  const catalogMoqTiers = useMemo(() => {
+    const tiersMap = new Map<number, number>();
+    projectProducts.forEach((p) => {
+      const tiers = p.moqConfigTiers && p.moqConfigTiers.length > 0 ? p.moqConfigTiers : DEFAULT_MOQ_TIERS;
+      tiers.forEach((t) => {
+        if (!tiersMap.has(t.moq)) {
+          tiersMap.set(t.moq, t.surchargePercent);
+        }
+      });
+    });
+    const list = Array.from(tiersMap.entries())
+      .map(([moq, surchargePercent]) => ({ moq, surchargePercent }))
+      .sort((a, b) => a.moq - b.moq);
+    return list.length > 0 ? list : DEFAULT_MOQ_TIERS;
+  }, [projectProducts]);
+
   // Handlers for Project Products Collection
   const handleSelectProduct = (productId: string) => {
     setActiveProductId(productId);
@@ -752,12 +805,22 @@ function QuotingWorkspace() {
   };
 
   // Handlers for MOQ Tiers
-  const handleAddMoqTier = () => {
-    const nextMoq = (moqConfigTiers[moqConfigTiers.length - 1]?.moq || 20) + 10;
-    setMoqConfigTiers((prev) => [
-      ...prev,
-      { moq: nextMoq, surchargePercent: 0 },
-    ]);
+  const handleAddMoqTier = (customMoq?: number, customSurcharge?: number) => {
+    const maxMoq = Math.max(...moqConfigTiers.map((t) => t.moq), 0);
+    const nextMoq =
+      customMoq ??
+      (maxMoq >= 200 ? maxMoq + 100 : maxMoq >= 100 ? maxMoq + 50 : maxMoq >= 20 ? maxMoq + 20 : maxMoq + 10);
+    const nextSurcharge =
+      customSurcharge ??
+      (nextMoq >= 200 ? -15 : nextMoq >= 100 ? -10 : nextMoq >= 50 ? -5 : 0);
+
+    setMoqConfigTiers((prev) => {
+      const filtered = prev.filter((t) => t.moq !== nextMoq);
+      return [...filtered, { moq: nextMoq, surchargePercent: nextSurcharge }].sort(
+        (a, b) => a.moq - b.moq
+      );
+    });
+    showToast(`Đã thêm bậc MOQ ${nextMoq} bộ (${nextSurcharge >= 0 ? `+${nextSurcharge}%` : `${nextSurcharge}%`})!`, "success");
   };
 
   const handleUpdateMoqTier = (index: number, patch: Partial<MoqConfigTier>) => {
@@ -2252,16 +2315,167 @@ function QuotingWorkspace() {
                     </span>
                   </div>
 
-                  {/* Lựa chọn loại sản phẩm nội thất đa dòng hàng & tìm kiếm thông minh */}
-                  <ProductArchetypeSelector
-                    selectedArchetypeId={selectedArchetypeId}
-                    onSelectArchetype={handleArchetypeSelect}
-                    onCustomTextChange={(text) => {
-                      if (text.trim()) {
-                        setQuestionnaire((prev) => ({ ...prev, name: text }));
-                      }
-                    }}
-                  />
+                  {/* THÔNG TIN NHẬN DIỆN SẢN PHẨM (TÊN, PHÂN LOẠI, SỐ LƯỢNG) */}
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                          <span>Tên sản phẩm / Hạng mục gia công (*):</span>
+                        </label>
+                        <span className="text-[11px] text-slate-500">
+                          Nhập tên tự do hoặc chọn mẫu xưởng bên dưới
+                        </span>
+                      </div>
+                      <input
+                        type="text"
+                        value={questionnaire.name}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setQuestionnaire((prev) => ({ ...prev, name: val }));
+                          setProjectProducts((prev) =>
+                            prev.map((p) => (p.id === activeProductId ? { ...p, name: val } : p))
+                          );
+                        }}
+                        placeholder="VD: Tủ áo Master cánh kính, Bàn làm việc chữ L, Kệ tivi treo tường, Ghế sofa băng, Tủ giày..."
+                        className="w-full py-2 px-3 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition shadow-2xs"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className="text-[11px] font-semibold text-slate-600 block mb-1">
+                          {quoteScope === "collection" ? "Phân loại / Dòng hàng (Tag):" : "Khu vực / Phòng:"}
+                        </label>
+                        <input
+                          type="text"
+                          value={activeProduct.tag || activeProduct.room || ""}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setProjectProducts((prev) =>
+                              prev.map((p) =>
+                                p.id === activeProductId
+                                  ? { ...p, tag: val, room: val }
+                                  : p
+                              )
+                            );
+                          }}
+                          placeholder={quoteScope === "collection" ? "VD: Hàng xuất khẩu, Ghế ăn..." : "VD: Phòng khách, Phòng ngủ..."}
+                          className="w-full py-1.5 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-zinc-900"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[11px] font-semibold text-slate-600 block mb-1">
+                          Số lượng đặt hàng (SL):
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            min={1}
+                            value={activeProduct.qty || 1}
+                            onChange={(e) => {
+                              const val = Math.max(1, parseInt(e.target.value, 10) || 1);
+                              setProjectProducts((prev) =>
+                                prev.map((p) => (p.id === activeProductId ? { ...p, qty: val } : p))
+                              );
+                            }}
+                            className="w-full py-1.5 px-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs font-bold text-slate-900 focus:outline-none focus:border-zinc-900"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] font-mono">
+                            bộ / cái
+                          </span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-[11px] font-semibold text-slate-600 block mb-1">
+                          Biên LN riêng cho SP này:
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            step={1}
+                            min={0}
+                            max={200}
+                            value={
+                              activeProduct.customProfitMargin !== undefined
+                                ? Math.round((activeProduct.customProfitMargin >= 1 ? activeProduct.customProfitMargin - 1 : activeProduct.customProfitMargin) * 100)
+                                : Math.round((profitMargin >= 1 ? profitMargin - 1 : profitMargin) * 100)
+                            }
+                            onChange={(e) => {
+                              const pct = parseFloat(e.target.value) || 0;
+                              const newMargin = 1 + pct / 100;
+                              setProjectProducts((prev) =>
+                                prev.map((p) =>
+                                  p.id === activeProductId
+                                    ? { ...p, customProfitMargin: newMargin }
+                                    : p
+                                )
+                              );
+                            }}
+                            className="w-full py-1.5 px-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs font-bold text-slate-900 focus:outline-none focus:border-zinc-900"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] font-mono">
+                            %
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Điền nhanh từ 20+ mẫu xưởng (Collapsible Drawer) */}
+                    <div className="border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50">
+                      <div className="p-2.5 flex items-center justify-between">
+                        <button
+                          type="button"
+                          onClick={() => setShowArchetypeSelector(!showArchetypeSelector)}
+                          className="flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-slate-900 transition cursor-pointer"
+                        >
+                          <span className="p-1 rounded bg-white border border-slate-200 text-amber-600 shadow-2xs">
+                            💡
+                          </span>
+                          <span>Điền nhanh thông số &amp; kết cấu từ 20+ mẫu xưởng (Tùy chọn)</span>
+                          <span className="text-[11px] font-normal text-slate-500 font-mono">
+                            {showArchetypeSelector ? "▲ Thu gọn" : "▼ Mở rộng"}
+                          </span>
+                        </button>
+
+                        {selectedArchetypeId && (
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-900 text-white font-semibold">
+                              Mẫu: {PRODUCT_ARCHETYPES_CATALOG.find(a => a.id === selectedArchetypeId)?.name || selectedArchetypeId}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={handleClearArchetype}
+                              className="text-[10px] text-slate-500 hover:text-red-600 underline font-medium cursor-pointer"
+                            >
+                              Bỏ gán mẫu
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {showArchetypeSelector && (
+                        <div className="p-3 border-t border-slate-200 bg-white">
+                          <ProductArchetypeSelector
+                            selectedArchetypeId={selectedArchetypeId}
+                            onSelectArchetype={(arch) => {
+                              handleArchetypeSelect(arch);
+                              setShowArchetypeSelector(false);
+                            }}
+                            onCustomTextChange={(text) => {
+                              if (text.trim()) {
+                                setQuestionnaire((prev) => ({ ...prev, name: text }));
+                                setProjectProducts((prev) =>
+                                  prev.map((p) => (p.id === activeProductId ? { ...p, name: text } : p))
+                                );
+                              }
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
 
                   {/* Kích thước phủ bì Rộng × Sâu × Cao */}
                   <div className="space-y-2 pt-2">
@@ -2922,15 +3136,15 @@ function QuotingWorkspace() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-xs font-semibold text-slate-700 block mb-1">
-                        Số ngăn kéo (Hộc kéo ray trượt):
+                        Số ngăn kéo (nếu có):
                       </label>
                       <input
                         type="number"
                         min={0}
-                        placeholder="Để trống -> Tự nội suy theo kích thước"
+                        placeholder="Để 0 nếu không có hộc kéo"
                         value={questionnaire.details?.drawerCount ?? ""}
                         onChange={(e) => {
-                          const val = e.target.value === "" ? undefined : Number(e.target.value);
+                          const val = e.target.value === "" ? 0 : Number(e.target.value);
                           setQuestionnaire((prev) => ({
                             ...prev,
                             details: { ...prev.details, drawerCount: val },
@@ -2942,15 +3156,15 @@ function QuotingWorkspace() {
 
                     <div>
                       <label className="text-xs font-semibold text-slate-700 block mb-1">
-                        Số cánh cửa (Bản lề &amp; tay nắm):
+                        Số cánh cửa (nếu có):
                       </label>
                       <input
                         type="number"
                         min={0}
-                        placeholder="Để trống -> Tự nội suy theo kích thước"
+                        placeholder="Để 0 nếu là bàn, ghế, đồ hở"
                         value={questionnaire.details?.doorCount ?? ""}
                         onChange={(e) => {
-                          const val = e.target.value === "" ? undefined : Number(e.target.value);
+                          const val = e.target.value === "" ? 0 : Number(e.target.value);
                           setQuestionnaire((prev) => ({
                             ...prev,
                             details: { ...prev.details, doorCount: val },
@@ -4915,14 +5129,32 @@ function QuotingWorkspace() {
                         Tự do thêm bậc, tùy chỉnh số lượng đặt hàng và tỷ lệ phụ phí (+120% cữ máy mẫu lẻ → 0% sản xuất lô).
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleAddMoqTier}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-zinc-900 hover:bg-black rounded-lg transition shadow-xs cursor-pointer self-start sm:self-auto shrink-0"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>+ Thêm bậc MOQ</span>
-                    </button>
+                    <div className="flex flex-wrap items-center gap-1.5 self-start sm:self-auto">
+                      <span className="text-[11px] text-zinc-500 font-medium mr-1 hidden sm:inline">Thêm nhanh:</span>
+                      {[
+                        { label: "+ 50 bộ (-5%)", moq: 50, surcharge: -5 },
+                        { label: "+ 100 bộ (-10%)", moq: 100, surcharge: -10 },
+                        { label: "+ 200 bộ (-15%)", moq: 200, surcharge: -15 },
+                        { label: "+ 500 bộ (-20%)", moq: 500, surcharge: -20 },
+                      ].map((preset) => (
+                        <button
+                          key={preset.moq}
+                          type="button"
+                          onClick={() => handleAddMoqTier(preset.moq, preset.surcharge)}
+                          className="px-2 py-1 text-[11px] font-mono font-bold bg-white hover:bg-zinc-100 text-zinc-800 border border-zinc-300 rounded shadow-2xs transition cursor-pointer"
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => handleAddMoqTier()}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-white bg-zinc-900 hover:bg-black rounded-lg transition shadow-xs cursor-pointer ml-1"
+                      >
+                        <Plus className="w-3 h-3" />
+                        <span>+ Tùy biến</span>
+                      </button>
+                    </div>
                   </div>
 
                   <div className="overflow-x-auto border border-zinc-200 rounded-lg">
@@ -5784,17 +6016,21 @@ function QuotingWorkspace() {
                 <span className="font-bold text-slate-900">Bảng giá xuất xưởng theo số lượng đặt hàng tối thiểu (MOQ):</span> Đơn giá từng mã sản phẩm theo các bậc sản lượng đặt hàng.
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs min-w-[650px]">
+                <table className="w-full text-left border-collapse text-xs min-w-[700px]">
                   <thead className="bg-slate-100 text-slate-700 font-bold border-y border-slate-300">
                     <tr>
                       <th className="p-2.5 w-10 text-center">STT</th>
                       <th className="p-2.5">Mã &amp; Tên Sản Phẩm</th>
                       <th className="p-2.5 w-24 text-center">Phân Loại</th>
                       <th className="p-2.5 w-36">Kích Thước (W×D×H)</th>
-                      <th className="p-2.5 text-right">MOQ 1</th>
-                      <th className="p-2.5 text-right">MOQ 5</th>
-                      <th className="p-2.5 text-right">MOQ 10</th>
-                      <th className="p-2.5 text-right font-black text-slate-900">MOQ 20+</th>
+                      {catalogMoqTiers.map((tier) => (
+                        <th key={tier.moq} className="p-2.5 text-right whitespace-nowrap">
+                          <div>MOQ {tier.moq}</div>
+                          <span className="text-[9px] font-mono font-normal text-slate-500">
+                            {tier.surchargePercent === 0 ? "Giá chuẩn" : tier.surchargePercent > 0 ? `+${tier.surchargePercent}%` : `${tier.surchargePercent}%`}
+                          </span>
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200 text-slate-800">
@@ -5802,10 +6038,6 @@ function QuotingWorkspace() {
                       const costing = productCostings[prod.id];
                       const dims = prod.questionnaire?.dimensions || { widthMm: 0, depthMm: 0, heightMm: 0 };
                       const basePrice = productPrices[prod.id] || costing?.summary?.calculateSalesPrice || 0;
-                      const moq1 = costing?.summary?.moqPrices?.[1] || basePrice;
-                      const moq5 = costing?.summary?.moqPrices?.[5] || Math.round(basePrice * 0.95);
-                      const moq10 = costing?.summary?.moqPrices?.[10] || Math.round(basePrice * 0.90);
-                      const moq20 = costing?.summary?.moqPrices?.[20] || Math.round(basePrice * 0.85);
 
                       return (
                         <tr key={prod.id} className="hover:bg-slate-50/50 transition">
@@ -5821,21 +6053,28 @@ function QuotingWorkspace() {
                               {prod.tag || prod.room || "Sản phẩm"}
                             </span>
                           </td>
-                          <td className="p-2.5 font-mono text-slate-700 text-[11px]">
+                          <td className="p-2.5 font-mono text-slate-700 text-[11px] whitespace-nowrap">
                             {dims.widthMm} × {dims.depthMm} × {dims.heightMm} mm
                           </td>
-                          <td className="p-2.5 text-right font-mono text-slate-700">
-                            {formatVND(moq1)}
-                          </td>
-                          <td className="p-2.5 text-right font-mono text-slate-700">
-                            {formatVND(moq5)}
-                          </td>
-                          <td className="p-2.5 text-right font-mono text-slate-700">
-                            {formatVND(moq10)}
-                          </td>
-                          <td className="p-2.5 text-right font-mono font-bold text-zinc-900">
-                            {formatVND(moq20)}
-                          </td>
+                          {catalogMoqTiers.map((tier) => {
+                            const unitPrice =
+                              costing?.summary?.moqPrices?.[tier.moq] ??
+                              Math.round(basePrice * (1 + (tier.surchargePercent || 0) / 100));
+                            return (
+                              <td
+                                key={tier.moq}
+                                className={`p-2.5 text-right font-mono whitespace-nowrap ${
+                                  tier.surchargePercent < 0
+                                    ? "font-bold text-emerald-700"
+                                    : tier.surchargePercent === 0
+                                    ? "font-bold text-slate-900"
+                                    : "text-slate-700"
+                                }`}
+                              >
+                                {formatVND(unitPrice)}
+                              </td>
+                            );
+                          })}
                         </tr>
                       );
                     })}

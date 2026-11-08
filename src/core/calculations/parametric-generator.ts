@@ -733,13 +733,32 @@ export function generateCostingFromQuestionnaire(
   const profitAmount = Math.round(cogs * profitRate);
   const calculateSalesPrice = cogs + profitAmount;
 
-  // Bảng MOQ
+  // Bảng MOQ linh hoạt vượt trần 20 bộ
   const moqPrices: Record<number, number> = {
     1: calculateSalesPrice,
-    5: Math.round(calculateSalesPrice * 0.95),   // Giảm 5% cho 5 chiếc
-    10: Math.round(calculateSalesPrice * 0.92),  // Giảm 8% cho 10 chiếc
-    20: Math.round(calculateSalesPrice * 0.88),  // Giảm 12% cho 20 chiếc
+    2: Math.round(calculateSalesPrice * 0.98),
+    5: Math.round(calculateSalesPrice * 0.95),
+    10: Math.round(calculateSalesPrice * 0.92),
+    20: Math.round(calculateSalesPrice * 0.88),
+    50: Math.round(calculateSalesPrice * 0.85),
+    100: Math.round(calculateSalesPrice * 0.82),
+    200: Math.round(calculateSalesPrice * 0.80),
   };
+  if (q.details?.moqTiers && Array.isArray(q.details.moqTiers)) {
+    q.details.moqTiers.forEach((qty) => {
+      if (!moqPrices[qty]) {
+        let factor = 1.0;
+        if (qty >= 200) factor = 0.80;
+        else if (qty >= 100) factor = 0.82;
+        else if (qty >= 50) factor = 0.85;
+        else if (qty >= 20) factor = 0.88;
+        else if (qty >= 10) factor = 0.92;
+        else if (qty >= 5) factor = 0.95;
+        else if (qty >= 2) factor = 0.98;
+        moqPrices[qty] = Math.round(calculateSalesPrice * factor);
+      }
+    });
+  }
 
   const summary: CostSummary = {
     stone: stoneCost,

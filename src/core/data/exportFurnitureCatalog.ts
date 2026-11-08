@@ -388,12 +388,14 @@ export const DEFAULT_EXPORT_CONSTANTS = {
  * Bảng phụ phí MOQ linh hoạt mặc định (người dùng có thể thêm/xóa/sửa bậc)
  */
 export const DEFAULT_MOQ_TIERS: MoqConfigTier[] = [
-  { moq: 20, surchargePercent: 0 },
-  { moq: 15, surchargePercent: 5 },
-  { moq: 10, surchargePercent: 10 },
-  { moq: 5, surchargePercent: 25 },
-  { moq: 2, surchargePercent: 120 },
   { moq: 1, surchargePercent: 120 },
+  { moq: 2, surchargePercent: 80 },
+  { moq: 5, surchargePercent: 25 },
+  { moq: 10, surchargePercent: 10 },
+  { moq: 20, surchargePercent: 0 },
+  { moq: 50, surchargePercent: -5 },
+  { moq: 100, surchargePercent: -10 },
+  { moq: 200, surchargePercent: -15 },
 ];
 
 /**

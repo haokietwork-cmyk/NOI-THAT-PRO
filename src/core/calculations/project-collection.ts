@@ -133,7 +133,19 @@ export function createProjectProduct(params: {
     unit: params.unit || "Cái",
     archetypeId: params.archetypeId || "custom",
     questionnaire: {
-      productType: "wardrobe",
+      productType: (params.archetypeId?.includes("wardrobe")
+        ? "wardrobe"
+        : params.archetypeId?.includes("kitchen_base")
+        ? "kitchen_base"
+        : params.archetypeId?.includes("kitchen_upper")
+        ? "kitchen_upper"
+        : params.archetypeId?.includes("shoe")
+        ? "shoe_cabinet"
+        : params.archetypeId?.includes("vanity")
+        ? "vanity"
+        : params.archetypeId?.includes("tv")
+        ? "tv_shelf"
+        : "custom") as any,
       name: params.name,
       calcMode: "detail",
       dimensions: {
@@ -222,6 +234,11 @@ export function createBlankProduct(params?: {
     },
     archetypeId: "custom",
     customProfitMargin: params?.customProfitMargin,
+    details: {
+      drawerCount: 0,
+      doorCount: 0,
+      specialNotes: "",
+    },
   });
 }
 
